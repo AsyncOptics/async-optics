@@ -1,0 +1,14 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "test.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "author": "penghe",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}
