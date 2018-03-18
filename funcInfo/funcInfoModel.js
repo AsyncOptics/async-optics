@@ -1,4 +1,4 @@
-class funcNode {
+class funcInfo {
   constructor(asyncId, triggerAsyncId, type) {
     this.asyncId = asyncId;
     this.triggerAsyncId = triggerAsyncId;
@@ -9,4 +9,4 @@ class funcNode {
   }
 }
 
-module.exports = funcNode;
+module.exports = funcInfo;

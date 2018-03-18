@@ -1,8 +1,9 @@
 const async_hooks = require('async_hooks');
 const {performance, PerformanceObserver} = require('perf_hooks');
-const funcNode = require('./funcNodeModel/funcNode.js')
-const active = new Map();
+const funcInfo = require('./funcInfo/funcInfoModel.js')
+const io = require('./server/socket.js')
 
+const active = new Map();
 const hooks = {init: init, before: before, after: after, destroy: destroy};
 const asyncHook = async_hooks.createHook(hooks);
 asyncHook.enable()

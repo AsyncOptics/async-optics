@@ -20,6 +20,9 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(6666);
+const PORT = 6666;
+server.listen(PORT, () => {
+  process._rawDebug(`socket setup, listening to PORT ${PORT}`);
+});
 
 module.exports = io;
