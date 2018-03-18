@@ -1,6 +1,6 @@
 const async_hooks = require('async_hooks');
 const {performance, PerformanceObserver} = require('perf_hooks');
-
+const funcNode = require('./funcNodeModel/funcNode.js')
 const active = new Map();
 
 const hooks = {init: init, before: before, after: after, destroy: destroy};
