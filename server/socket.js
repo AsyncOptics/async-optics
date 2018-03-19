@@ -2,7 +2,6 @@ const express = require('express');
 const socketio = require('socket.io');
 const http = require('http');
 
-
 const app = express();
 const server = http.Server(app);
 const io = socketio(server);
@@ -15,6 +14,7 @@ app.use( (req, res, next) => {
 
 io.on('connection', (socket) => {
   process._rawDebug('New Socket Connection', socket.id);
+
   socket.on('disconnect', (reason) => {
     process._rawDebug('Socket Disonnect', socket.id);
   });
