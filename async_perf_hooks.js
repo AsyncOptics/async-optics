@@ -56,7 +56,9 @@ const obs = new PerformanceObserver((list, observer) => {
   activeAsyncProcess.delete(asyncId);
 
   // observer.disconnect();
-  // ioController.sendInfo(asyncInfoEmit);
+  ioController.sendInfo(asyncInfoEmit,obs);
+  // process._rawDebug(activeAsyncProcess);
+
   // obs.observe({ entryTypes: ['measure','function'], buffered: false });
 
   // if (activeAsyncProcess.size === 1) {

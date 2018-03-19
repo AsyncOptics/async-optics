@@ -20,7 +20,7 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = 6666;
+const PORT = 3000;
 server.listen(PORT, () => {
   process._rawDebug(`socket setup, listening to PORT ${PORT}`);
 });
