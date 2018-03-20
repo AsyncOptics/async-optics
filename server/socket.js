@@ -14,13 +14,7 @@ app.use( (req, res, next) => {
 })
 
 app.get('/', (req, res, next) => {
-	// res.contentType('text/js') 
 	res.sendFile(path.join(__dirname, '../index.html'))
-})
-
-app.get('/test.js', (req, res, next) => {
-	res.contentType('text/javascript')
-	res.sendFile(path.join(__dirname, '../test.js'))
 })
 
 io.on('connection', (socket) => {
