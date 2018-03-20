@@ -1,0 +1,258 @@
+[
+    {
+        "asyncId": 8,
+        "triggerAsyncId": 1,
+        "type": "FSREQWRAP",
+        "startTime": 229.282606,
+        "duration": 8.917787,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.open (fs.js:657:11)\n    at Object.fs.writeFile (fs.js:1304:6)\n    at Object.<anonymous> (/Users/aturberv/alpha/test.js:18:4)\n    at Module._compile (module.js:649:30)\n    at Object.Module._extensions..js (module.js:660:10)\n    at Module.load (module.js:561:32)\n    at tryModuleLoad (module.js:501:12)\n    at Function.Module._load (module.js:493:3)"
+    },
+    {
+        "asyncId": 9,
+        "triggerAsyncId": 8,
+        "type": "FSREQWRAP",
+        "startTime": 231.274134,
+        "duration": 9.107015,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.write (fs.js:724:20)\n    at writeAll (fs.js:1268:6)\n    at writeFd (fs.js:1317:5)\n    at fs.js:1308:7\n    at FSReqWrap.oncomplete (fs.js:153:20)"
+    },
+    {
+        "asyncId": 13,
+        "triggerAsyncId": 9,
+        "type": "FSREQWRAP",
+        "startTime": 240.002717,
+        "duration": 1.388668,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.close (fs.js:629:11)\n    at fs.js:1281:12\n    at FSReqWrap.wrapper [as oncomplete] (fs.js:707:5)"
+    },
+    {
+        "asyncId": 14,
+        "triggerAsyncId": 12,
+        "type": "FSREQWRAP",
+        "startTime": 240.125303,
+        "duration": 1.729519,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.write (fs.js:724:20)\n    at writeAll (fs.js:1268:6)\n    at writeFd (fs.js:1317:5)\n    at fs.js:1308:7\n    at FSReqWrap.oncomplete (fs.js:153:20)"
+    },
+    {
+        "asyncId": 18,
+        "triggerAsyncId": 14,
+        "type": "FSREQWRAP",
+        "startTime": 241.297472,
+        "duration": 1.355155,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.close (fs.js:629:11)\n    at fs.js:1281:12\n    at FSReqWrap.wrapper [as oncomplete] (fs.js:707:5)"
+    },
+    {
+        "asyncId": 25,
+        "triggerAsyncId": 17,
+        "type": "FSREQWRAP",
+        "startTime": 242.329921,
+        "duration": 1.007749,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.write (fs.js:724:20)\n    at writeAll (fs.js:1268:6)\n    at writeFd (fs.js:1317:5)\n    at fs.js:1308:7\n    at FSReqWrap.oncomplete (fs.js:153:20)"
+    },
+    {
+        "asyncId": 26,
+        "triggerAsyncId": 21,
+        "type": "FSREQWRAP",
+        "startTime": 242.546045,
+        "duration": 1.181132,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.write (fs.js:724:20)\n    at writeAll (fs.js:1268:6)\n    at writeFd (fs.js:1317:5)\n    at fs.js:1308:7\n    at FSReqWrap.oncomplete (fs.js:153:20)"
+    },
+    {
+        "asyncId": 30,
+        "triggerAsyncId": 24,
+        "type": "FSREQWRAP",
+        "startTime": 243.116169,
+        "duration": 1.405861,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.write (fs.js:724:20)\n    at writeAll (fs.js:1268:6)\n    at writeFd (fs.js:1317:5)\n    at fs.js:1308:7\n    at FSReqWrap.oncomplete (fs.js:153:20)"
+    },
+    {
+        "asyncId": 31,
+        "triggerAsyncId": 25,
+        "type": "FSREQWRAP",
+        "startTime": 243.194429,
+        "duration": 1.756946,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.close (fs.js:629:11)\n    at fs.js:1281:12\n    at FSReqWrap.wrapper [as oncomplete] (fs.js:707:5)"
+    },
+    {
+        "asyncId": 32,
+        "triggerAsyncId": 26,
+        "type": "FSREQWRAP",
+        "startTime": 243.255012,
+        "duration": 2.1072,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.close (fs.js:629:11)\n    at fs.js:1281:12\n    at FSReqWrap.wrapper [as oncomplete] (fs.js:707:5)"
+    },
+    {
+        "asyncId": 39,
+        "triggerAsyncId": 29,
+        "type": "FSREQWRAP",
+        "startTime": 244.184041,
+        "duration": 2.262763,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.write (fs.js:724:20)\n    at writeAll (fs.js:1268:6)\n    at writeFd (fs.js:1317:5)\n    at fs.js:1308:7\n    at FSReqWrap.oncomplete (fs.js:153:20)"
+    },
+    {
+        "asyncId": 40,
+        "triggerAsyncId": 30,
+        "type": "FSREQWRAP",
+        "startTime": 244.26271,
+        "duration": 2.633213,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.close (fs.js:629:11)\n    at fs.js:1281:12\n    at FSReqWrap.wrapper [as oncomplete] (fs.js:707:5)"
+    },
+    {
+        "asyncId": 41,
+        "triggerAsyncId": 35,
+        "type": "FSREQWRAP",
+        "startTime": 244.419316,
+        "duration": 2.90813,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.write (fs.js:724:20)\n    at writeAll (fs.js:1268:6)\n    at writeFd (fs.js:1317:5)\n    at fs.js:1308:7\n    at FSReqWrap.oncomplete (fs.js:153:20)"
+    },
+    {
+        "asyncId": 51,
+        "triggerAsyncId": 38,
+        "type": "FSREQWRAP",
+        "startTime": 245.872774,
+        "duration": 2.46973,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.write (fs.js:724:20)\n    at writeAll (fs.js:1268:6)\n    at writeFd (fs.js:1317:5)\n    at fs.js:1308:7\n    at FSReqWrap.oncomplete (fs.js:153:20)"
+    },
+    {
+        "asyncId": 52,
+        "triggerAsyncId": 39,
+        "type": "FSREQWRAP",
+        "startTime": 245.954081,
+        "duration": 2.790565,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.close (fs.js:629:11)\n    at fs.js:1281:12\n    at FSReqWrap.wrapper [as oncomplete] (fs.js:707:5)"
+    },
+    {
+        "asyncId": 53,
+        "triggerAsyncId": 41,
+        "type": "FSREQWRAP",
+        "startTime": 246.049991,
+        "duration": 3.13779,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.close (fs.js:629:11)\n    at fs.js:1281:12\n    at FSReqWrap.wrapper [as oncomplete] (fs.js:707:5)"
+    },
+    {
+        "asyncId": 54,
+        "triggerAsyncId": 44,
+        "type": "FSREQWRAP",
+        "startTime": 246.223766,
+        "duration": 3.383839,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.write (fs.js:724:20)\n    at writeAll (fs.js:1268:6)\n    at writeFd (fs.js:1317:5)\n    at fs.js:1308:7\n    at FSReqWrap.oncomplete (fs.js:153:20)"
+    },
+    {
+        "asyncId": 55,
+        "triggerAsyncId": 47,
+        "type": "FSREQWRAP",
+        "startTime": 246.344605,
+        "duration": 3.711272,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.write (fs.js:724:20)\n    at writeAll (fs.js:1268:6)\n    at writeFd (fs.js:1317:5)\n    at fs.js:1308:7\n    at FSReqWrap.oncomplete (fs.js:153:20)"
+    },
+    {
+        "asyncId": 65,
+        "triggerAsyncId": 50,
+        "type": "FSREQWRAP",
+        "startTime": 247.790649,
+        "duration": 3.294104,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.write (fs.js:724:20)\n    at writeAll (fs.js:1268:6)\n    at writeFd (fs.js:1317:5)\n    at fs.js:1308:7\n    at FSReqWrap.oncomplete (fs.js:153:20)"
+    },
+    {
+        "asyncId": 66,
+        "triggerAsyncId": 51,
+        "type": "FSREQWRAP",
+        "startTime": 247.864496,
+        "duration": 3.696594,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.close (fs.js:629:11)\n    at fs.js:1281:12\n    at FSReqWrap.wrapper [as oncomplete] (fs.js:707:5)"
+    },
+    {
+        "asyncId": 67,
+        "triggerAsyncId": 54,
+        "type": "FSREQWRAP",
+        "startTime": 247.999929,
+        "duration": 4.561705,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.close (fs.js:629:11)\n    at fs.js:1281:12\n    at FSReqWrap.wrapper [as oncomplete] (fs.js:707:5)"
+    },
+    {
+        "asyncId": 68,
+        "triggerAsyncId": 55,
+        "type": "FSREQWRAP",
+        "startTime": 248.06318,
+        "duration": 5.013976,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.close (fs.js:629:11)\n    at fs.js:1281:12\n    at FSReqWrap.wrapper [as oncomplete] (fs.js:707:5)"
+    },
+    {
+        "asyncId": 69,
+        "triggerAsyncId": 58,
+        "type": "FSREQWRAP",
+        "startTime": 248.145385,
+        "duration": 5.431029,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.write (fs.js:724:20)\n    at writeAll (fs.js:1268:6)\n    at writeFd (fs.js:1317:5)\n    at fs.js:1308:7\n    at FSReqWrap.oncomplete (fs.js:153:20)"
+    },
+    {
+        "asyncId": 70,
+        "triggerAsyncId": 61,
+        "type": "FSREQWRAP",
+        "startTime": 248.226053,
+        "duration": 5.77568,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.write (fs.js:724:20)\n    at writeAll (fs.js:1268:6)\n    at writeFd (fs.js:1317:5)\n    at fs.js:1308:7\n    at FSReqWrap.oncomplete (fs.js:153:20)"
+    },
+    {
+        "asyncId": 86,
+        "triggerAsyncId": 64,
+        "type": "FSREQWRAP",
+        "startTime": 250.500474,
+        "duration": 5.924657,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.write (fs.js:724:20)\n    at writeAll (fs.js:1268:6)\n    at writeFd (fs.js:1317:5)\n    at fs.js:1308:7\n    at FSReqWrap.oncomplete (fs.js:153:20)"
+    },
+    {
+        "asyncId": 87,
+        "triggerAsyncId": 65,
+        "type": "FSREQWRAP",
+        "startTime": 250.565074,
+        "duration": 6.267155,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.close (fs.js:629:11)\n    at fs.js:1281:12\n    at FSReqWrap.wrapper [as oncomplete] (fs.js:707:5)"
+    },
+    {
+        "asyncId": 88,
+        "triggerAsyncId": 69,
+        "type": "FSREQWRAP",
+        "startTime": 250.642002,
+        "duration": 6.588533,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.close (fs.js:629:11)\n    at fs.js:1281:12\n    at FSReqWrap.wrapper [as oncomplete] (fs.js:707:5)"
+    },
+    {
+        "asyncId": 89,
+        "triggerAsyncId": 70,
+        "type": "FSREQWRAP",
+        "startTime": 250.697436,
+        "duration": 6.952153,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.close (fs.js:629:11)\n    at fs.js:1281:12\n    at FSReqWrap.wrapper [as oncomplete] (fs.js:707:5)"
+    },
+    {
+        "asyncId": 90,
+        "triggerAsyncId": 73,
+        "type": "FSREQWRAP",
+        "startTime": 250.785783,
+        "duration": 7.251678,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.write (fs.js:724:20)\n    at writeAll (fs.js:1268:6)\n    at writeFd (fs.js:1317:5)\n    at fs.js:1308:7\n    at FSReqWrap.oncomplete (fs.js:153:20)"
+    },
+    {
+        "asyncId": 91,
+        "triggerAsyncId": 76,
+        "type": "FSREQWRAP",
+        "startTime": 250.864082,
+        "duration": 7.559198,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.write (fs.js:724:20)\n    at writeAll (fs.js:1268:6)\n    at writeFd (fs.js:1317:5)\n    at fs.js:1308:7\n    at FSReqWrap.oncomplete (fs.js:153:20)"
+    },
+    {
+        "asyncId": 92,
+        "triggerAsyncId": 79,
+        "type": "FSREQWRAP",
+        "startTime": 250.937452,
+        "duration": 7.88126,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.write (fs.js:724:20)\n    at writeAll (fs.js:1268:6)\n    at writeFd (fs.js:1317:5)\n    at fs.js:1308:7\n    at FSReqWrap.oncomplete (fs.js:153:20)"
+    },
+    {
+        "asyncId": 93,
+        "triggerAsyncId": 82,
+        "type": "FSREQWRAP",
+        "startTime": 251.00974,
+        "duration": 8.221412,
+        "errMessage": "Error\n    at AsyncHook.init (/Users/aturberv/alpha/async_perf_hooks.js:32:17)\n    at FSReqWrap.emitInitNative (internal/async_hooks.js:131:43)\n    at Object.fs.write (fs.js:724:20)\n    at writeAll (fs.js:1268:6)\n    at writeFd (fs.js:1317:5)\n    at fs.js:1308:7\n    at FSReqWrap.oncomplete (fs.js:153:20)"
+    }
+]

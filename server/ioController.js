@@ -15,8 +15,14 @@ ioController.sendInfo = function(asyncInfoEmit, obs) {
 }
 
 function sendFuncInfo(asyncInfoEmit) {
-  io.emit('funcInfo', asyncInfoEmit);
-  asyncInfoEmit = [];
+  // process._rawDebug('send func info', io.emit)
+  if(io.connected){
+    process._rawDebug('connectedd')
+    io.emit('funcInfo', asyncInfoEmit)
+    asyncInfoEmit = [];
+  } else {
+    global.asyncInfo = asyncInfoEmit  
+  }
 }
 
 module.exports = ioController;

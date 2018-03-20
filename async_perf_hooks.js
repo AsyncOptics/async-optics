@@ -13,17 +13,31 @@ const ignoreType = ['Timeout','TIMERWRAP'];
 
 
 function init(asyncId, type, triggerAsyncId, resource) {
-  if (!ignoreType.includes(type)) {
-    process._rawDebug('INIT', type, asyncId, triggerAsyncId, resource);
+  switch(type) {
+    case 'TickObject':
+      if(resource.args && resource.args[0].constructor.name === 'WriteStream') return destroy(asyncId)
+      asyncHook.disable()
+      break;
+    case 'Timeout':
+      if(resource._timerArgs && resource._timerArgs[0][0].constructor.name === 'funcInfo') return destroy(asyncId)
+      asyncHook.disable()
+      break;
+    default:
+      // process._rawDebug('default', resource)
+    }
+      // process._rawDebug('look4socket', type, resource.callback, resource.args ? resource.args.server : resource)
+  // if (!ignoreType.includes(type)) {
+    // process._rawDebug('INIT', type, asyncId, triggerAsyncId, resource);
     // process._rawDebug('INIT', type, asyncId, triggerAsyncId);
     const err = new Error().stack;
-    const errMessage = err.split('\n').slice(3).join('\n');
+    const errMessage = err
+    if(errMessage.includes('ioController' || 'async_perf_hooks' )) return destroy(asyncId)
     // process._rawDebug(err.split('\n').slice(3).join('\n'));
     const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
     funcInfoNode.errMessage = errMessage;
     activeAsyncProcess.set(asyncId, funcInfoNode);
     performance.mark(`${type}-${asyncId}-Init`);
-  }
+  // }
 }
 
 function before(asyncId) {
