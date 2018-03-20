@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>test</title>
+</head>
+<body>
+<div class="test">
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io.connect('http://localhost:3000');
+  socket.on("funcInfo", function(data) {
+      console.log('data', data);
+      let testDiv = document.getElementsByClassName('test')
+      // console.log(testDiv[0])
+      data.forEach((data) => {
+      	let dataText = document.createTextNode(JSON.stringify(data))
+      	testDiv[0].appendChild(dataText)
+      })
+  });
+</script>
+</body>
+</html>

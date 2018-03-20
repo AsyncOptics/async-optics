@@ -1,6 +1,7 @@
 const express = require('express');
 const socketio = require('socket.io');
 const http = require('http');
+const path = require('path')
 
 const app = express();
 const server = http.Server(app);
@@ -12,9 +13,16 @@ app.use( (req, res, next) => {
   next();
 })
 
+app.get('/', (req, res, next) => {
+	res.sendFile(path.join(__dirname, '../index.html'))
+})
+
 io.on('connection', (socket) => {
   process._rawDebug('New Socket Connection', socket.id);
-
+  socket._tagName = 'MNodejs'
+  if(global.asyncInfo) {
+  	socket.emit('funcInfo', global.asyncInfo)
+  }
   socket.on('disconnect', (reason) => {
     process._rawDebug('Socket Disonnect', socket.id);
   });
