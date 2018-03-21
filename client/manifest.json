@@ -1,7 +1,0 @@
-{
-  "short_name": "Monitor Node JS",
-  "name": "M-Node",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "orientation": "landscape"
-}

@@ -12,6 +12,8 @@ app.use( (req, res, next) => {
   next();
 })
 
+app.use(express.static('client'));
+
 io.on('connection', (socket) => {
   process._rawDebug('New Socket Connection', socket.id);
 

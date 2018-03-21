@@ -19,6 +19,7 @@ function init(asyncId, type, triggerAsyncId, resource) {
     // process._rawDebug('INIT', type, asyncId, triggerAsyncId, resource);
     // process._rawDebug('INIT', type, asyncId, triggerAsyncId);
     const err = new Error().stack;
+    process._rawDebug(err);
     const errMessage = err.split('\n').slice(3).join('\n');
     // process._rawDebug(err.split('\n').slice(3).join('\n'));
     const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
@@ -39,7 +40,7 @@ function destroy(asyncId) {
   if (activeAsyncProcess.has(asyncId)) {
     const type = activeAsyncProcess.get(asyncId).type;
     process._rawDebug('DESTROY',asyncId);
-    process._rawDebug(activeAsyncProcess);
+    process._rawDebug(activeAsyncProcess.keys());
     performance.mark(`${type}-${asyncId}-Destroy`);
     performance.measure(`${type}-${asyncId}`,
                         `${type}-${asyncId}-Init`,
@@ -58,17 +59,10 @@ const obs = new PerformanceObserver((list, observer) => {
   activeAsyncProcess.delete(asyncId);
 
   // observer.disconnect();
-  asyncHook.disable();
-  ioController.sendInfo(asyncInfoEmit,obs);
-  // process._rawDebug(activeAsyncProcess);
-  asyncHook.enable();
+  // asyncHook.disable();
+  // ioController.sendInfo(asyncInfoEmit,obs);
+  // asyncHook.enable();
   // obs.observe({ entryTypes: ['measure','function'], buffered: false });
-
-  // if (activeAsyncProcess.size === 1) {
-  //   performance.clearMarks();
-  //   performance.clearMeasures();
-  //
-  // }
 });
 //entryTypes can be: 'node', 'mark', 'measure', 'gc', or 'function'
 obs.observe({ entryTypes: ['measure','function'], buffered: false });
