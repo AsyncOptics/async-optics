@@ -1,22 +1,41 @@
-const mongoose = require('mongoose');
 const Test = require('./TestModel.js');
-
+const async_perf_hooks = require('../async_perf_hooks.js');
+const mongoose = require('mongoose');
 
 Test.create({
-	item: 'test1',
-	number: 1,
-	createdAt: {type: Date, default: Date.now}
-}, (err, test) => {
-	if(err) console.log('CREATE ERR', err)
-		else console.log('CREATE', test)
-});
+	item: 'Test2',
+	number: 2,
+})
 
-// Test.find({}, (err, test) => {
-// 	if(err) console.log('FIND ERR', err)
-// 	else console.log('FIND', test)
+// Test.create({
+// 	item: 'Test4',
+// 	number: 4,
 // })
 
-// Test.findOneAndRemove({item: 'test1'}, (err, test) => {
-// 	if(err) console.log('FOAR ERR', err)
-// 	else console.log('FOAR', test)
+// Test.create({
+// 	item: 'Test3',
+// 	number: 3,
+// })
+
+// Test.create({
+// 	item: 'Test1',
+// 	number: 1,
+// })
+
+// Test.find({}, (err, test) => {
+// 	if(err) {
+// 		console.log('err', err)
+// 	} else {
+// 		console.log(test)
+// 	}
+// })
+
+// Test.findOneAndRemove({number: 2}, (err, test) => {
+// 	if(err) console.log('no way jose ', err)
+// 	else console.log(test)
+// })
+
+// Test.findOneAndUpdate({number: 1}, {number: 6}, (err, test) => {
+// 	if(err) console.log('no can do ', err)
+// 	else console.log(test)
 // })
