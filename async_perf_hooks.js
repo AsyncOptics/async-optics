@@ -13,31 +13,37 @@ const ignoreType = ['Timeout','TIMERWRAP'];
 
 
 function init(asyncId, type, triggerAsyncId, resource) {
-  switch(type) {
-    case 'TickObject':
-      if(resource.args && resource.args[0].constructor.name === 'WriteStream') return destroy(asyncId)
-      asyncHook.disable()
-      break;
-    case 'Timeout':
-      if(resource._timerArgs && resource._timerArgs[0][0].constructor.name === 'funcInfo') return destroy(asyncId)
-      asyncHook.disable()
-      break;
-    default:
-      // process._rawDebug('default', resource)
+  const err = new Error().stack;
+  const errMessage = err.split('\n');
+  const newErr = [];
+
+  for(let i = 0; i < errMessage.length; i++){
+    if(errMessage[i].includes('module.js') || 
+      errMessage[i].includes('async_hooks') || 
+      errMessage[i].includes('async_perf_hooks') || 
+      errMessage[i].includes('Error') ||
+      errMessage[i].includes('bootstrap_node')){
+      continue;
+    } else {
+      newErr.push(errMessage[i])
     }
-      // process._rawDebug('look4socket', type, resource.callback, resource.args ? resource.args.server : resource)
-  // if (!ignoreType.includes(type)) {
-    // process._rawDebug('INIT', type, asyncId, triggerAsyncId, resource);
-    // process._rawDebug('INIT', type, asyncId, triggerAsyncId);
-    const err = new Error().stack;
-    const errMessage = err
-    if(errMessage.includes('ioController' || 'async_perf_hooks' )) return destroy(asyncId)
-    // process._rawDebug(err.split('\n').slice(3).join('\n'));
+  }
+    
+  if(
+    err.includes('ioController') ||
+    err.includes('/alpha/node_modules/') ||
+    err.includes('at AsyncHook.init (/Users/aturberv/testAlpha/node_modules/alpha/async_perf_hooks.js:32:17)') &&
+    err.includes('at TCP.emitInitNative (internal/async_hooks.js:131:43)') 
+    ){
+    return;
+  } else if(triggerAsyncId < 8 || activeAsyncProcess.get(triggerAsyncId)){
     const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
-    funcInfoNode.errMessage = errMessage;
+    funcInfoNode.errMessage = newErr.join('\n');
     activeAsyncProcess.set(asyncId, funcInfoNode);
     performance.mark(`${type}-${asyncId}-Init`);
-  // }
+  } else {
+    return;
+  }
 }
 
 function before(asyncId) {
@@ -66,6 +72,7 @@ const obs = new PerformanceObserver((list, observer) => {
   const funcInfoNode = activeAsyncProcess.get(asyncId);
   funcInfoNode.duration = funcInfoEntries.duration;
   funcInfoNode.startTime = funcInfoEntries.startTime;
+  funcInfoNode.endTime = funcInfoEntries.startTime + funcInfoEntries.duration;
   asyncInfoEmit.push(funcInfoNode);
   activeAsyncProcess.delete(asyncId);
 
