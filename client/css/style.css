@@ -38,6 +38,8 @@ div.tooltip {
 }
 
 svg {
+  width: 800px;
+  height: 1000px;
   background-color: White;
   padding: 3%;
   overflow: scroll;
