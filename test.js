@@ -15,4 +15,4 @@ function testWrite() {
   })
 }
 
-setInterval(testWrite,40000);
+setInterval(testWrite,2000);

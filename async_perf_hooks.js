@@ -17,27 +17,25 @@ function init(asyncId, type, triggerAsyncId, resource) {
   const errMessage = err.split('\n');
   const newErr = [];
 
-  for(let i = 0; i < errMessage.length; i++){
-    if(errMessage[i].includes('module.js') || 
-      errMessage[i].includes('async_hooks') || 
-      errMessage[i].includes('async_perf_hooks') || 
+  for (let i = 0; i < errMessage.length; i++) {
+    if (errMessage[i].includes('module.js') ||
+      errMessage[i].includes('async_hooks') ||
+      errMessage[i].includes('async_perf_hooks') ||
       errMessage[i].includes('Error') ||
-      errMessage[i].includes('bootstrap_node')){
+      errMessage[i].includes('bootstrap_node')) {
       continue;
     } else {
       newErr.push(errMessage[i])
     }
   }
-    
-  if(
-    err.includes('ioController') ||
-    err.includes('/alpha/node_modules/') ||
-    err.includes('at AsyncHook.init (/Users/aturberv/testAlpha/node_modules/alpha/async_perf_hooks.js:32:17)') &&
-    err.includes('at TCP.emitInitNative (internal/async_hooks.js:131:43)') 
-    ){
-    return;
-  } else if(triggerAsyncId < 8 || activeAsyncProcess.get(triggerAsyncId)){
 
+  if( err.includes('ioController') ||
+      err.includes('/alpha/node_modules/') ||
+      err.includes('at AsyncHook.init (/Users/aturberv/testAlpha/node_modules/alpha/async_perf_hooks.js:32:17)') &&
+      err.includes('at TCP.emitInitNative (internal/async_hooks.js:131:43)') ) {
+    return;
+  } else if(triggerAsyncId < 8 || activeAsyncProcess.get(triggerAsyncId)) {
+    process._rawDebug('INIT', type, asyncId, triggerAsyncId);
     const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
     funcInfoNode.errMessage = newErr.join('\n');
     activeAsyncProcess.set(asyncId, funcInfoNode);
@@ -71,19 +69,18 @@ const obs = new PerformanceObserver((list, observer) => {
   const funcInfoEntries = list.getEntries()[0];
   const asyncId = Number(funcInfoEntries.name.split('-')[1]);
   const funcInfoNode = activeAsyncProcess.get(asyncId);
+  process._rawDebug(funcInfoNode);
   funcInfoNode.duration = funcInfoEntries.duration;
   funcInfoNode.startTime = funcInfoEntries.startTime;
   funcInfoNode.endTime = funcInfoEntries.startTime + funcInfoEntries.duration;
-  asyncInfoEmit.push(funcInfoNode);
+
   activeAsyncProcess.delete(asyncId);
   performance.clearMeasures(funcInfoEntries.name);
   performance.clearMarks(`${funcInfoEntries.name}-Init`);
   performance.clearMarks(`${funcInfoEntries.name}-Destroy`);
 
-  // observer.disconnect();
-  asyncHook.disable();
+
   ioController.sendInfo(funcInfoNode);
-  asyncHook.enable();
   // obs.observe({ entryTypes: ['measure','function'], buffered: false });
 });
 //entryTypes can be: 'node', 'mark', 'measure', 'gc', or 'function'
