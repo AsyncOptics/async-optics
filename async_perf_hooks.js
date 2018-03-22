@@ -18,8 +18,8 @@ function init(asyncId, type, triggerAsyncId, resource) {
     // process._rawDebug('INIT', type, asyncId, triggerAsyncId, resource);
     process._rawDebug('INIT', type, asyncId, triggerAsyncId);
     const err = new Error().stack;
-    process._rawDebug(err);
-    const errMessage = err.split('\n').slice(3).join('\n');
+    // process._rawDebug(err);
+    const errMessage = err;//.split('\n').slice(3).join('\n');
     // process._rawDebug(err.split('\n').slice(3).join('\n'));
     const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
     funcInfoNode.errMessage = errMessage;
