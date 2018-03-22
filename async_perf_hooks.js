@@ -8,47 +8,24 @@ const asyncHook = async_hooks.createHook(hooks);
 asyncHook.enable();
 
 const activeAsyncProcess = new Map();
-let asyncInfoEmit = [];
 
 const ignoreType = ['Timeout','TIMERWRAP'];
 
 
 function init(asyncId, type, triggerAsyncId, resource) {
-<<<<<<< HEAD
   // if (!ignoreType.includes(type)) {
-  if (type) {
+  if (triggerAsyncId && type) {
     // process._rawDebug('INIT', type, asyncId, triggerAsyncId, resource);
-    // process._rawDebug('INIT', type, asyncId, triggerAsyncId);
+    process._rawDebug('INIT', type, asyncId, triggerAsyncId);
     const err = new Error().stack;
-    // process._rawDebug(err);
+    process._rawDebug(err);
     const errMessage = err.split('\n').slice(3).join('\n');
-=======
-  switch(type) {
-    case 'TickObject':
-      if(resource.args && resource.args[0].constructor.name === 'WriteStream') return destroy(asyncId)
-      asyncHook.disable()
-      break;
-    case 'Timeout':
-      if(resource._timerArgs && resource._timerArgs[0][0].constructor.name === 'funcInfo') return destroy(asyncId)
-      asyncHook.disable()
-      break;
-    default:
-      // process._rawDebug('default', resource)
-    }
-      // process._rawDebug('look4socket', type, resource.callback, resource.args ? resource.args.server : resource)
-  // if (!ignoreType.includes(type)) {
-    // process._rawDebug('INIT', type, asyncId, triggerAsyncId, resource);
-    // process._rawDebug('INIT', type, asyncId, triggerAsyncId);
-    const err = new Error().stack;
-    const errMessage = err
-    if(errMessage.includes('ioController' || 'async_perf_hooks' )) return destroy(asyncId)
     // process._rawDebug(err.split('\n').slice(3).join('\n'));
->>>>>>> 2a8f64be969614c787975018247448b0bcbce7ff
     const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
     funcInfoNode.errMessage = errMessage;
     activeAsyncProcess.set(asyncId, funcInfoNode);
     performance.mark(`${type}-${asyncId}-Init`);
-  // }
+  }
 }
 
 function before(asyncId) {
@@ -61,8 +38,8 @@ function after(asyncId) {
 function destroy(asyncId) {
   if (activeAsyncProcess.has(asyncId)) {
     const type = activeAsyncProcess.get(asyncId).type;
-    process._rawDebug('DESTROY',asyncId);
-    process._rawDebug(activeAsyncProcess.keys());
+    // process._rawDebug('DESTROY',asyncId);
+    // process._rawDebug(activeAsyncProcess.keys());
     performance.mark(`${type}-${asyncId}-Destroy`);
     performance.measure(`${type}-${asyncId}`,
                         `${type}-${asyncId}-Init`,
@@ -77,13 +54,12 @@ const obs = new PerformanceObserver((list, observer) => {
   const funcInfoNode = activeAsyncProcess.get(asyncId);
   funcInfoNode.duration = funcInfoEntries.duration;
   funcInfoNode.startTime = funcInfoEntries.startTime;
-  asyncInfoEmit.push(funcInfoNode);
   activeAsyncProcess.delete(asyncId);
 
   // observer.disconnect();
-  // asyncHook.disable();
-  // ioController.sendInfo(asyncInfoEmit,obs);
-  // asyncHook.enable();
+  asyncHook.disable();
+  ioController.sendInfo(funcInfoNode);
+  asyncHook.enable();
   // obs.observe({ entryTypes: ['measure','function'], buffered: false });
 });
 //entryTypes can be: 'node', 'mark', 'measure', 'gc', or 'function'
