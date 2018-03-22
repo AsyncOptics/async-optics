@@ -55,6 +55,9 @@ const obs = new PerformanceObserver((list, observer) => {
   funcInfoNode.duration = funcInfoEntries.duration;
   funcInfoNode.startTime = funcInfoEntries.startTime;
   activeAsyncProcess.delete(asyncId);
+  performance.clearMeasures(funcInfoEntries.name);
+  performance.clearMarks(`${funcInfoEntries.name}-Init`);
+  performance.clearMarks(`${funcInfoEntries.name}-Destroy`);
 
   // observer.disconnect();
   asyncHook.disable();

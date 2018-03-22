@@ -1,26 +1,27 @@
 const socket = io.connect('http://localhost:3000');
 
 socket.on('funcInfo', data => {
-  console.log(data);
-  
+  // console.log(data);
+  parseData(data)
+
 });
 
 
 
-var numbs = [ 4, 7, 8, 2, 3, 1, 23 ]
+const numbs = [ 4, 7, 8, 2, 3, 1, 23 ];
 
-var margin = {top: 20, right: 90, bottom: 30, left: 90},
-width = 500 - margin.left - margin.right,
-height = 500 - margin.top - margin.bottom;
+const margin = {top: 20, right: 90, bottom: 30, left: 90};
+const width = 700 - margin.left - margin.right;
+const height = 500 - margin.top - margin.bottom;
 
-var i = 0,
-duration = 750,
-root;
+let i = 0;
+let duration = 750;
+let root;
 
-var counter = 0;
-var treeData = {};
+let counter = 0;
+let treeData = {};
 
-var svg = d3.select("#tree")
+const svg = d3.select("#tree")
 .append("svg")
 .attr("width", width + margin.right + margin.left)
 .attr("height", height + margin.top + margin.bottom)
