@@ -3,11 +3,8 @@ const socket = io.connect('http://localhost:3000');
 
 socket.on('funcInfo', data => {
   const needToRefresh = parseData(data);
-  // flatData.sort((a,b) => {
-  //   return a.asyncId - b.asyncId;
-  // })
-  console.log(flatData);  // from dataParser.js file
   if (needToRefresh) {
+    // convert the flat data into a hierarchy
     const inputData = d3.stratify()
                         .id( (d) => { return d.asyncId; })
                         .parentId( (d) => { return d.triggerAsyncId; })
@@ -16,15 +13,6 @@ socket.on('funcInfo', data => {
     refreshTree(inputData);
   }
 });
-
-// convert the flat data into a hierarchy
-
-//
-// // assign the name to each node
-// treeData.each(function(d) {
-//     d.name = d.id;
-//   });
-
 
 const margin = {top: 20, right: 90, bottom: 30, left: 90};
 const width = 800 - margin.left - margin.right;
@@ -56,9 +44,7 @@ const div = d3.select("body")
 
 
 function refreshTree(inputData) {
-  // console.log(newsource);
   root = d3.hierarchy(inputData, d => d.children );
-  // console.log(root);
   root.x0 = 0;
   root.y0 = width/2;
   update(root);
