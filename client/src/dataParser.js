@@ -1,4 +1,4 @@
-const CORE_THRESHOLD = 9;
+const CORE_THRESHOLD = 8;
 const remainData = {}; //key is the id, value is arr contains all func trggered by the id
 const checklist_flat = {}; //key is the id, value is true,keep track for flatData
 const flatData = [];  //data to show
@@ -24,7 +24,6 @@ function parseData(data) {
     const funcNode = data.pop();
     const triggerAsyncId = funcNode.triggerAsyncId;
     const asyncId = funcNode.asyncId;
-    // console.log(checklist_flat);
     if (triggerAsyncId < CORE_THRESHOLD || checklist_flat[triggerAsyncId]) {
       if (triggerAsyncId < CORE_THRESHOLD) funcNode.triggerAsyncId = 'Node.js core';
       needToRefresh = true;
