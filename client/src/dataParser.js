@@ -16,7 +16,6 @@ function parseData(data) {
   data.sort( (a,b) => {
     return b.asyncId - a.asyncId;
   });
-  console.log(data);
   let n = data.length;
   while (n > 0) {
     const funcNode = data.pop();

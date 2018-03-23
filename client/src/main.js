@@ -3,16 +3,16 @@ const socket = io.connect('http://localhost:3000');
 
 socket.on('funcInfo', data => {
   parseData(data);
-  flatData.sort((a,b) => {
-    return a.asyncId - b.asyncId;
-  })
-  
+  // flatData.sort((a,b) => {
+  //   return a.asyncId - b.asyncId;
+  // })
   console.log(flatData);  // from dataParser.js file
   const inputData = d3.stratify()
                       .id( (d) => { return d.asyncId; })
                       .parentId( (d) => { return d.triggerAsyncId; })
                       (flatData);
   inputData.each((d) => { d.name = d.id; });
+  // console.log(inputData);
   refreshTree(inputData);
 });
 
