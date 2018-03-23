@@ -44,6 +44,14 @@ function init(asyncId, type, triggerAsyncId, resource) {
     }
   }
 
+  if(type === 'TCPSERVERWRAP' && triggerAsyncId === 1){
+    const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
+    funcInfoNode.errMessage = newErr.join('\n');
+    funcInfoNode.startTime = 0;
+    funcInfoNode.duration = 0;
+    ioController.sendInfo(funcInfoNode)
+  }
+
   if(resource.constructor.name === 'Socket' && resource.server && resource.server._connectionKey === '6::::3000'){
     checkMap(triggerAsyncId)
   }
@@ -58,6 +66,10 @@ function init(asyncId, type, triggerAsyncId, resource) {
     if(resource.args[0].server && resource.args[0].server._connectionKey === '6::::3000'){
       checkMap(triggerAsyncId)   
     }
+  }
+
+  if(type === 'GETADDRINFOREQWRAP' || resource.constructor.name === 'Socket' && resource.hostname === 'ds249798.mlab.com'){
+    checkMap(triggerAsyncId)
   }
 
   if( err.includes('ioController') ||

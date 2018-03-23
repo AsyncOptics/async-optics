@@ -20,7 +20,7 @@ function parseData(data) {
   while (n > 0) {
     const funcNode = data.pop();
     const triggerAsyncId = funcNode.triggerAsyncId;
-    const asyncId = funcNode.triggerAsyncId;
+    const asyncId = funcNode.asyncId;
     if (triggerAsyncId < 8 || checklist_flat[triggerAsyncId]) {
       if (triggerAsyncId < 8) funcNode.triggerAsyncId = 'Node.js core';
       checklist_flat[asyncId] = true;
@@ -38,7 +38,9 @@ function parseData(data) {
 function getfromRemainData(id) {
   if (remainData[id]) { //
     for (let i=0; i<remainData[id].length; i++) {
-      flatData.push(remainData[id][i]);
+      const funcNode = remainData[id][i];
+      checklist_flat[funcNode.asyncId] = true;
+      flatData.push(funcNode);
       getfromRemainData(remainData[id][i].asyncId);
     }
     remainData[id] = null;
@@ -55,12 +57,3 @@ function putIntoRemainData(funcNode) {
   return;
 }
 
-
-
-// var flatData = [
-//   {"name": "Top Level", "parent": null},
-//   {"name": "Level 2: A", "parent": "Top Level" },
-//   {"name": "Level 2: B", "parent": "Top Level" },
-//   {"name": "Son of A", "parent": "Level 2: A" },
-//   {"name": "Daughter of A", "parent": "Level 2: A" }
-// ];
