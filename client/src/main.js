@@ -2,18 +2,19 @@ const socket = io.connect('http://localhost:3000');
 
 
 socket.on('funcInfo', data => {
-  parseData(data);
+  const needToRefresh = parseData(data);
   // flatData.sort((a,b) => {
   //   return a.asyncId - b.asyncId;
   // })
   console.log(flatData);  // from dataParser.js file
-  const inputData = d3.stratify()
-                      .id( (d) => { return d.asyncId; })
-                      .parentId( (d) => { return d.triggerAsyncId; })
-                      (flatData);
-  inputData.each((d) => { d.name = d.id; });
-  // console.log(inputData);
-  refreshTree(inputData);
+  if (needToRefresh) {
+    const inputData = d3.stratify()
+                        .id( (d) => { return d.asyncId; })
+                        .parentId( (d) => { return d.triggerAsyncId; })
+                        (flatData);
+    inputData.each((d) => { d.name = d.id; });
+    refreshTree(inputData);
+  }
 });
 
 // convert the flat data into a hierarchy
@@ -95,11 +96,16 @@ function update(source){
              return d._children ? "lightsteelblue" : "#fff";
            })  // TOOLTIP ON MOUSE OVER
            .on("mouseover", (d) => {
-             // console.log(d);
+             // console.log(d.data.data);
+             const funcNode = d.data.data;
+             const funcInfoStr = `Type: ${funcNode.type}
+                                startTime: ${funcNode.startTime}
+                                duration: ${funcNode.duration}
+                                ${funcNode.errMessage}`;
              div.transition()
                 .duration(200)
                 .style("opacity", .9);
-             div.html("some data info")
+             div.html(funcInfoStr)
                .style("left", (d3.event.pageX) + "px")
                .style("top", (d3.event.pageY - 28) + "px");
            })
