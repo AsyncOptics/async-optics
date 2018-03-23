@@ -9,7 +9,20 @@ asyncHook.enable();
 
 const activeAsyncProcess = new Map();
 
-const ignoreType = ['Timeout','TIMERWRAP'];
+function checkMap(currentTrigger){
+  let buffer;
+  activeAsyncProcess.forEach((value, key) => {
+    if(value.asyncId === currentTrigger || value.triggerAsyncId === currentTrigger){
+      if(value.triggerAsyncId < 7){
+        buffer = value.asyncId
+      }else {
+        buffer = value.triggerAsyncId
+      }
+      activeAsyncProcess.delete(key)
+      return checkMap(buffer)
+    }
+  })
+}
 
 
 function init(asyncId, type, triggerAsyncId, resource) {
@@ -29,13 +42,41 @@ function init(asyncId, type, triggerAsyncId, resource) {
     }
   }
 
+  if(type === 'TCPSERVERWRAP' && triggerAsyncId === 1){
+    const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
+    funcInfoNode.errMessage = newErr.join('\n');
+    funcInfoNode.startTime = 0;
+    funcInfoNode.duration = 0;
+    ioController.sendInfo(funcInfoNode)
+  }
+
+  if(resource.constructor.name === 'Socket' && resource.server && resource.server._connectionKey === '6::::3000'){
+    checkMap(triggerAsyncId)
+  }
+
+  if(resource.args && resource.args[0].url){
+    if(resource.args[0].url.includes('socket.io') && resource.args[0].socket.server._connectionKey === '6::::3000'){
+      checkMap(triggerAsyncId)
+    }
+  }
+
+  if(resource.args && resource.args[0].constructor.name === 'Socket'){
+    if(resource.args[0].server && resource.args[0].server._connectionKey === '6::::3000'){
+      checkMap(triggerAsyncId)   
+    }
+  }
+
+  if(type === 'GETADDRINFOREQWRAP' || resource.constructor.name === 'Socket' && resource.hostname === 'ds249798.mlab.com'){
+    checkMap(triggerAsyncId)
+  }
+
   if( err.includes('ioController') ||
       err.includes('/alpha/node_modules/') ||
       err.includes('at AsyncHook.init (/Users/aturberv/testAlpha/node_modules/alpha/async_perf_hooks.js:32:17)') &&
       err.includes('at TCP.emitInitNative (internal/async_hooks.js:131:43)') ) {
     return;
   } else if(triggerAsyncId < 8 || activeAsyncProcess.get(triggerAsyncId)) {
-    process._rawDebug('INIT', type, asyncId, triggerAsyncId);
+    process._rawDebug('INIT', type, asyncId, triggerAsyncId, resource);
     const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
     funcInfoNode.errMessage = newErr.join('\n');
     activeAsyncProcess.set(asyncId, funcInfoNode);
@@ -65,7 +106,6 @@ function destroy(asyncId) {
 }
 
 const obs = new PerformanceObserver((list, observer) => {
-  // process._rawDebug(list.getEntries()[0]);
   const funcInfoEntries = list.getEntries()[0];
   const asyncId = Number(funcInfoEntries.name.split('-')[1]);
   const funcInfoNode = activeAsyncProcess.get(asyncId);
@@ -79,7 +119,6 @@ const obs = new PerformanceObserver((list, observer) => {
   performance.clearMarks(`${funcInfoEntries.name}-Destroy`);
 
   ioController.sendInfo(funcInfoNode);
-  // obs.observe({ entryTypes: ['measure','function'], buffered: false });
 });
 //entryTypes can be: 'node', 'mark', 'measure', 'gc', or 'function'
 obs.observe({ entryTypes: ['measure','function'], buffered: false });
