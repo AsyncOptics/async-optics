@@ -3,10 +3,10 @@ const ioController = {};
 
 let asyncInfoEmit = [];
 let sendInfoAnyway;
-ioController.sendInfo = function(funcInfoNode) {  
+ioController.sendInfo = function(funcInfoNode) {
   if(io._hasConnection) {
     asyncInfoEmit.push(funcInfoNode);
-    if (asyncInfoEmit.length > 39) {
+    if (asyncInfoEmit.length > 59) {
       clearTimeout(sendInfoAnyway);
       sendFuncInfo(asyncInfoEmit);
     } else if (asyncInfoEmit.length > 0) {
