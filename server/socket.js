@@ -14,8 +14,8 @@ app.use( (req, res, next) => {
   next();
 })
 
-app.use(express.static('client'));
-
+// app.use(express.static('client'));
+app.use(express.static(path.join(__dirname, '../client')));
 io.on('connection', (socket) => {
   process._rawDebug('New Socket Connection', socket.id);
   io._hasConnection = true;
