@@ -69,7 +69,6 @@ const obs = new PerformanceObserver((list, observer) => {
   const funcInfoEntries = list.getEntries()[0];
   const asyncId = Number(funcInfoEntries.name.split('-')[1]);
   const funcInfoNode = activeAsyncProcess.get(asyncId);
-  process._rawDebug(funcInfoNode);
   funcInfoNode.duration = funcInfoEntries.duration;
   funcInfoNode.startTime = funcInfoEntries.startTime;
   funcInfoNode.endTime = funcInfoEntries.startTime + funcInfoEntries.duration;
@@ -78,7 +77,6 @@ const obs = new PerformanceObserver((list, observer) => {
   performance.clearMeasures(funcInfoEntries.name);
   performance.clearMarks(`${funcInfoEntries.name}-Init`);
   performance.clearMarks(`${funcInfoEntries.name}-Destroy`);
-
 
   ioController.sendInfo(funcInfoNode);
   // obs.observe({ entryTypes: ['measure','function'], buffered: false });
