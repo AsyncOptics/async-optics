@@ -5,10 +5,10 @@ const ioController = require('./server/ioController.js');
 
 const hooks = {init: init, before: before, after: after, destroy: destroy};
 const asyncHook = async_hooks.createHook(hooks);
-asyncHook.enable()
+asyncHook.enable();
 
 const activeAsyncProcess = new Map();
-let asyncInfoEmit = [];
+
 const ignoreType = ['Timeout','TIMERWRAP'];
 
 function checkMap(currentTrigger){
@@ -86,8 +86,8 @@ function after(asyncId) {
 function destroy(asyncId) {
   if (activeAsyncProcess.has(asyncId)) {
     const type = activeAsyncProcess.get(asyncId).type;
-    process._rawDebug('DESTROY',asyncId);
-    process._rawDebug(activeAsyncProcess.keys());
+    // process._rawDebug('DESTROY',asyncId);
+    // process._rawDebug(activeAsyncProcess.keys());
     performance.mark(`${type}-${asyncId}-Destroy`);
     performance.measure(`${type}-${asyncId}`,
                         `${type}-${asyncId}-Init`,
@@ -103,20 +103,14 @@ const obs = new PerformanceObserver((list, observer) => {
   funcInfoNode.duration = funcInfoEntries.duration;
   funcInfoNode.startTime = funcInfoEntries.startTime;
   funcInfoNode.endTime = funcInfoEntries.startTime + funcInfoEntries.duration;
-  asyncInfoEmit.push(funcInfoNode);
+
   activeAsyncProcess.delete(asyncId);
+  performance.clearMeasures(funcInfoEntries.name);
+  performance.clearMarks(`${funcInfoEntries.name}-Init`);
+  performance.clearMarks(`${funcInfoEntries.name}-Destroy`);
 
-  // observer.disconnect();
-  ioController.sendInfo(asyncInfoEmit,obs);
-  // process._rawDebug(activeAsyncProcess);
-
+  ioController.sendInfo(funcInfoNode);
   // obs.observe({ entryTypes: ['measure','function'], buffered: false });
-
-  // if (activeAsyncProcess.size === 1) {
-  //   performance.clearMarks();
-  //   performance.clearMeasures();
-  //
-  // }
 });
 //entryTypes can be: 'node', 'mark', 'measure', 'gc', or 'function'
 obs.observe({ entryTypes: ['measure','function'], buffered: false });

@@ -11,7 +11,7 @@
   var socket = io.connect('http://localhost:3000');
   socket.on("funcInfo", function(data) {
       console.log('data', data);
-      let testDiv = document.getElementsByClassName('test')
+      let testDiv = document.getElementsByClassName('test');
       // console.log(testDiv[0])
       data.forEach((data) => {
       	let dataText = document.createTextNode(JSON.stringify(data))
