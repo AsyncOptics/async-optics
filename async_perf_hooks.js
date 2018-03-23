@@ -9,8 +9,6 @@ asyncHook.enable();
 
 const activeAsyncProcess = new Map();
 
-const ignoreType = ['Timeout','TIMERWRAP'];
-
 function checkMap(currentTrigger){
   let buffer;
   activeAsyncProcess.forEach((value, key) => {
@@ -108,7 +106,6 @@ function destroy(asyncId) {
 }
 
 const obs = new PerformanceObserver((list, observer) => {
-  // process._rawDebug(list.getEntries()[0]);
   const funcInfoEntries = list.getEntries()[0];
   const asyncId = Number(funcInfoEntries.name.split('-')[1]);
   const funcInfoNode = activeAsyncProcess.get(asyncId);
@@ -122,7 +119,6 @@ const obs = new PerformanceObserver((list, observer) => {
   performance.clearMarks(`${funcInfoEntries.name}-Destroy`);
 
   ioController.sendInfo(funcInfoNode);
-  // obs.observe({ entryTypes: ['measure','function'], buffered: false });
 });
 //entryTypes can be: 'node', 'mark', 'measure', 'gc', or 'function'
 obs.observe({ entryTypes: ['measure','function'], buffered: false });
