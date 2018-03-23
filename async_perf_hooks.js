@@ -11,32 +11,62 @@ const activeAsyncProcess = new Map();
 let asyncInfoEmit = [];
 const ignoreType = ['Timeout','TIMERWRAP'];
 
+function checkMap(currentTrigger){
+  let buffer;
+  activeAsyncProcess.forEach((value, key) => {
+    if(value.asyncId === currentTrigger || value.triggerAsyncId === currentTrigger){
+      if(value.triggerAsyncId < 7){
+        buffer = value.asyncId
+      }else {
+        buffer = value.triggerAsyncId
+      }
+      activeAsyncProcess.delete(key)
+      return checkMap(buffer)
+    }
+  })
+}
+
 
 function init(asyncId, type, triggerAsyncId, resource) {
   const err = new Error().stack;
   const errMessage = err.split('\n');
   const newErr = [];
 
-  for(let i = 0; i < errMessage.length; i++){
-    if(errMessage[i].includes('module.js') || 
-      errMessage[i].includes('async_hooks') || 
-      errMessage[i].includes('async_perf_hooks') || 
+  for (let i = 0; i < errMessage.length; i++) {
+    if (errMessage[i].includes('module.js') ||
+      errMessage[i].includes('async_hooks') ||
+      errMessage[i].includes('async_perf_hooks') ||
       errMessage[i].includes('Error') ||
-      errMessage[i].includes('bootstrap_node')){
+      errMessage[i].includes('bootstrap_node')) {
       continue;
     } else {
       newErr.push(errMessage[i])
     }
   }
-    
-  if(
-    err.includes('ioController') ||
-    err.includes('/alpha/node_modules/') ||
-    err.includes('at AsyncHook.init (/Users/aturberv/testAlpha/node_modules/alpha/async_perf_hooks.js:32:17)') &&
-    err.includes('at TCP.emitInitNative (internal/async_hooks.js:131:43)') 
-    ){
+
+  if(resource.constructor.name === 'Socket' && resource.server && resource.server._connectionKey === '6::::3000'){
+    checkMap(triggerAsyncId)
+  }
+
+  if(resource.args && resource.args[0].url){
+    if(resource.args[0].url.includes('socket.io') && resource.args[0].socket.server._connectionKey === '6::::3000'){
+      checkMap(triggerAsyncId)
+    }
+  }
+
+  if(resource.args && resource.args[0].constructor.name === 'Socket'){
+    if(resource.args[0].server && resource.args[0].server._connectionKey === '6::::3000'){
+      checkMap(triggerAsyncId)   
+    }
+  }
+
+  if( err.includes('ioController') ||
+      err.includes('/alpha/node_modules/') ||
+      err.includes('at AsyncHook.init (/Users/aturberv/testAlpha/node_modules/alpha/async_perf_hooks.js:32:17)') &&
+      err.includes('at TCP.emitInitNative (internal/async_hooks.js:131:43)') ) {
     return;
-  } else if(triggerAsyncId < 8 || activeAsyncProcess.get(triggerAsyncId)){
+  } else if(triggerAsyncId < 8 || activeAsyncProcess.get(triggerAsyncId)) {
+    process._rawDebug('INIT', type, asyncId, triggerAsyncId, resource);
     const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
     funcInfoNode.errMessage = newErr.join('\n');
     activeAsyncProcess.set(asyncId, funcInfoNode);
