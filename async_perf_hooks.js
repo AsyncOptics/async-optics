@@ -13,7 +13,7 @@ function checkMap(currentTrigger){
   let buffer;
   activeAsyncProcess.forEach((value, key) => {
     if(value.asyncId === currentTrigger || value.triggerAsyncId === currentTrigger){
-      if(value.triggerAsyncId < 7){
+      if(value.triggerAsyncId < 7) {
         buffer = value.asyncId
       }else {
         buffer = value.triggerAsyncId
@@ -62,7 +62,7 @@ function init(asyncId, type, triggerAsyncId, resource) {
 
   if(resource.args && resource.args[0].constructor.name === 'Socket'){
     if(resource.args[0].server && resource.args[0].server._connectionKey === '6::::3000'){
-      checkMap(triggerAsyncId)   
+      checkMap(triggerAsyncId)
     }
   }
 
@@ -76,7 +76,7 @@ function init(asyncId, type, triggerAsyncId, resource) {
       err.includes('at TCP.emitInitNative (internal/async_hooks.js:131:43)') ) {
     return;
   } else if(triggerAsyncId < 8 || activeAsyncProcess.get(triggerAsyncId)) {
-    process._rawDebug('INIT', type, asyncId, triggerAsyncId, resource);
+    // process._rawDebug('INIT', type, asyncId, triggerAsyncId, resource);
     const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
     funcInfoNode.errMessage = newErr.join('\n');
     activeAsyncProcess.set(asyncId, funcInfoNode);

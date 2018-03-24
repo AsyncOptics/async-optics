@@ -24,6 +24,7 @@ function parseData(data) {
     const funcNode = data.pop();
     const triggerAsyncId = funcNode.triggerAsyncId;
     const asyncId = funcNode.asyncId;
+    // console.log(asyncId, triggerAsyncId, funcNode.type);
     if (triggerAsyncId < CORE_THRESHOLD || checklist_flat[triggerAsyncId]) {
       if (triggerAsyncId < CORE_THRESHOLD) funcNode.triggerAsyncId = 'Node.js core';
       needToRefresh = true;
