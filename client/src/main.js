@@ -2,7 +2,9 @@ const socket = io.connect('http://localhost:3000');
 
 
 socket.on('funcInfo', data => {
+  console.log(data);
   const needToRefresh = parseData(data);
+  // console.log(flatData);
   if (needToRefresh) {
     // convert the flat data into a hierarchy
     const inputData = d3.stratify()
