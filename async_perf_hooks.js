@@ -3,25 +3,45 @@ const {performance, PerformanceObserver} = require('perf_hooks');
 const funcInfo = require('./funcInfo/funcInfoModel.js');
 const ioController = require('./server/ioController.js');
 
+// Return the id of the current execution context. Useful for tracking state
+// and retrieving the resource of the current trigger without needing to use an
+// AsyncHook.
+
+// Return the id of the resource responsible for triggering the callback of the
+// current execution scope to fire.
+const cid = async_hooks.currentId();
+// process._rawDebug('currentId',async_hooks.currentId(),'  triggerId',async_hooks.triggerId());
+
 const hooks = {init: init, before: before, after: after, destroy: destroy};
 const asyncHook = async_hooks.createHook(hooks);
 asyncHook.enable();
 
 const activeAsyncProcess = new Map();
 
-function checkMap(currentTrigger){
-  let buffer;
-  activeAsyncProcess.forEach((value, key) => {
-    if(value.asyncId === currentTrigger || value.triggerAsyncId === currentTrigger){
-      if(value.triggerAsyncId < 7) {
-        buffer = value.asyncId
-      }else {
-        buffer = value.triggerAsyncId
+function deleteEntireBranch(triggerAsyncId) {
+  if (triggerAsyncId < 7) return;
+  const rootAsyncId = findRootId(triggerAsyncId)
+  deleteThisBranch(rootAsyncId);
+
+  function deleteThisBranch(id) { // delete branch based on root async id ,won't catch the broken subbranch if middle nodes are missing
+    activeAsyncProcess.forEach((funcNode, asyncId) => {
+      if (funcNode.triggerAsyncId === id) {
+        deleteThisBranch(asyncId);
       }
-      activeAsyncProcess.delete(key)
-      return checkMap(buffer)
+    });
+    activeAsyncProcess.delete(id);
+    return;
+  }
+
+  function findRootId(asyncId) {
+    let rootId = asyncId;
+    let funcNode = activeAsyncProcess.get(asyncId);
+    while (funcNode && funcNode.triggerAsyncId>=7) {
+      rootId = funcNode.triggerAsyncId;
+      funcNode = activeAsyncProcess.get(rootId);
     }
-  })
+    return rootId;
+  }
 }
 
 
@@ -38,41 +58,41 @@ function init(asyncId, type, triggerAsyncId, resource) {
       errMessage[i].includes('bootstrap_node')) {
       continue;
     } else {
-      newErr.push(errMessage[i])
+      newErr.push(errMessage[i]);
     }
   }
 
-  if(type === 'TCPSERVERWRAP' && triggerAsyncId === 1){
+  if(type === 'TCPSERVERWRAP' && triggerAsyncId === cid){
     const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
     funcInfoNode.errMessage = newErr.join('\n');
     funcInfoNode.startTime = 0;
     funcInfoNode.duration = 0;
-    ioController.sendInfo(funcInfoNode)
+    ioController.sendInfo(funcInfoNode);
   }
 
   if(resource.constructor.name === 'Socket' && resource.server && resource.server._connectionKey === '6::::3000'){
-    checkMap(triggerAsyncId)
+    deleteEntireBranch(triggerAsyncId);
   }
 
   if(resource.args && resource.args[0].url){
     if(resource.args[0].url.includes('socket.io') && resource.args[0].socket.server._connectionKey === '6::::3000'){
-      checkMap(triggerAsyncId)
+      deleteEntireBranch(triggerAsyncId);
     }
   }
 
   if(resource.args && resource.args[0].constructor.name === 'Socket'){
     if(resource.args[0].server && resource.args[0].server._connectionKey === '6::::3000'){
-      checkMap(triggerAsyncId)
+      deleteEntireBranch(triggerAsyncId);
     }
   }
 
   if(type === 'GETADDRINFOREQWRAP' || resource.constructor.name === 'Socket' && resource.hostname === 'ds249798.mlab.com'){
-    checkMap(triggerAsyncId)
+    deleteEntireBranch(triggerAsyncId);
   }
-
+  //from ourOwncode
   if( err.includes('ioController') ||
       err.includes('/alpha/node_modules/') ||
-      err.includes('at AsyncHook.init (/Users/aturberv/testAlpha/node_modules/alpha/async_perf_hooks.js:32:17)') &&
+      err.includes(`at AsyncHook.init (${__dirname}/async_perf_hooks.js)`) &&
       err.includes('at TCP.emitInitNative (internal/async_hooks.js:131:43)') ) {
     return;
   } else if(triggerAsyncId < 8 || activeAsyncProcess.get(triggerAsyncId)) {
