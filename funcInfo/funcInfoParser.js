@@ -16,16 +16,9 @@ function funcInfoParser(asyncId, type, resource) {
       // process._rawDebug('DOMAIN******',resource.domain);
       break;
     case 'TCPWRAP':
-      if (asyncId === 34) {
-        // process._rawDebug(Object.keys(resource));
-        // process._rawDebug(resource);
-      }
-      process._rawDebug(Object.keys(resource));
-      process._rawDebug(resource);
-      // process._rawDebug(Object.keys(resource));
-      // process._rawDebug('CALLBACK******',resource.callback);
-      // process._rawDebug('ARGS******',resource.args);
-      // process._rawDebug('DOMAIN******',resource.domain);
+
+      process._rawDebug(asyncId, resource);
+
       break;
     default:
 
@@ -35,7 +28,22 @@ function funcInfoParser(asyncId, type, resource) {
 }
 
 
+function errMessageParser(errMessage) {
+  const newErr = [];
+  for (let i = 0; i < errMessage.length; i++) {
+    if (errMessage[i].includes('module.js') ||
+      errMessage[i].includes('async_hooks') ||
+      errMessage[i].includes('async_perf_hooks') ||
+      errMessage[i].includes('Error') ||
+      errMessage[i].includes('bootstrap_node')) {
+      continue;
+    } else {
+      newErr.push(errMessage[i]);
+    }
+  }
+  return newErr;
+}
 
 
 
-module.exports = {funcInfoParser};
+module.exports = {funcInfoParser, errMessageParser};

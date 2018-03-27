@@ -1,17 +1,17 @@
 const async_hooks = require('async_hooks');
 const {performance, PerformanceObserver} = require('perf_hooks');
 const funcInfo = require('./funcInfo/funcInfoModel.js');
-const {funcInfoParser} = require('./funcInfo/funcInfoParser.js');
+const {funcInfoParser, errMessageParser} = require('./funcInfo/funcInfoParser.js');
 const ioController = require('./server/ioController.js');
 
 // Return the id of the current execution context. Useful for tracking state
 // and retrieving the resource of the current trigger without needing to use an
 // AsyncHook.
-const cid = async_hooks.currentId();
+
 // Return the id of the resource responsible for triggering the callback of the
 // current execution scope to fire.
 
-// process._rawDebug('currentId',async_hooks.currentId(),'  triggerId',async_hooks.triggerId());
+// process._rawDebug('currentId',async_hooks.executionAsyncId(),'  triggerId',async_hooks.triggerAsyncId());
 
 const hooks = {init: init, before: before, after: after, destroy: destroy};
 const asyncHook = async_hooks.createHook(hooks);
@@ -48,19 +48,7 @@ function deleteEntireBranch(triggerAsyncId) {
 function init(asyncId, type, triggerAsyncId, resource) {
   const err = new Error().stack;
   const errMessage = err.split('\n');
-  const newErr = [];
-
-  for (let i = 0; i < errMessage.length; i++) {
-    if (errMessage[i].includes('module.js') ||
-      errMessage[i].includes('async_hooks') ||
-      errMessage[i].includes('async_perf_hooks') ||
-      errMessage[i].includes('Error') ||
-      errMessage[i].includes('bootstrap_node')) {
-      continue;
-    } else {
-      newErr.push(errMessage[i]);
-    }
-  }
+  const newErr = errMessageParser(errMessage);
 
   if(type === 'TCPSERVERWRAP' && triggerAsyncId === cid){
     const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
@@ -100,20 +88,17 @@ function init(asyncId, type, triggerAsyncId, resource) {
       err.includes(`at AsyncHook.init (${__dirname}/async_perf_hooks.js)`) &&
       err.includes('at TCP.emitInitNative (internal/async_hooks.js:131:43)') ) {
     return;
-  } else if(triggerAsyncId < 8 || activeAsyncProcess.get(triggerAsyncId)) {
+  } else if(triggerAsyncId < 8 || activeAsyncProcess.has(triggerAsyncId)) {
     // process._rawDebug('INIT', type, asyncId, triggerAsyncId, resource);
-    if (newErr.length === 0 && type === 'TCPWRAP') {
-      const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
-      funcInfoNode.errMessage = newErr.join('\n');
-      activeAsyncProcess.set(asyncId, funcInfoNode);
-      performance.mark(`${type}-${asyncId}-Init`);
-    }
+    const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
+    funcInfoNode.errMessage = newErr.join('\n');
+    activeAsyncProcess.set(asyncId, funcInfoNode);
+    performance.mark(`${type}-${asyncId}-Init`);
     process._rawDebug(activeAsyncProcess.keys());
     funcInfoParser(asyncId, type, resource);
     return;
-  } else {
-    return;
   }
+  return;
 }
 
 function before(asyncId) {
