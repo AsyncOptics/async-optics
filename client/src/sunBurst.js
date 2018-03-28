@@ -14,7 +14,7 @@ sunSocket.on('packageInfo', data => {
         .style("fill", function(d) { return color((d.children ? d : d.parent).data.name); })
         .on("click", click)
         .append("title")
-        .text(function(d) { return d.data.name + "\n" + formatNumber(d.data.totalTime); });
+        .text(function(d) { return d.data.name === 'root' ? `${d.data.name} \n ${formatNumber(rootTime)}` : `${d.data.name} \n ${formatNumber(d.data.totalTime)}` });
 
   var packageData = d3.select("#package-panel")
       .selectAll("#packageData")
@@ -28,7 +28,7 @@ sunSocket.on('packageInfo', data => {
     packageData.append("p").attr("class", "package-data")
                .text((d) => { return `percentage: ${Math.floor(d.totalTime/rootTime * 100)}%`})
     packageData.append("p").attr("class", "package-data")
-               .text((d) => { return `time taken to load: ${d.totalTime}`})
+               .text((d) => { return `time taken to load: ${d.totalTime} ms`})
 
 })
 

@@ -66,9 +66,9 @@ function init(asyncId, type, triggerAsyncId, resource) {
     }
   }
 
-  // if(type === 'GETADDRINFOREQWRAP' || resource.constructor.name === 'Socket' && resource.hostname === 'ds249798.mlab.com'){
-  //   checkMap(triggerAsyncId)
-  // }
+  if(type === 'GETADDRINFOREQWRAP' || resource.constructor.name === 'Socket' && resource.hostname === 'ds249798.mlab.com'){
+    checkMap(triggerAsyncId)
+  }
 
   if( err.includes('ioController') ||
       err.includes('/alpha/node_modules/') ||
