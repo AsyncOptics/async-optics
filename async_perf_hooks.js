@@ -15,9 +15,11 @@ const ioController = require('./server/ioController.js');
 
 const hooks = {init: init, before: before, after: after, destroy: destroy};
 const asyncHook = async_hooks.createHook(hooks);
+
 asyncHook.enable();
 
 const activeAsyncProcess = new Map();
+
 
 function deleteEntireBranch(triggerAsyncId) {
   if (triggerAsyncId < 7) return;
@@ -89,14 +91,13 @@ function init(asyncId, type, triggerAsyncId, resource) {
       err.includes('at TCP.emitInitNative (internal/async_hooks.js:131:43)') ) {
     return;
   } else if(triggerAsyncId < 8 || activeAsyncProcess.has(triggerAsyncId)) {
-    // process._rawDebug('INIT', type, asyncId, triggerAsyncId, resource);
+    funcInfoParser(asyncId, type, triggerAsyncId,resource);
     const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
     funcInfoNode.errMessage = newErr.join('\n');
     activeAsyncProcess.set(asyncId, funcInfoNode);
     performance.mark(`${type}-${asyncId}-Init`);
-    process._rawDebug(activeAsyncProcess.keys());
-    funcInfoParser(asyncId, type, resource);
-    return;
+    // process._rawDebug(activeAsyncProcess.keys());
+
   }
   return;
 }
@@ -137,3 +138,7 @@ const obs = new PerformanceObserver((list, observer) => {
 });
 //entryTypes can be: 'node', 'mark', 'measure', 'gc', or 'function'
 obs.observe({ entryTypes: ['measure','function'], buffered: false });
+
+
+
+process._rawDebug('async_perf_hooks.js');

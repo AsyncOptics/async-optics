@@ -1,32 +1,40 @@
 const hist = {};
-
-function funcInfoParser(asyncId, type, resource) {
-  if (hist[type] !== undefined) {
-    hist[type]++;
-  } else {
-    hist[type] = 1;
-  }
-
+let counter = 0;
+const DISPLAY_FREQ = 0;
+function funcInfoParser(asyncId, type, triggerAsyncId, resource) {
+  histDisplay(type)
 
   switch (type) {
     case 'TickObject':
-      // process._rawDebug(Object.keys(resource));
+      // no useful information
       // process._rawDebug('CALLBACK******',resource.callback);
-      // process._rawDebug('ARGS******',resource.args);
+      process._rawDebug('ARGS******',resource.args);
       // process._rawDebug('DOMAIN******',resource.domain);
       break;
+    case 'TIMERWRAP':
+      // no information at all, Timer {}
+      break;
     case 'TCPWRAP':
-
-      process._rawDebug(asyncId, resource);
-
+      // no information
+      // TCP { reading: false, owner: null, onread: null, onconnection: null }
       break;
     default:
 
   }
-  process._rawDebug('HIST',hist);
+
   return;
 }
 
+function histDisplay(type) {
+  if (hist[type] !== undefined) hist[type]++;
+  else hist[type] = 1;
+  counter++;
+  if (counter >= DISPLAY_FREQ) {
+    counter = 0;
+    process._rawDebug('HIST',hist);
+  }
+  return;
+}
 
 function errMessageParser(errMessage) {
   const newErr = [];
@@ -43,7 +51,6 @@ function errMessageParser(errMessage) {
   }
   return newErr;
 }
-
 
 
 module.exports = {funcInfoParser, errMessageParser};
