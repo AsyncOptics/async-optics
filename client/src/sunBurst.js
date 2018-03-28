@@ -1,6 +1,10 @@
 const sunSocket = io.connect('http://localhost:3000');
 sunSocket.on('packageInfo', data => {
+  let rootTime = 0;
 	let sunData = data;
+  for(let i = 0; i < sunData.children.length; i++){
+    rootTime += sunData.children[i].totalTime
+  }
     root = d3.hierarchy(sunData);
     root.sum(function(d) { return d.duration; });
     svg.selectAll("path")
@@ -12,27 +16,19 @@ sunSocket.on('packageInfo', data => {
         .append("title")
         .text(function(d) { return d.data.name + "\n" + formatNumber(d.data.totalTime); });
 
-
-    d3.select("#package-panel")
-    .selectAll("#package-data")
-    .data(sunData.children)
-    .enter()
-    .append("div")
-    .attr("class", "package-data")
-    .text((d) => { 
-      console.log('d text', d)
-      return `percentage: root total/${d.totalTime} \n total time taken to load: ${d.totalTime}`
-    })
-
-    d3.select("#package-panel")
-      .selectAll(".package-data")
+  var packageData = d3.select("#package-panel")
+      .selectAll("#packageData")
       .data(sunData.children)
       .enter()
-      .insert("h4")
-      .attr("class", "package-name")
-      .text((d) => {
-        return `${d.name}`
-      })
+      .append("div")
+      .attr("class", "package-info")
+   
+    packageData.append("h4").attr("class", "package-name")
+               .text((d) => { return `${d.name}`})
+    packageData.append("p").attr("class", "package-data")
+               .text((d) => { return `percentage: ${Math.floor(d.totalTime/rootTime * 100)}%`})
+    packageData.append("p").attr("class", "package-data")
+               .text((d) => { return `time taken to load: ${d.totalTime}`})
 
 })
 

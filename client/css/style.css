@@ -58,12 +58,18 @@ div.tooltip {
 
 #package-data {
   width: 5%;
+  margin-left: 10%;
 }
 
-.package-data {
+.package-info {
   border: 1px solid black;
   background-color: #FFFFFF;
-  width: 40%;
+  width: 100%;
+  padding: 10px;
+}
+
+.package-name {
+  text-align: center;
 }
 
 /*#package-panel {
