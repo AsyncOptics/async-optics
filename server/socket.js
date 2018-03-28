@@ -24,6 +24,11 @@ io.on('connection', (socket) => {
     io._asyncInfo = [];
   }
 
+  // socket.on('packageInfo', (data) => {
+  //   console.log('packageInfo')
+  //   socket.emit('packageInfo', data)
+  // })
+
   socket.on('disconnect', (reason) => {
     process._rawDebug('Socket Disonnect', socket.id);
     io._hasConnection = false;

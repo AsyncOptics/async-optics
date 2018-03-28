@@ -37,10 +37,58 @@ div.tooltip {
   pointer-events: none;
 }
 
-svg {
+/*#tree {
   width: 800px;
   height: 1000px;
   background-color: White;
   padding: 3%;
   overflow: scroll;
+}*/
+
+#sunburst-container {
+  display: flex;
+  flex-direction: row;
 }
+
+#sun-container {
+  width: 95%;
+  height: auto;
+  margin-right: -20px;
+}
+
+#package-data {
+  width: 5%;
+}
+
+.package-data {
+  border: 1px solid black;
+  background-color: #FFFFFF;
+  width: 40%;
+}
+
+/*#package-panel {
+  display: flex;
+  flex-direction: row;
+  width: 15%;
+  height: auto;
+  padding: 5px;
+  border: 1px solid black;
+  background-color: #FFFFFF;
+}*/
+
+
+
+/*#package-name {
+  display: flex;
+  flex-direction: column;
+}
+
+#package-percentage {
+  display: flex;
+  flex-direction: column;
+}
+
+#package-time {
+  display: flex;
+  flex-direction: column;
+}*/
