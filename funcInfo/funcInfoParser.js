@@ -11,16 +11,30 @@ function funcInfoParser(asyncId, type, triggerAsyncId, resource, err) {
       // process._rawDebug('CALLBACK******',resource.callback); //not useful
       // process._rawDebug('ARGS******',resource.args);         // too much info
       // process._rawDebug('DOMAIN******',resource.domain);     // null
+      if (err.includes('/mongodb-core/lib/connection/pool.js:1246:15') ||    //ignore mongoose calling process.nextTick (_execute)
+          err.includes('/mongodb-core/lib/connection/pool.js:552:17') ||
+          err.includes('/mongodb-core/lib/connection/pool.js:540:24')) {
+        shouldKeep = false;
+        // ignore SOMEWHERE in mongoose keep calling process.nextTick, expecting related to connection
+      } else if(err === `    at process.nextTick (internal/process/next_tick.js:270:7)\n    at maybeReadMore (_stream_readable.js:527:13)\n    at addChunk (_stream_readable.js:276:3)\n    at readableAddChunk (_stream_readable.js:250:11)\n    at Socket.Readable.push (_stream_readable.js:208:10)\n    at TCP.onread (net.js:607:20)`) {
+        shouldKeep = false;
+      }
+      // process._rawDebug(err);
       break;
     case 'TIMERWRAP': // can be ignored ?!
       // no information at all, Timer {}
       // process._rawDebug(type, resource);
       break;
     case 'Timeout':
-      resourceInfo = {};
-      resourceInfo.funcAwait = resource._onTimeout.toString();
-      resourceInfo.delayTime = resource._idleTimeout;
-      resourceInfo.timerArgs = resource._timerArgs;
+      if (err.includes('at Connection.resetSocketTimeout') &&   // ignore mongoose keep calling setTimeout in resetSocketTimeout
+          err.includes('mongodb-core/lib/connection/connection.js:188:21') ) {
+        shouldKeep = false;
+      } else {
+        resourceInfo = {};
+        resourceInfo.funcAwait = resource._onTimeout.toString();
+        resourceInfo.delayTime = resource._idleTimeout;
+        resourceInfo.timerArgs = resource._timerArgs;
+      }
       break;
     case 'FSREQWRAP':
       process._rawDebug(type, asyncId, triggerAsyncId, err);
@@ -64,7 +78,7 @@ function errMessageParser(errMessage) {
       newErr.push(errMessage[i]);
     }
   }
-  return newErr;
+  return newErr.join('\n');
 }
 
 

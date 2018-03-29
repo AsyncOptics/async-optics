@@ -19,8 +19,26 @@ const asyncHook = async_hooks.createHook(hooks);
 
 asyncHook.enable();
 
+let previousTime = Date.now();
+const CHECK_DURATION = 15000;
 const activeAsyncProcess = new Map();
-const idDeleted = {};
+const activeTimeTrack = new Map();
+const idDeleted = [];
+
+function check_ActiveTimeTrack() {
+  activeTimeTrack.forEach( (initTime, id) => {
+    if (initTime < previousTime) {
+      activeTimeTrack.delete(id);
+      const funcInfoNode = activeAsyncProcess.get(id);
+      ioController.sendInfo(funcInfoNode);
+    }
+  });
+  previousTime = Date.now();
+  return;
+}
+
+
+setInterval(check_ActiveTimeTrack,CHECK_DURATION);
 
 function deleteEntireBranch(triggerAsyncId) {
   // let buffer;
@@ -46,11 +64,11 @@ function deleteEntireBranch(triggerAsyncId) {
         deleteThisBranch(asyncId);
       }
     });
-    idDeleted[id] = true;
+    idDeleted.push(id);
+    activeTimeTrack.delete(id);
     activeAsyncProcess.delete(id);
     return;
   }
-
   function findRootId(asyncId) {
     let rootId = asyncId;
     let funcNode = activeAsyncProcess.get(asyncId);
@@ -63,23 +81,18 @@ function deleteEntireBranch(triggerAsyncId) {
 }
 
 function init(asyncId, type, triggerAsyncId, resource) {
-
+  // process._rawDebug(type, Reflect.getPrototypeOf(resource));
   const err = new Error().stack;
   const errMessage = err.split('\n');
   const newErr = errMessageParser(errMessage);
 
-  if (asyncId === 10) {
-    console.log(asyncId, type, triggerAsyncId, newErr)
-    // console.log(activeAsyncProcess.get(triggerAsyncId));
-  }
-
-  if(type === 'TCPSERVERWRAP' && triggerAsyncId === cid){
-    const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
-    funcInfoNode.errMessage = newErr.join('\n');
-    funcInfoNode.startTime = 0;
-    funcInfoNode.duration = 0;
-    ioController.sendInfo(funcInfoNode);
-  }
+  // if(type === 'TCPSERVERWRAP' && triggerAsyncId === cid){
+  //   const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
+  //   funcInfoNode.errMessage = newErr;
+  //   funcInfoNode.startTime = 0;
+  //   funcInfoNode.duration = 0;
+  //   ioController.sendInfo(funcInfoNode);
+  // }
 
   if(resource.constructor.name === 'Socket' && resource.server && resource.server._connectionKey === '6::::3000'){
     deleteEntireBranch(triggerAsyncId);
@@ -115,9 +128,12 @@ function init(asyncId, type, triggerAsyncId, resource) {
     // process._rawDebug(p);
     if (p.shouldKeep) {
       const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
-      funcInfoNode.errMessage = newErr.join('\n');
+      funcInfoNode.errMessage = newErr;
       funcInfoNode.resourceInfo = p.resourceInfo;
+
       activeAsyncProcess.set(asyncId, funcInfoNode);
+      activeTimeTrack.set(asyncId, Date.now());
+
       performance.mark(`${type}-${asyncId}-Init`);
     }
     // process._rawDebug(activeAsyncProcess.keys());
@@ -126,17 +142,9 @@ function init(asyncId, type, triggerAsyncId, resource) {
   return;
 }
 
-function before(asyncId) {
-  // process._rawDebug('BEFORE',asyncId);
-}
-function after(asyncId) {
-  // process._rawDebug('AFTER', asyncId);
-}
-
 function destroy(asyncId) {
   if (activeAsyncProcess.has(asyncId)) {
     const type = activeAsyncProcess.get(asyncId).type;
-    // process._rawDebug('DESTROY',asyncId);
     performance.mark(`${type}-${asyncId}-Destroy`);
     performance.measure(`${type}-${asyncId}`,
                         `${type}-${asyncId}-Init`,
@@ -146,6 +154,7 @@ function destroy(asyncId) {
 
 const obs = new PerformanceObserver((list, observer) => {
   const funcInfoEntries = list.getEntries()[0];
+
   const asyncId = Number(funcInfoEntries.name.split('-')[1]);
   const funcInfoNode = activeAsyncProcess.get(asyncId);
   funcInfoNode.duration = funcInfoEntries.duration;
@@ -153,6 +162,7 @@ const obs = new PerformanceObserver((list, observer) => {
   funcInfoNode.endTime = funcInfoEntries.startTime + funcInfoEntries.duration;
 
   activeAsyncProcess.delete(asyncId);
+  activeTimeTrack.delete(asyncId);
   performance.clearMeasures(funcInfoEntries.name);
   performance.clearMarks(`${funcInfoEntries.name}-Init`);
   performance.clearMarks(`${funcInfoEntries.name}-Destroy`);
@@ -160,4 +170,12 @@ const obs = new PerformanceObserver((list, observer) => {
   ioController.sendInfo(funcInfoNode);
 });
 //entryTypes can be: 'node', 'mark', 'measure', 'gc', or 'function'
-obs.observe({ entryTypes: ['measure','function'], buffered: false });
+obs.observe({ entryTypes: ['measure'], buffered: false });
+
+
+function before(asyncId) {
+  // process._rawDebug('BEFORE',asyncId);
+}
+function after(asyncId) {
+  // process._rawDebug('AFTER', asyncId);
+}

@@ -37,13 +37,13 @@ div.tooltip {
   pointer-events: none;
 }
 
-/*#tree {
+#tree {
   width: 800px;
   height: 1000px;
   background-color: White;
   padding: 3%;
   overflow: scroll;
-}*/
+}
 
 #sunburst-container {
   display: flex;
@@ -73,5 +73,3 @@ div.tooltip {
 .package-name {
   text-align: center;
 }
-
-
