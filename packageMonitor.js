@@ -134,7 +134,3 @@ function checkStack(stack, currHierarchy){
 	  }
 	}	
 }
-
-// module.exports = function (module) {
-// 	let userPackages
-// }
