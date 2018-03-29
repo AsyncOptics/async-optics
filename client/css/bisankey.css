@@ -1,0 +1,48 @@
+.node rect {
+  cursor: move;
+  shape-rendering: crispEdges;
+}
+
+.node text {
+  pointer-events: none;
+  text-shadow: 1px 1px 2px #fff;
+  font-size: 0.8em;
+  font-family: sans-serif;
+}
+
+#tooltip {
+  position: absolute;
+  pointer-events: none;
+  font-size: 0.7em;
+  font-family: sans-serif;
+  padding: 3px;
+  width: auto;
+  height: auto;
+  background-color: #F2F2F2;
+  -webkit-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.4);
+  -mox-box-shadow: 0px 0px 0px 5px rgba(0, 0, 0, 0.4);
+  box-shadow: 0px 0px 5px rbga(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+.value {
+  white-space: pre-line;
+  margin: 0;
+}
+
+
+#sankey_graph {
+ /* order: 1;
+  flex: 4;
+  background-color: blue;
+  
+  max-height: 100%;*/
+}
+
+#sankey_info {
+  color: red;
+  background-color: orange;
+  padding: 2em;
+  float: right;
+  z-index: 200;
+}

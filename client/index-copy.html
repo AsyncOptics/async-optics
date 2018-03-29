@@ -14,20 +14,16 @@
 
    <script src="http://d3js.org/d3.v3.min.js"></script>
    <!--   <script type="text/javascript" src="./d3/d3.js"></script>  -->  
-   
   <script type="text/javascript" src="./src/dataParser.js"></script>
 
-  <script type="text/javascript" src="./src/bisankey.js"></script>
+  <script src="https://cdn.rawgit.com/Neilos/bihisankey/master/bihisankey.js">
 
-<!--   <script src="https://cdn.rawgit.com/Neilos/bihisankey/master/bihisankey.js"></script> -->
-
-<!--
   <script src="https://cdn.rawgit.com/northam/styled_sankey/e4043489/bihisankey.app.js"></script>
 
   <script src="https://cdn.rawgit.com/northam/styled_sankey/e4043489/bihisankey.js"></script>
   </script>
 
--->
+  <!--    <script src="./src/sankey.js"></script> -->
 
 
  
@@ -45,10 +41,34 @@
         <div style="color:#6cfff9;left:1151px">FINANCIAL PRODUCTS</div>
     </div>
 
-    <!--  <svg id="tree"></svg>  -->
+    <!--   <svg id="tree"></svg> -->
     <!--  <svg id="chart"></svg> -->
 
-    <div id="chart"></div>
+    <div id="chart1"></div>
+
+        <!-- Displaying chart 1 -->
+      <div id="chart1"></div>
+      <script>var chartDomElementId = "#chart1";</script>
+      <script src="./src/bisankey-main.js"></script>
+      <script src="./src/treasury_data_chart1.js"></script>
+      
+      <script>
+      
+      biHiSankey
+          .nodeWidth(140)
+          .size([1000, 950])
+          .onlyOneTextColor(false)
+          .labelsAlwaysMiddle(true)
+          .nodes(diagramNodes)
+          .links(diagramLinks)
+          .initializeNodes(function (node) {
+              node.state = node.parent ? "contained" : "collapsed";
+          })
+          .layout(LAYOUT_INTERATIONS);
+      disableUserInteractions(2 * TRANSITION_DURATION);
+      update();
+
+      </script>
 
  
  </body>
@@ -59,6 +79,7 @@
 
   <!-- <script src="./src/sankey-main.js"></script> -->
 
+  <script src="./src/bisankey-main.js"></script>
   <script src="./src/sankey_info.js"></script>
 
  </html>

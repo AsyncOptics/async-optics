@@ -1,6 +1,5 @@
 const socket = io.connect('http://localhost:3000');
 
-
 socket.on('funcInfo', data => {
   console.log(data);
   const needToRefresh = parseData(data);
@@ -52,8 +51,6 @@ function refreshTree(inputData) {
   update(root);
 }
 
-
-// leaving this global so i can mess with it in the console
 
 
 function update(source){

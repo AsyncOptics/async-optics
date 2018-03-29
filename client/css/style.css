@@ -1,27 +1,22 @@
 body{
   /* background-color: #FFFFFF; */
   /* background-color: WhiteSmoke; */
-  background-color: cornflowerblue;
+  /*background-color: cornflowerblue;*/
+  padding: 2em;
 }
 
-.node {
-cursor: pointer;
+* {
+  margin: 0;
+  padding: 0;
 }
 
-.node circle {
-fill: #fff;
-stroke: steelblue;
-stroke-width: 1.5px;
-}
 
-.node text {
-  font: 10px sans-serif;
-}
 
-.link {
-  fill: none;
-  stroke: #ccc;
-  stroke-width: 1.5px;
+#text-area{
+  flex: 1;
+  order: 2;
+  background: #333;
+  margin-left: 20px;
 }
 
 div.tooltip {
@@ -37,10 +32,4 @@ div.tooltip {
   pointer-events: none;
 }
 
-svg {
-  width: 800px;
-  height: 1000px;
-  background-color: White;
-  padding: 3%;
-  overflow: scroll;
-}
+
