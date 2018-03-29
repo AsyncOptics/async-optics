@@ -22,6 +22,10 @@ sunSocket.on('packageInfo', data => {
       .enter()
       .append("div")
       .attr("class", "package-info")
+      .style("background-color", function(d){
+        console.log(d)
+        return color((d.children ? d : d.parent).name); 
+      })
    
     packageData.append("h4").attr("class", "package-name")
                .text((d) => { return `${d.name}`})
@@ -81,7 +85,7 @@ function click(d) {
       .enter()
       .append("div")
       .attr("class", "package-info")
-      .style("fill", function(d){
+      .style("background-color", function(d){
         console.log(this)
         return color((d.children ? d : d.parent).data.name); 
       })
@@ -106,6 +110,10 @@ function click(d) {
                         .enter()
                         .insert("div", ":first-child")
                         .attr("class", "package-info")
+                        .style("background-color", function(d){
+                          console.log('parent', this)
+                          return color((d.children ? d : d).name); 
+                        })
     parentPanel.insert("h4", ".package-info").attr("class", "parent-name")
                .text(() => { 
                   return `Currently inspecting: ${parent[0].name}`
