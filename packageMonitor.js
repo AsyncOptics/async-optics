@@ -12,7 +12,7 @@ for(let i in deps){
 };
 let hierarchyAggregate;
 
-performance.maxEntries = 1500
+performance.maxEntries = process.env.pacmonMaxEntries || 1500
 
 mod.Module.prototype.require =
   performance.timerify(mod.Module.prototype.require);

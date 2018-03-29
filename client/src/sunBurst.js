@@ -1,6 +1,6 @@
 const sunSocket = io.connect('http://localhost:3000');
-sunSocket.on('packageInfo', data => {
   let rootTime = 0;
+sunSocket.on('packageInfo', data => {
 	let sunData = data;
   for(let i = 0; i < sunData.children.length; i++){
     rootTime += sunData.children[i].totalTime
@@ -73,6 +73,47 @@ function click(d) {
       })
     .selectAll("path")
       .attrTween("d", function(d) { return function() { return arc(d); }; });
+  d3.select("#package-panel").selectAll("*").remove()
+    var parent = [d.data]
+    var packageData = d3.select("#package-panel")
+      .selectAll("#packageData")
+      .data(d.children)
+      .enter()
+      .append("div")
+      .attr("class", "package-info")
+      .style("fill", function(d){
+        console.log(this)
+        return color((d.children ? d : d.parent).data.name); 
+      })
+
+    
+    packageData.append("h4").attr("class", "package-name")
+               .text((c) => { return `${c.data.name}`})
+    packageData.append("p").attr("class", "package-data")
+               .text((c) => { 
+                  return `percentage: ${parent[0].name === 'root' ? 
+                  Math.floor(c.data.totalTime/rootTime * 100) 
+                  : 
+                  Math.floor(c.data.totalTime/parent[0].totalTime * 100)}%`
+              })
+    packageData.append("p").attr("class", "package-data")
+               .text((c) => { return `time taken to load: ${c.data.totalTime} ms`})
+
+
+    var parentPanel = d3.select("#package-panel")
+                        .selectAll("#packageData")
+                        .data(parent)
+                        .enter()
+                        .insert("div", ":first-child")
+                        .attr("class", "package-info")
+    parentPanel.insert("h4", ".package-info").attr("class", "parent-name")
+               .text(() => { 
+                  return `Currently inspecting: ${parent[0].name}`
+               })
+    parentPanel.insert("p", ".package-info").attr("class", "parent-data")
+               .text(() => {
+                  return `time taken to load: ${parent[0].name === 'root' ? rootTime : parent[0].totalTime} ms`
+               })
 }
 
 d3.select(self.frameElement).style("height", sunHeight + "px");
