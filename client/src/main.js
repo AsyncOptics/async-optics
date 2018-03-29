@@ -1,51 +1,49 @@
 const socket = io.connect('http://localhost:3000');
 
-socket.on('funcInfo', data => {
-
-  console.log('raw data');
-  data.forEach((n) => {
-    console.log(n);
-  });
-  const needToRefresh = parseData(data);
+// socket.on('funcInfo', data => {
+//   console.log('raw data');
+//   data.forEach((n) => {
+//     console.log(n);
+//   });
+  // const needToRefresh = parseData(data);
   // console.log(flatData);
-  if (needToRefresh) {
-    // convert the flat data into a hierarchy
-    const inputData = d3.stratify()
-                        .id( (d) => { return d.asyncId; })
-                        .parentId( (d) => { return d.triggerAsyncId; })
-                        (flatData);
-    inputData.each((d) => { d.name = d.id; });
-    refreshTree(inputData);
-  }
-});
+  // if (needToRefresh) {
+  //   // convert the flat data into a hierarchy
+  //   const inputData = d3.stratify()
+  //                       .id( (d) => { return d.asyncId; })
+  //                       .parentId( (d) => { return d.triggerAsyncId; })
+  //                       (flatData);
+  //   inputData.each((d) => { d.name = d.id; });
+  //   refreshTree(inputData);
+  // }
+// });
 
-const margin = {top: 20, right: 90, bottom: 30, left: 90};
-const width = 800 - margin.left - margin.right;
-const height = 500 - margin.top - margin.bottom;
-
-let i = 0;
-let duration = 750;
-let root;
-let nodes;
-let counter = 0;
-let treeData = {};
-
-const svg = d3.select("#tree")
-              .append("svg")
-              .attr("width", width + margin.right + margin.left)
-              .attr("height", height + margin.top + margin.bottom)
-
-const g = svg.append("g")
-             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-const tree = d3.tree()
-               .size([width, height]);
-
-const div = d3.select("body")
-              .append("div")
-              .attr("class", "tooltip")
-              .style("opacity", 0);
-
+// const margin = {top: 20, right: 90, bottom: 30, left: 90};
+// const width = 800 - margin.left - margin.right;
+// const height = 500 - margin.top - margin.bottom;
+//
+// let i = 0;
+// let duration = 750;
+// let root;
+// let nodes;
+// let counter = 0;
+// let treeData = {};
+//
+// const svg = d3.select("#tree")
+//               .append("svg")
+//               .attr("width", width + margin.right + margin.left)
+//               .attr("height", height + margin.top + margin.bottom)
+//
+// const g = svg.append("g")
+//              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+//
+// const tree = d3.tree()
+//                .size([width, height]);
+//
+// const div = d3.select("body")
+//               .append("div")
+//               .attr("class", "tooltip")
+//               .style("opacity", 0);
 
 
 function refreshTree(inputData) {
@@ -54,8 +52,6 @@ function refreshTree(inputData) {
   root.y0 = width/2;
   update(root);
 }
-
-
 
 function update(source){
   let treeData = tree(root);
@@ -194,29 +190,6 @@ function update(source){
 // Takes an index and an array and finds all the children.
 // returns an array which can be added to children of the root node to
 // make a json thing which can be used to make a d3.hierarchy();
-function getChildren(i, arr) {
-  const childs = [];
-  if (arr[i+1+i]){
-    childs[0] = {name: arr[i*2+1], children: []};
-    if( arr[i+i+2] ){
-      childs[1] = {name: arr[i * 2 + 2], children:[]}  ;
-    }
-  }
-  const nextin = i * 2 + 1;
-  if (arr[nextin*2+1]) {
-    childs[0].children = getChildren(nextin, arr)
-    childs[0]._children = null;
-    if (arr[nextin*2+2]) {
-      childs[1].children = getChildren(nextin+1, arr);
-      childs[1]._children = null;
-    }
-  }
-  return childs;
-}
-
-
-
-
 
 // Creates a curved (diagonal) path from parent to the child nodes
 // switched around all the x's and y's from orig so it's verticle
@@ -228,12 +201,11 @@ function diagonal(s, d) {
   return path;
 }
 
-
 // Toggle children on click.
 function click(d) {
   // console.log(d);
-// use the following to superficially change the text of the node.
-//  this.getElementsByTagName('text')[0].textContent = "clicked all over"
+  // use the following to superficially change the text of the node.
+  //  this.getElementsByTagName('text')[0].textContent = "clicked all over"
   if (d.children) {
     d._children = d.children;
     d.children = null;
@@ -243,7 +215,6 @@ function click(d) {
   }
   update(d);
 }
-
 // will make all the children null and store the real vals in _children
 function collapse(d) {
   if (d.children) {

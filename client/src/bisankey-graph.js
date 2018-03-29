@@ -1,5 +1,35 @@
+socket.on('funcInfo', data => {
+  console.log('raw Data', data);
+  const needToRefresh = parseData(data);
+  const chartDomElementId = "#chart";
 
-const socket = io.connect('http://localhost:3000');
+  const nodeDataArray = nodeData(flatData);
+  const linkDataArray = linkData(flatData);
+
+
+  if (needToRefresh) {
+
+     console.log('REFRESHED nodeDataArray', nodeDataArray)
+     console.log('REFRESHED linkDataArray', linkDataArray)
+
+     biHiSankey
+     .nodeWidth(140)
+     .size([1000, 950])
+     .onlyOneTextColor(false)
+     .labelsAlwaysMiddle(true)
+     .nodes(nodeDataArray)
+     .links(linkDataArray)
+     .initializeNodes(function (node) {
+      node.state = node.parent ? "contained" : "collapsed";
+    })
+     .layout(LAYOUT_INTERATIONS);
+     disableUserInteractions(2 * TRANSITION_DURATION);
+     update();
+
+  }
+
+});
+
 
 function nodeData(data) {
  let parsed = [];
@@ -32,45 +62,6 @@ function linkData(nodeData) {
  });
  return parsed;
 }
-
-
-
-socket.on('funcInfo', data => {
-
-  console.log('DATA', data);
-
-  const needToRefresh = parseData(data);
-  console.log(needToRefresh);
-
-  var chartDomElementId = "#chart";
-
-  const nodeDataArray = nodeData(flatData);
-  const linkDataArray = linkData(flatData);
-  
-
-  if (needToRefresh) {
-
-     console.log('REFRESHED nodeDataArray', nodeDataArray)
-     console.log('REFRESHED linkDataArray', linkDataArray)
-
-     biHiSankey
-     .nodeWidth(140)
-     .size([1000, 950])
-     .onlyOneTextColor(false)
-     .labelsAlwaysMiddle(true)
-     .nodes(nodeDataArray)
-     .links(linkDataArray)
-     .initializeNodes(function (node) {
-      node.state = node.parent ? "contained" : "collapsed";
-    })
-     .layout(LAYOUT_INTERATIONS);
-     disableUserInteractions(2 * TRANSITION_DURATION);
-     update();
-
-  }
- 
-});
-
 
 
 // https://github.com/northam/styled_sankey/blob/master/bihisankey.app.js
@@ -517,14 +508,14 @@ function update () {
     .filter(function (d) { return d.x < biHiSankey.nodeWidth() / 2; })
     .attr("x", 6 + biHiSankey.nodeWidth())
     .attr("text-anchor", "start");
-  
+
   node.filter(function (d) { return d.value !== 0; }).select("text").append("tspan") /* append second line of the text */
     .attr("x", biHiSankey.labelsAlwaysMiddle() ? biHiSankey.nodeWidth()/2 : -6)
     .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
     .attr("dy", "1.5em")
     .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
     .text(function (d) { return d.name[1]; });
-    
+
   node.filter(function (d) { return d.value !== 0; }).select("text").append("tspan") /* append third line of the text */
     .attr("x", biHiSankey.labelsAlwaysMiddle() ? biHiSankey.nodeWidth()/2 : -6)
     .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
@@ -607,4 +598,3 @@ function update () {
   collapser.exit().remove();
 
 }
-
