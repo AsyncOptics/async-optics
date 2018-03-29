@@ -1,6 +1,6 @@
-const sunSocket = io.connect('http://localhost:3000');
-  let rootTime = 0;
-sunSocket.on('packageInfo', data => {
+
+let rootTime = 0;
+socket.on('packageInfo', data => {
 	let sunData = data;
   for(let i = 0; i < sunData.children.length; i++){
     rootTime += sunData.children[i].totalTime
@@ -23,9 +23,9 @@ sunSocket.on('packageInfo', data => {
       .append("div")
       .attr("class", "package-info")
       .style("background-color", function(d){
-        return color((d.children ? d : d.parent).name); 
+        return color((d.children ? d : d.parent).name);
       })
-   
+
     packageData.append("h4").attr("class", "package-name")
                .text((d) => { return `${d.name}`})
     packageData.append("p").attr("class", "package-data")
@@ -85,17 +85,17 @@ function click(d) {
       .append("div")
       .attr("class", "package-info")
       .style("background-color", function(d){
-        return color((d.children ? d : d.parent).data.name); 
+        return color((d.children ? d : d.parent).data.name);
       })
 
-    
+
     packageData.append("h4").attr("class", "package-name")
                .text((c) => { return `${c.data.name}`})
     packageData.append("p").attr("class", "package-data")
-               .text((c) => { 
-                  return `percentage: ${parent[0].name === 'root' ? 
-                  Math.floor(c.data.totalTime/rootTime * 100) 
-                  : 
+               .text((c) => {
+                  return `percentage: ${parent[0].name === 'root' ?
+                  Math.floor(c.data.totalTime/rootTime * 100)
+                  :
                   Math.floor(c.data.totalTime/parent[0].totalTime * 100)}%`
               })
     packageData.append("p").attr("class", "package-data")
@@ -109,10 +109,10 @@ function click(d) {
                         .insert("div", ":first-child")
                         .attr("class", "package-info")
                         .style("background-color", function(d){
-                          return color((d.children ? d : d).name); 
+                          return color((d.children ? d : d).name);
                         })
     parentPanel.insert("h4", ".package-info").attr("class", "parent-name")
-               .text(() => { 
+               .text(() => {
                   return `Currently inspecting: ${parent[0].name}`
                })
     parentPanel.insert("p", ".package-info").attr("class", "parent-data")
@@ -122,4 +122,3 @@ function click(d) {
 }
 
 d3.select(self.frameElement).style("height", sunHeight + "px");
-
