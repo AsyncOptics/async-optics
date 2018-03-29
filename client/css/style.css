@@ -1,7 +1,7 @@
 body{
   /* background-color: #FFFFFF; */
   /* background-color: WhiteSmoke; */
-  background-color: cornflowerblue;
+  background-color: #464a51;
 }
 
 .node {
@@ -37,10 +37,41 @@ div.tooltip {
   pointer-events: none;
 }
 
-svg {
+/*#tree {
   width: 800px;
   height: 1000px;
   background-color: White;
   padding: 3%;
   overflow: scroll;
+}*/
+
+#sunburst-container {
+  display: flex;
+  flex-direction: row;
+  border: 1px solid white;
 }
+
+#sun-container {
+  width: 95%;
+  height: auto;
+  margin-right: -20px;
+  margin-top: 30px;
+}
+
+#package-data {
+  width: 5%;
+  margin-left: 10%;
+}
+
+.package-info {
+  border: 1px solid black;
+  background-color: #FFFFFF;
+  width: 110%;
+  padding: 10px;
+}
+
+.package-name {
+  text-align: center;
+}
+
+
