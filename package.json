@@ -4,7 +4,7 @@
   "description": "",
   "main": "test.js",
   "scripts": {
-    "test": "node test.js"
+    "start": "node async_perf_hooks.js"
   },
   "author": "penghe",
   "license": "ISC",

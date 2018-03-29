@@ -2,7 +2,11 @@ const socket = io.connect('http://localhost:3000');
 
 
 socket.on('funcInfo', data => {
-  console.log(data);
+
+  console.log('raw data');
+  data.forEach((n) => {
+    console.log(n);
+  });
   const needToRefresh = parseData(data);
   // console.log(flatData);
   if (needToRefresh) {
