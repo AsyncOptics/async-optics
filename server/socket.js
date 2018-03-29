@@ -12,7 +12,7 @@ io._asyncInfo = [];
 let numOfConnections = 0;
 
 app.use( (req, res, next) => {
-  process._rawDebug(req.method, req.url);
+  // process._rawDebug(req.method, req.url);
   next();
 })
 
@@ -41,6 +41,11 @@ server.listen(PORT, () => {
   process._rawDebug(`socket setup, listening to PORT ${PORT}`);
 });
 
+
+
+
+
+
 function checkIdExist(id) {
   for (let i=0; i<io._asyncInfo.length; i++) {
     if (io._asyncInfo[i].asyncId === id) {
@@ -51,13 +56,6 @@ function checkIdExist(id) {
   process._rawDebug(`asyncID ${id} DOESN"T EXIST`);
   return;
 };
-
-
-
-
-
-
-
 
 
 module.exports = io;

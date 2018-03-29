@@ -6,6 +6,7 @@ class funcInfo {
     this.startTime = null;
     this.duration = null;
     this.errMessage = null;
+    this.resourceInfo = null;
   }
 }
 
