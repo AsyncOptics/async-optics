@@ -14,6 +14,7 @@ flatData.push({
 });
 
 function parseData(data) {
+
   let needToRefresh = false;
   data.sort( (a,b) => {
     return b.asyncId - a.asyncId;
@@ -38,6 +39,7 @@ function parseData(data) {
   }
   return needToRefresh;
 }
+
 
 function getfromRemainData(id) {
   if (remainData[id]) { //

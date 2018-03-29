@@ -1,4 +1,4 @@
-const async_hooks = require('async_hooks');
+  const async_hooks = require('async_hooks');
 const {performance, PerformanceObserver} = require('perf_hooks');
 const funcInfo = require('./funcInfo/funcInfoModel.js');
 const {funcInfoParser, errMessageParser} = require('./funcInfo/funcInfoParser.js');

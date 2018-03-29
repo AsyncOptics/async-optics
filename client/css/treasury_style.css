@@ -1,0 +1,67 @@
+html, body { 
+  background-color: #001635;
+  color: white;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-weight: 300;
+  font-size: 0.9em;
+}
+#itemtitles {
+  margin: 2px 0 0 20px; 
+  min-height: 1.2em;
+}
+#itemtitles div {
+  position: absolute; 
+  float: left; 
+  top: 100px;
+}
+#chart1 {
+  position: absolute; 
+  z-index:160; 
+  width: 1050px;
+}
+
+#chart1 svg {
+ width: 1050px; /* to enable user's interactions on underlaying chart2 */
+}
+#chart2 {
+  position: absolute; z-index:80;
+  /*min-width:100px;min-height:100px;border-right: 1px dashed red;*/
+}
+.node rect {
+  cursor: move;
+  shape-rendering: crispEdges;
+  fill: #001648 !important;
+  stroke-width: 3 !important;
+}
+
+.node text {
+  pointer-events: none;
+  /*text-shadow: 1px 1px 2px #fff;*/
+  font-size: 0.9em;
+  font-family: Helvetica, sans-serif;
+  /*-webkit-filter: drop-shadow( 2px 2px 2px #fff );
+  filter: drop-shadow( 2px 2px 2px #fff );*/
+  fill: white; 
+  /*stroke: black; stroke-width: 1;*/
+}
+
+#tooltip {
+  color: black;
+  position: absolute;
+  pointer-events: none;
+  font-size: 0.7em;
+  font-family: sans-serif;
+  padding: 3px;
+  width: auto;
+  height: auto;
+  background-color: #F2F2F2;
+  -webkit-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.4);
+  -mox-box-shadow: 0px 0px 0px 5px rgba(0, 0, 0, 0.4);
+  box-shadow: 0px 0px 5px rbga(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+.value {
+  white-space: pre-line;
+  margin: 0;
+}
