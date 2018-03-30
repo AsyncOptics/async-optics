@@ -120,6 +120,7 @@ function init(asyncId, type, triggerAsyncId, resource) {
   //from ourOwncode
   if( err.includes('ioController.js') ||
       err.includes('/alpha/node_modules/') ||
+      err.includes('/alpha/packageMonitor.js') ||
       err.includes(`at AsyncHook.init (${__dirname}/async_perf_hooks.js)`) &&
       err.includes('at TCP.emitInitNative (internal/async_hooks.js:131:43)') ) {
     return;
