@@ -1,48 +1,48 @@
-const {
-  performance,
-  PerformanceObserver
-} = require('perf_hooks');
+const {performance, PerformanceObserver} = require('perf_hooks');
+const io = require('./server/socket.js');
 const mod = require('module');
 const path = require('path');
-const deps = require(path.join(__dirname, './package.json')).dependencies;
-const io = require('./server/socket.js');
+
+let deps;
 const aggregate = {};
-for(let i in deps){
-	aggregate[i] = true
-};
 let hierarchyAggregate;
+let clientPath;
+
+io.on('connection', (socket) => {
+	socket.emit('packageInfo', hierarchyAggregate);
+});
 
 performance.maxEntries = process.env.pacmonMaxEntries || 1500
-
-mod.Module.prototype.require =
-  performance.timerify(mod.Module.prototype.require);
-	require = performance.timerify(require);
+mod.Module.prototype.require = performance.timerify(mod.Module.prototype.require);
+require = performance.timerify(require);
 
 const obs = new PerformanceObserver((list, observer) => {
   const entries = list.getEntries();
   let buffer;
   entries.forEach((entry, i) => {
+    console.log(entry)
   	if (aggregate[entry[0]]) {
   		aggregate[entry[0]] = [];
-  		buffer = aggregate[entry[0]]
-  		endTime = entry.startTime + entry.duration
+  		buffer = aggregate[entry[0]];
+  		endTime = entry.startTime + entry.duration;
   		buffer.push({
-  			name: entry[0], 
-  			startTime: entry.startTime, 
-  			duration: entry.duration, 
-  			endTime: endTime, 
-  			totalTime: entry.duration, 
+  			name: entry[0],
+  			startTime: entry.startTime,
+  			duration: entry.duration,
+  			endTime: endTime,
+  			totalTime: entry.duration,
   			children: []
   		})
   	} else {
+      console.log(buffer)
   		buffer[0].totalTime += entry.duration
   		endTime = entry.startTime + entry.duration
   		buffer.push({
-  			name: entry[0], 
-  			startTime: entry.startTime, 
-  			duration: entry.duration, 
-  			endTime: endTime, 
-  			totalTime: entry.duration, 
+  			name: entry[0],
+  			startTime: entry.startTime,
+  			duration: entry.duration,
+  			endTime: endTime,
+  			totalTime: entry.duration,
   			children: null
   		})
   	}
@@ -54,16 +54,22 @@ const obs = new PerformanceObserver((list, observer) => {
 
 obs.observe({ entryTypes: ['function'], buffered: true });
 
-gatherAggregate();
+function pkgMonitor(pkgPath) {
 
-io.on('connection', (socket) => {
-	socket.emit('packageInfo', hierarchyAggregate);
-});
-
+  clientPath = pkgPath.slice(0, pkgPath.length - 13);
+  deps = require(pkgPath).dependencies;
+  module.paths[0] = `${clientPath}/node_modules`;
+  console.log(module.paths);
+  for(let i in deps){
+  	aggregate[i] = true
+  }
+  gatherAggregate();
+}
 
 function gatherAggregate(){
 	for(let i in deps){
-		require(i)
+    console.log(module.paths)
+		require(`${i}`);
 	}
 }
 
@@ -73,12 +79,12 @@ function createHierarchy(data){
 	let stack = [];
 	for (let i in data) {
 		hierarchy[i] = {
-			name: i, 
+			name: i,
 			startTime: data[i][0].startTime,
 			duration: data[i][0].duration,
 			totalTime: data[i][0].totalTime,
 			endTime: data[i][0].endTime,
-			children: [] 
+			children: []
 		};
 
 		for (let j = 1; j < data[i].length; j++) {
@@ -88,7 +94,7 @@ function createHierarchy(data){
 		  }
 
 			let currParent = stack[stack.length - 1]
-			if (data[i][j] && data[i][j].startTime >= currParent.startTime && 
+			if (data[i][j] && data[i][j].startTime >= currParent.startTime &&
 				data[i][j].endTime < currParent.endTime) {
 				stack.push(data[i][j]);
 			} else {
@@ -132,5 +138,9 @@ function checkStack(stack, currHierarchy){
 	    }
 	    if (temp) currHierarchy.children.push(temp);
 	  }
-	}	
+	}
 }
+
+
+
+module.exports = {pkgMonitor};
