@@ -4,9 +4,9 @@ socket.on('funcInfo', data => {
   const needToRefresh = parseData(data);
   const chartDomElementId = "#chart";
 
-  const nodeDataArray = nodeData(flatData);
-  const linkDataArray = linkData(flatData);
   if (needToRefresh) {
+     const nodeDataArray = nodeData(flatData);
+     const linkDataArray = linkData(flatData);
      console.log('flat Data', flatData);
      // console.log('nodeDataArray', nodeDataArray)
      // console.log('linkDataArray', linkDataArray)
