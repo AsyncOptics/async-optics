@@ -11,7 +11,6 @@ console.log = process._rawDebug;
 const cid = async_hooks.executionAsyncId();
 // Return the id of the resource responsible for triggering the callback of the
 // current execution scope to fire.
-
 // process._rawDebug('currentId',async_hooks.executionAsyncId(),'  triggerId',async_hooks.triggerAsyncId());
 
 const hooks = {init: init, before: before, after: after, destroy: destroy};
@@ -41,19 +40,6 @@ function check_ActiveTimeTrack() {
 setInterval(check_ActiveTimeTrack,CHECK_DURATION);
 
 function deleteEntireBranch(triggerAsyncId) {
-  // let buffer;
-  // activeAsyncProcess.forEach((value, key) => {
-  //   if(value.asyncId === triggerAsyncId || value.triggerAsyncId === triggerAsyncId){
-  //     if(value.triggerAsyncId < 7) {
-  //       buffer = value.asyncId
-  //     }else {
-  //       buffer = value.triggerAsyncId
-  //     }
-  //     activeAsyncProcess.delete(key)
-  //     return deleteEntireBranch(buffer);
-  //   }
-  // })
-  //////////////////////////////////////////////////////////////
   if (triggerAsyncId < 7) return;
   const rootAsyncId = findRootId(triggerAsyncId)
   deleteThisBranch(rootAsyncId);
@@ -86,13 +72,11 @@ function init(asyncId, type, triggerAsyncId, resource) {
   const errMessage = err.split('\n');
   const newErr = errMessageParser(errMessage);
 
-  // if(type === 'TCPSERVERWRAP' && triggerAsyncId === cid){
-  //   const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
-  //   funcInfoNode.errMessage = newErr;
-  //   funcInfoNode.startTime = 0;
-  //   funcInfoNode.duration = 0;
-  //   ioController.sendInfo(funcInfoNode);
-  // }
+  if(type === 'TCPSERVERWRAP' && triggerAsyncId === cid){
+    const funcInfoNode = new funcInfo(asyncId, triggerAsyncId, type);
+    funcInfoNode.errMessage = newErr;
+    ioController.sendInfo(funcInfoNode);
+  }
 
   if(resource.constructor.name === 'Socket' && resource.server && resource.server._connectionKey === '6::::3000'){
     deleteEntireBranch(triggerAsyncId);

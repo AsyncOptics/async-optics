@@ -1,34 +1,62 @@
 
-function nodeData(data) {
- let parsed = [];
- console.log('node flatdata', data)
- data.forEach((obj) => {
-   let nodeObj = {};
-   nodeObj["type"] = obj.type;
-   nodeObj["id"] = obj.asyncId;
-   nodeObj["parent"] = null;
-   nodeObj["startTime"] = obj.startTime;
-   nodeObj["duration"] = obj.duration;
-   nodeObj["errMessage"] = obj.errMessage;
-   nodeObj["name"] = [obj.type];
-   parsed.push(nodeObj);
+socket.on('funcInfo', data => {
+  console.log('raw Data', data.length);
+  const needToRefresh = parseData(data);
+  const chartDomElementId = "#chart";
+
+  if (needToRefresh) {
+     const nodeDataArray = nodeData(flatData);
+     const linkDataArray = linkData(flatData);
+     console.log('flat Data', flatData);
+     // console.log('nodeDataArray', nodeDataArray)
+     // console.log('linkDataArray', linkDataArray)
+     biHiSankey.nodeWidth(140)
+               .size([1000, 950])
+               .onlyOneTextColor(false)
+               .labelsAlwaysMiddle(true)
+               .nodes(nodeDataArray)
+               .links(linkDataArray)
+               .initializeNodes(function (node) {
+                 node.state = node.parent ? "contained" : "collapsed";
+               })
+               .layout(LAYOUT_INTERATIONS);
+               disableUserInteractions(2 * TRANSITION_DURATION);
+               update();
+  }
+});
+
+
+function nodeData(flatData) {
+ const nodeDataArray = [];
+ flatData.forEach((funcInfoNode) => {
+   const nodeObj = {
+     type: funcInfoNode.type,
+     id: funcInfoNode.asyncId,
+     parent: null,
+     startTime: funcInfoNode.startTime,
+     duration: funcInfoNode.duration,
+     errMessage: funcInfoNode.errMessage,
+     name: funcInfoNode.type
+   };
+   nodeDataArray.push(nodeObj);
  });
- return parsed;
+ return nodeDataArray;
 }
 
-function linkData(nodeData) {
- let parsed = [];
- console.log('link flatdata', nodeData)
- nodeData.forEach((obj) => {
-   let linkObj = {};
-   linkObj["source"] = obj.triggerAsyncId || false;
-   linkObj["target"] = obj.asyncId;
-   linkObj["value"] = obj.duration;
-   if(linkObj["source"] !== "Node.js core" && linkObj["source"] !== false) {
-    parsed.push(linkObj);
+function linkData(flatData) {
+ const linkDataArray = [];
+ flatData.forEach((funcInfoNode) => {
+   const linkObj = {
+     source: funcInfoNode.triggerAsyncId,
+     target: funcInfoNode.asyncId,
+     value: funcInfoNode.duration
+   };
+
+   if(linkObj.source !== "Node.js core" && linkObj.source) {
+    linkDataArray.push(linkObj);
    }
  });
- return parsed;
+ return linkDataArray;
 }
 
 
@@ -567,35 +595,3 @@ function update () {
   collapser.exit().remove();
 
 }
-
-
-socket.on('funcInfo', data => {
-  console.log('raw Data', data);
-  const needToRefresh = parseData(data);
-  const chartDomElementId = "#chart";
-
-  const nodeDataArray = nodeData(flatData);
-  const linkDataArray = linkData(flatData);
-
-
-  if (needToRefresh) {
-
-     console.log('REFRESHED nodeDataArray', nodeDataArray)
-     console.log('REFRESHED linkDataArray', linkDataArray)
-
-     biHiSankey.nodeWidth(140)
-               .size([1000, 950])
-               .onlyOneTextColor(false)
-               .labelsAlwaysMiddle(true)
-               .nodes(nodeDataArray)
-               .links(linkDataArray)
-               .initializeNodes(function (node) {
-                 node.state = node.parent ? "contained" : "collapsed";
-               })
-               .layout(LAYOUT_INTERATIONS);
-               disableUserInteractions(2 * TRANSITION_DURATION);
-               update();
-
-  }
-
-});
