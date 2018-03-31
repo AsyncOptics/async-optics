@@ -1,35 +1,3 @@
-socket.on('funcInfo', data => {
-  console.log('raw Data', data);
-  const needToRefresh = parseData(data);
-  const chartDomElementId = "#chart";
-
-  const nodeDataArray = nodeData(flatData);
-  const linkDataArray = linkData(flatData);
-
-
-  if (needToRefresh) {
-
-     console.log('REFRESHED nodeDataArray', nodeDataArray)
-     console.log('REFRESHED linkDataArray', linkDataArray)
-
-     biHiSankey
-     .nodeWidth(140)
-     .size([1000, 950])
-     .onlyOneTextColor(false)
-     .labelsAlwaysMiddle(true)
-     .nodes(nodeDataArray)
-     .links(linkDataArray)
-     .initializeNodes(function (node) {
-      node.state = node.parent ? "contained" : "collapsed";
-    })
-     .layout(LAYOUT_INTERATIONS);
-     disableUserInteractions(2 * TRANSITION_DURATION);
-     update();
-
-  }
-
-});
-
 
 function nodeData(data) {
  let parsed = [];
@@ -140,13 +108,14 @@ showTooltip = function () {
 if (typeof chartDomElementId  === 'undefined') var chartDomElementId = "#chart"; // will make it optional
 if (!chartDomElementId) chartDomElementId = "#chart";
 
-colorScale = d3.scale.ordinal().domain(TYPES).range(TYPE_COLORS),
-highlightColorScale = d3.scale.ordinal().domain(TYPES).range(TYPE_HIGHLIGHT_COLORS),
+colorScale = d3.scaleOrdinal().domain(TYPES).range(TYPE_COLORS),
+highlightColorScale = d3.scaleOrdinal().domain(TYPES).range(TYPE_HIGHLIGHT_COLORS),
 
-svg = d3.select(chartDomElementId).append("svg")
+svg = d3.select(chartDomElementId)
+        .append("svg")
         .attr("width", WIDTH + MARGIN.LEFT + MARGIN.RIGHT)
         .attr("height", HEIGHT + MARGIN.TOP + MARGIN.BOTTOM)
-      .append("g")
+        .append("g")
         .attr("transform", "translate(" + MARGIN.LEFT + "," + MARGIN.TOP + ")");
 
 svg.append("g").attr("id", "links");
@@ -484,9 +453,9 @@ function update () {
     .on("dblclick", showHideChildren);
 
   // allow nodes to be dragged to new positions
-  node.call(d3.behavior.drag()
-    .origin(function (d) { return d; })
-    .on("dragstart", function () { this.parentNode.appendChild(this); })
+  node.call(d3.drag()
+    .subject(function (d) { return d; })
+    .on("start", function () { this.parentNode.appendChild(this); })
     .on("drag", dragmove));
 
   // add in the text for the nodes
@@ -598,3 +567,35 @@ function update () {
   collapser.exit().remove();
 
 }
+
+
+socket.on('funcInfo', data => {
+  console.log('raw Data', data);
+  const needToRefresh = parseData(data);
+  const chartDomElementId = "#chart";
+
+  const nodeDataArray = nodeData(flatData);
+  const linkDataArray = linkData(flatData);
+
+
+  if (needToRefresh) {
+
+     console.log('REFRESHED nodeDataArray', nodeDataArray)
+     console.log('REFRESHED linkDataArray', linkDataArray)
+
+     biHiSankey.nodeWidth(140)
+               .size([1000, 950])
+               .onlyOneTextColor(false)
+               .labelsAlwaysMiddle(true)
+               .nodes(nodeDataArray)
+               .links(linkDataArray)
+               .initializeNodes(function (node) {
+                 node.state = node.parent ? "contained" : "collapsed";
+               })
+               .layout(LAYOUT_INTERATIONS);
+               disableUserInteractions(2 * TRANSITION_DURATION);
+               update();
+
+  }
+
+});

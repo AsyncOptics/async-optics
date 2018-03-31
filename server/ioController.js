@@ -30,9 +30,7 @@ ioController.sendPackageInfo = function(packageInfo){
   process._rawDebug('send package info');
   if(io._hasConnection){
     io.emit('packageInfo', packageInfo)
-  } else {
-    process._rawDebug('no connection')
-  }
+  } 
 }
 
 module.exports = ioController;
