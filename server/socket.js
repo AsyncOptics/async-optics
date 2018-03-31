@@ -24,7 +24,11 @@ io.on('connection', (socket) => {
   numOfConnections++;
   io._hasConnection = true;
   // checkIdExist(20);
+  socket.emit('packageInfo',io._hierarchyAggregate);
+
+
   if(io._asyncInfo.length !== 0) {
+    process._rawDebug('funcInfo');
   	socket.emit('funcInfo', io._asyncInfo);
     io._asyncInfo = [];
   }

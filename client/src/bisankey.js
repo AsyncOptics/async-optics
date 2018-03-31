@@ -1,6 +1,5 @@
-d3.biHiSankey = function () {
+d3.biHiSankey = function() {
   "use strict";
-
   var biHiSankey = {},
     nodeWidth = 24,
     nodeSpacing = 8,
@@ -15,8 +14,8 @@ d3.biHiSankey = function () {
     xScaleFactor = 1,
     yScaleFactor = 1,
     defaultLinkCurvature = 0.5,
-  labelsAlwaysMiddle = true, // if "false" the text will be rendered outside of the nodes
-  onlyOneTextColor = false, // set it to 'true' if you want only AND the same text color as specified in css
+    labelsAlwaysMiddle = true, // if "false" the text will be rendered outside of the nodes
+    onlyOneTextColor = false, // set it to 'true' if you want only AND the same text color as specified in css
     mergeSameNodesLinks = true, // default will merge the links in the same direction between the same target and source
     linkIdIncrement = 0;
 
@@ -37,7 +36,7 @@ d3.biHiSankey = function () {
     node.children = [];
     node.ancestors = [];
   }
-  
+
   // generates the nodeMap {"1": <node1>, "2": <node2>}
   // and initializes the array properties of each node
   function initializeNodeMap() {
@@ -347,7 +346,7 @@ d3.biHiSankey = function () {
           .sortKeys(d3.ascending)
           .entries(nodes)
           .map(function (object) { return object.values; });
-      
+
     function calculateYScaleFactor() {
       var linkSpacesCount, nodeValueSum, discretionaryY;
       yScaleFactor = d3.min(nodesByXPosition, function (nodes) {
@@ -677,7 +676,7 @@ d3.biHiSankey = function () {
   /** If "false" the text will be rendered outside of the,
   otherwise the label text will be centered above the node
   */
-  biHiSankey.labelsAlwaysMiddle = function (_) { 
+  biHiSankey.labelsAlwaysMiddle = function (_) {
     if (!arguments.length) { return labelsAlwaysMiddle; }
     labelsAlwaysMiddle = _;
     return biHiSankey;

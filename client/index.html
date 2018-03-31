@@ -1,14 +1,13 @@
-
-
  <!DOCTYPE html>
  <html>
  <head>
    <title>M_Node</title>
+   <script type="text/javascript" src="./d3/d3.js"></script>
    <script src="/socket.io/socket.io.js"></script>
    <link rel="stylesheet" type="text/css" href="./css/style.css">
    <link rel="stylesheet" type="text/css" href="./css/treasury_style.css">
-   <!-- <script src="http://d3js.org/d3.v3.min.js"></script> -->
-   <script type="text/javascript" src="./d3/d3.js"></script> 
+   <script type="text/javascript" src="./src/dataParser.js"></script>
+   <script type="text/javascript" src="./src/bisankey.js"></script>
  </head>
  <body>
    <h1>Async Function Monitor</h1>
@@ -26,11 +25,9 @@
       <div id="package-panel"></div>
     </div>
 
+    <script type="text/javascript" src="./src/main.js"></script>
+    <script type="text/javascript" src="./src/sunBurst.js"></script>
+    <script type="text/javascript" src="./src/bisankey-graph.js"></script>
+</body>
 
- </body>
-<script type="text/javascript" src="./src/main.js"></script>
-<script type="text/javascript" src="./src/sunBurst.js"></script>
-<script type="text/javascript" src="./src/dataParser.js"></script>
-<script type="text/javascript" src="./src/bisankey.js"></script>
-<script type="text/javascript" src="./src/bisankey-graph.js"></script>
 </html>
