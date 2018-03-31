@@ -21,7 +21,7 @@ function funcInfoParser(asyncId, type, triggerAsyncId, resource, err) {
                 err.includes('at addChunk (_stream_readable.js:') && err.includes(':3') &&
                 err.includes('at readableAddChunk (_stream_readable.js:') && err.includes(':11') &&
                 err.includes('at Socket.Readable.push (_stream_readable.js:') && err.includes(':10') &&
-                err.includes('at TCP.onread (net.js:') && err.includes(':20') {
+                err.includes('at TCP.onread (net.js:') && err.includes(':20')) {
         // err === `    at process.nextTick (internal/process/next_tick.js:270:7)\n    at maybeReadMore (_stream_readable.js:527:13)\n    at addChunk (_stream_readable.js:276:3)\n    at readableAddChunk (_stream_readable.js:250:11)\n    at Socket.Readable.push (_stream_readable.js:208:10)\n    at TCP.onread (net.js:607:20)`) {
         shouldKeep = false;
       }
