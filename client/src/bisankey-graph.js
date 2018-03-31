@@ -1,16 +1,18 @@
+const MIN_DURATION = 20;
+
 
 socket.on('funcInfo', data => {
-  console.log('raw Data', data.length);
+  // console.log('raw Data', data.length);
   const needToRefresh = parseData(data);
   const chartDomElementId = "#chart";
 
   if (needToRefresh) {
      const nodeDataArray = nodeData(flatData);
      const linkDataArray = linkData(flatData);
-     console.log('flat Data', flatData);
+     // console.log('flat Data', flatData);
      // console.log('nodeDataArray', nodeDataArray)
      // console.log('linkDataArray', linkDataArray)
-     biHiSankey.nodeWidth(140)
+     biHiSankey.nodeWidth(40)
                .size([1000, 950])
                .onlyOneTextColor(false)
                .labelsAlwaysMiddle(true)
@@ -36,8 +38,10 @@ function nodeData(flatData) {
      startTime: funcInfoNode.startTime,
      duration: funcInfoNode.duration,
      errMessage: funcInfoNode.errMessage,
+     resourceInfo: funcInfoNode.resourceInfo,
      name: funcInfoNode.type
    };
+   if (!nodeObj.duration) nodeObj.duration = MIN_DURATION;
    nodeDataArray.push(nodeObj);
  });
  return nodeDataArray;
@@ -53,7 +57,8 @@ function linkData(flatData) {
    };
 
    if(linkObj.source !== "Node.js core" && linkObj.source) {
-    linkDataArray.push(linkObj);
+     if (!linkObj.value) linkObj.value = MIN_DURATION;
+     linkDataArray.push(linkObj);
    }
  });
  return linkDataArray;
@@ -62,7 +67,7 @@ function linkData(flatData) {
 
 // https://github.com/northam/styled_sankey/blob/master/bihisankey.app.js
 
-var svg, tooltip, biHiSankey, path, defs, colorScale, highlightColorScale, isTransitioning;
+let svg, tooltip, biHiSankey, path, defs, colorScale, highlightColorScale, isTransitioning;
 
 var OPACITY = {
     NODE_DEFAULT: 0.9,
@@ -334,9 +339,9 @@ function update () {
     if (!isTransitioning) {
       showTooltip().select(".value").text(function () {
         if (d.direction > 0) {
-          return d.source.name.join(" ") + " -> " + d.target.name.join(" "); /* + "\n" + formatNumber(d.value);*/
+          return d.source.name + " -> " + d.target.name; /* + "\n" + formatNumber(d.value);*/
         }
-        return d.target.name.join(" ") + " <- " + d.source.name.join(" "); /* + "\n" + formatNumber(d.value);*/
+        return d.target.name + " <- " + d.source.name; /* + "\n" + formatNumber(d.value);*/
       });
 
       d3.select(this)
@@ -465,7 +470,7 @@ function update () {
           .text(function () {
             var additionalInstructions = g.children.length ? "\n(Double click to expand)" : "";
             /*return g.name + "\nNet flow: " + formatFlow(g.netFlow) + additionalInstructions;*/
-            return g.name.join(" ") + additionalInstructions;
+            return g.name + additionalInstructions;
           });
     }
   });
@@ -558,7 +563,7 @@ function update () {
     if (!isTransitioning) {
       showTooltip().select(".value")
         .text(function () {
-          return g.name.join(" ") + "\n(Double click to collapse its children)";
+          return g.name + "\n(Double click to collapse its children)";
         });
 
       var highlightColor = highlightColorScale(g.type.replace(/ .*/, ""));
