@@ -1,6 +1,6 @@
 const hist = {};
 let counter = 0;
-const DISPLAY_FREQ = 100;
+const DISPLAY_FREQ = 400;
 
 function funcInfoParser(asyncId, type, triggerAsyncId, resource, err) {
   histDisplay(type);
@@ -16,7 +16,13 @@ function funcInfoParser(asyncId, type, triggerAsyncId, resource, err) {
           err.includes('/mongodb-core/lib/connection/pool.js:540:24')) {
         shouldKeep = false;
         // ignore SOMEWHERE in mongoose keep calling process.nextTick, expecting related to connection
-      } else if(err === `    at process.nextTick (internal/process/next_tick.js:270:7)\n    at maybeReadMore (_stream_readable.js:527:13)\n    at addChunk (_stream_readable.js:276:3)\n    at readableAddChunk (_stream_readable.js:250:11)\n    at Socket.Readable.push (_stream_readable.js:208:10)\n    at TCP.onread (net.js:607:20)`) {
+      } else if(err.includes('at process.nextTick (internal/process/next_tick.js:') &&
+                err.includes('at maybeReadMore (_stream_readable.js:') && err.includes(':13') &&
+                err.includes('at addChunk (_stream_readable.js:') && err.includes(':3') &&
+                err.includes('at readableAddChunk (_stream_readable.js:') && err.includes(':11') &&
+                err.includes('at Socket.Readable.push (_stream_readable.js:') && err.includes(':10') &&
+                err.includes('at TCP.onread (net.js:') && err.includes(':20') {
+        // err === `    at process.nextTick (internal/process/next_tick.js:270:7)\n    at maybeReadMore (_stream_readable.js:527:13)\n    at addChunk (_stream_readable.js:276:3)\n    at readableAddChunk (_stream_readable.js:250:11)\n    at Socket.Readable.push (_stream_readable.js:208:10)\n    at TCP.onread (net.js:607:20)`) {
         shouldKeep = false;
       }
       // process._rawDebug(err);

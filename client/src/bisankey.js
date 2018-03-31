@@ -1,6 +1,6 @@
 d3.biHiSankey = function() {
   "use strict";
-  var biHiSankey = {},
+  let biHiSankey = {},
     nodeWidth = 24,
     nodeSpacing = 8,
     linkSpacing = 5,
