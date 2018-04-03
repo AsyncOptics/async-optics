@@ -39,6 +39,14 @@ div.tooltip {
   overflow: scroll;
 }
 
+#bisankey-container {
+  display: flex;
+  flex-direction: row;
+  height: 1200px;
+  border: 1px solid white;
+}
+
+
 #sunburst-container {
   display: flex;
   flex-direction: row;

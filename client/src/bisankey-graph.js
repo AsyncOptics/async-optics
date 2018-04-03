@@ -1,15 +1,20 @@
-const MIN_DURATION = 20;
-let lastLength;
+
 const hasSeen = {};
 let newEventArray;
 socket.on('funcInfo', data => {
   const needToRefresh = parseData(data);
   const chartDomElementId = "#chart";
   if (needToRefresh) {
+     scaleDuration();
      const nodeDataArray = nodeData(flatData);
      const linkDataArray = linkData(flatData);
-     biHiSankey.nodeWidth(40)
-               .size([1000, 950])
+     // console.log('flat Data', flatData);
+     // console.log('nodeDataArray', nodeDataArray)
+     // console.log('linkDataArray', linkDataArray)
+     biHiSankey.nodeWidth(70)
+               .nodeSpacing(10)
+               .linkSpacing(5)
+               .size([2200, 1100])
                .onlyOneTextColor(false)
                .labelsAlwaysMiddle(true)
                .nodes(nodeDataArray)
@@ -18,9 +23,8 @@ socket.on('funcInfo', data => {
                  node.state = node.parent ? "contained" : "collapsed";
                })
                .layout(LAYOUT_INTERATIONS);
-               disableUserInteractions(2 * TRANSITION_DURATION);
-               update();
-
+    disableUserInteractions(2 * TRANSITION_DURATION);
+    update();
     // d3.select("#func-panel").selectAll("*").remove()
     // var packageData = d3.select("#func-panel")
     //                     .selectAll("#funcData")
@@ -40,51 +44,53 @@ socket.on('funcInfo', data => {
     // packageData.append("p").attr("class", "package-data")
     //            .text((d) => { return `${d.target.errMessage}`})
     var funcData = d3.select("#nodes")
-                        .selectAll(".node")
-                        
-        newEventArray.forEach((event) => {
-          funcData.filter((d) => {
-            if(d.id === event.target.id){
-              d.isNew = true
-              return d.id === event.target.id
-            }
-          }).select("rect").style("stroke", "white")
-        })
-      funcData.on("mouseenter", (d) => {
-        if(d.isNew){
-          newEventArray.forEach((event) => {
-            funcData.filter((d) => {
-              return d.id === event.target.id
-            }).select("rect").style("opacity", .25)
-          })
-        }
-      })
+                     .selectAll(".node")
 
-      funcData.on("mouseleave", () => {
+    newEventArray.forEach((event) => {
+      funcData.filter((d) => {
+        if(d.id === event.target.id){
+          d.isNew = true
+          return d.id === event.target.id
+        }
+      }).select("rect").style("stroke", "white")
+    })
+    funcData.on("mouseenter", (d) => {
+      if(d.isNew){
         newEventArray.forEach((event) => {
           funcData.filter((d) => {
             return d.id === event.target.id
-          }).select("rect").style("opacity", 1)
+          }).select("rect").style("opacity", .25)
         })
-      })
-    }
+      }
+    })
+
+    funcData.on("mouseleave", () => {
+      newEventArray.forEach((event) => {
+        funcData.filter((d) => {
+          return d.id === event.target.id
+        }).select("rect").style("opacity", 1)
+      });
+    });
+  }
 });
 
 
 function nodeData(flatData) {
  const nodeDataArray = [];
  flatData.forEach((funcInfoNode) => {
+   // console.log(funcInfoNode.duration, funcInfoNode.type);
    const nodeObj = {
      type: funcInfoNode.type,
      id: funcInfoNode.asyncId,
+     trigger: funcInfoNode.triggerAsyncId,
      parent: null,
      startTime: funcInfoNode.startTime,
      duration: funcInfoNode.duration,
+     durationScaled: funcInfoNode.durationScaled,
      errMessage: funcInfoNode.errMessage,
      resourceInfo: funcInfoNode.resourceInfo,
      name: funcInfoNode.type
    };
-   if (!nodeObj.duration) nodeObj.duration = MIN_DURATION;
    nodeDataArray.push(nodeObj);
  });
  return nodeDataArray;
@@ -97,16 +103,13 @@ function linkData(flatData) {
    const linkObj = {
      source: funcInfoNode.triggerAsyncId,
      target: funcInfoNode.asyncId,
-     value: funcInfoNode.duration
+     value: funcInfoNode.durationScaled
   };
 
   if(linkObj.source !== "Node.js core" && linkObj.source) {
-    if (!linkObj.value) linkObj.value = MIN_DURATION;
-    console.log(newEventArray)
     if(!hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`]){
       newEventArray.push(linkObj)
       hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`] = true;
-      // console.log('after', hasSeen)
     }
     linkDataArray.push(linkObj);
   }
@@ -147,12 +150,12 @@ var OPACITY = {
     LEFT: OUTER_MARGIN
   },
   TRANSITION_DURATION = 400,
-  WIDTH = 1300 - MARGIN.LEFT - MARGIN.RIGHT,
-  HEIGHT = 1000 - MARGIN.TOP - MARGIN.BOTTOM,
-  LAYOUT_INTERATIONS = 32,
+  WIDTH = 2300 - MARGIN.LEFT - MARGIN.RIGHT,
+  HEIGHT = 1100 - MARGIN.TOP - MARGIN.BOTTOM,
+  LAYOUT_INTERATIONS = 10,
   REFRESH_INTERVAL = 7000;
 
-var formatNumber = function (d) {
+const formatNumber = function (d) {
   var numberFormat = d3.format(",.0f"); // zero decimal places
   return "$" + numberFormat(d);
 },
@@ -185,17 +188,11 @@ showTooltip = function () {
       .style("opacity", 1);
 };
 
-/** The parent DOM element id of D3 chart should be specified in html.
- * Let's check it for integrity.
- * Default value is "#chart".
- * */
-if (typeof chartDomElementId  === 'undefined') var chartDomElementId = "#chart"; // will make it optional
-if (!chartDomElementId) chartDomElementId = "#chart";
 
 colorScale = d3.scaleOrdinal().domain(TYPES).range(TYPE_COLORS),
 highlightColorScale = d3.scaleOrdinal().domain(TYPES).range(TYPE_HIGHLIGHT_COLORS),
 
-svg = d3.select(chartDomElementId)
+svg = d3.select('#bisankey-container')
         .append("svg")
         .attr("width", WIDTH + MARGIN.LEFT + MARGIN.RIGHT)
         .attr("height", HEIGHT + MARGIN.TOP + MARGIN.BOTTOM)
@@ -206,11 +203,11 @@ svg.append("g").attr("id", "links");
 svg.append("g").attr("id", "nodes");
 svg.append("g").attr("id", "collapsers");
 
-tooltip = d3.select(chartDomElementId).append("div").attr("id", "tooltip");
+tooltip = d3.select('#bisankey-container').append("div").attr("id", "tooltip");
 
 tooltip.style("opacity", 0)
-    .append("p")
-      .attr("class", "value");
+       .append("p")
+       .attr("class", "value");
 
 /** New D3 diagram object */
 biHiSankey = d3.biHiSankey();
@@ -222,10 +219,10 @@ biHiSankey
   .nodeWidth(NODE_WIDTH)
   .nodeSpacing(10)
   .linkSpacing(4)
-  .arrowheadScaleFactor(0.5) // Specifies that 0.5 of the link's stroke WIDTH should be allowed for the marker at the end of the link.
+  .arrowheadScaleFactor(0.5)
   .size([WIDTH, HEIGHT])
-  .onlyOneTextColor(false)  // 'true' will render single only AND the same text color as specified in css
-  .labelsAlwaysMiddle(false); // 'true' will align node's text in the middle. 'false' will align left and right
+  .onlyOneTextColor(false)
+  .labelsAlwaysMiddle(true);
 
 path = biHiSankey.link().curvature(0.45);
 
@@ -307,15 +304,13 @@ function update () {
   }
 
   function restoreLinksAndNodes() {
-    link
-      .style("stroke", LINK_COLOR)
-      .style("marker-end", function () { return 'url(#arrowHead)'; })
-      .transition()
+    link.style("stroke", LINK_COLOR)
+        .style("marker-end", function () { return 'url(#arrowHead)'; })
+        .transition()
         .duration(TRANSITION_DURATION)
         .style("opacity", OPACITY.LINK_DEFAULT);
 
-    node
-      .selectAll("rect")
+    node.selectAll("rect")
         .style("fill", function (d) {
           d.color = colorScale(d.type.replace(/ .*/, ""));
           return d.color;
@@ -335,8 +330,8 @@ function update () {
     console.log(node, 'clicked' )
     disableUserInteractions(2 * TRANSITION_DURATION);
     hideTooltip();
-    if (node.state === "collapsed") { expand(node); }
-    else { collapse(node); }
+    if (node.state === "collapsed") expand(node);
+    else collapse(node);
 
     biHiSankey.relayout();
     update();
@@ -370,12 +365,13 @@ function update () {
       .style("opacity", OPACITY.NODE_FADED);
   }
 
-  link = svg.select("#links").selectAll("path.link")
-    .data(biHiSankey.visibleLinks(), function (d) { return d.id; });
+  link = svg.select("#links")
+            .selectAll("path.link")
+            .data(biHiSankey.visibleLinks(), function (d) { return d.id; });
 
   link.transition()
     .duration(TRANSITION_DURATION)
-    .style("stroke-WIDTH", function (d) { return Math.max(1, d.thickness); })
+    .attr("stroke-width", function (d) {return Math.max(1, d.thickness); })
     .attr("d", path)
     .style("opacity", OPACITY.LINK_DEFAULT);
 
@@ -432,7 +428,10 @@ function update () {
       .delay(TRANSITION_DURATION)
       .duration(TRANSITION_DURATION)
       .attr("d", path)
-      .style("stroke-WIDTH", function (d) { return Math.max(1, d.thickness); })
+      .attr("stroke-width", function (d) {
+        // console.log('d.thickness', d.thickness)
+        return Math.max(1, d.thickness);
+      })
       .style("opacity", OPACITY.LINK_DEFAULT);
 
 
@@ -450,7 +449,7 @@ function update () {
         return d.color;
       })
       .style("stroke", function (d) { return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1); })
-      .style("stroke-WIDTH", "1px")
+      .style("stroke-width", "1px")
       .attr("height", function (d) { return d.height; })
       .attr("width", biHiSankey.nodeWidth());
 
@@ -492,13 +491,14 @@ function update () {
     .style("stroke", function (d) {
       return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1);
     })
-    .style("stroke-WIDTH", "1px")
+    .style("stroke-width", "1px")
     .attr("height", function (d) { return d.height; })
     .attr("width", biHiSankey.nodeWidth());
+
   nodeEnter.append("foreignObject")
            .append("xhtml:text")
            .attr("class", "node-type")
-           .text(function(d) { 
+           .text(function(d) {
               if(d.sourceLinks.length > 0 || d.leftLinks.length > 0){
                 return d.name
               }
@@ -575,11 +575,10 @@ function update () {
       return d.color;
     });
 
-  collapserEnter
-    .style("opacity", OPACITY.NODE_DEFAULT)
-    .attr("transform", function (d) {
-      return "translate(" + (d.x + d.width / 2) + "," + (d.y + COLLAPSER.RADIUS) + ")";
-    });
+  collapserEnter.style("opacity", OPACITY.NODE_DEFAULT)
+                .attr("transform", function (d) {
+                  return "translate(" + (d.x + d.width / 2) + "," + (d.y + COLLAPSER.RADIUS) + ")";
+                });
 
   collapserEnter.on("click", showHideChildren );
 
@@ -626,7 +625,7 @@ function update () {
       d3.select(this)
         .style("opacity", OPACITY.NODE_DEFAULT)
         .select("circle")
-          .style("fill", function (d) { return d.color; });
+        .style("fill", function (d) { return d.color; });
 
       node.filter(function (d) {
         return d.ancestors.indexOf(g) >= 0;
