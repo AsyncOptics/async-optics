@@ -3,18 +3,11 @@ let lastLength;
 const hasSeen = {};
 let newEventArray;
 socket.on('funcInfo', data => {
-  // console.log('raw Data', data.length);
   const needToRefresh = parseData(data);
   const chartDomElementId = "#chart";
   if (needToRefresh) {
      const nodeDataArray = nodeData(flatData);
      const linkDataArray = linkData(flatData);
-     // console.log('flat Data', flatData);
-     // console.log('nodeDataArray', nodeDataArray)
-     // console.log('linkDataArray', linkDataArray)
-     // console.log('lastLen, newLength', lastLength, newLength)
-     // console.log('non-sliced', linkDataArray)
-     // console.log('sliced', linkDataArray.slice(newLength - 1, -1))
      biHiSankey.nodeWidth(40)
                .size([1000, 950])
                .onlyOneTextColor(false)
@@ -28,24 +21,52 @@ socket.on('funcInfo', data => {
                disableUserInteractions(2 * TRANSITION_DURATION);
                update();
 
-    d3.select("#func-panel").selectAll("*").remove()
-    var packageData = d3.select("#func-panel")
-                        .selectAll("#funcData")
-                        .data(newEventArray)
-                        .enter()
-                        .append("div")
-                        .attr("class", "func-info")
-                        .style("border-color", function(d){
-                          return d.target.color;
-                        })
-    packageData.append("h4").attr("class", "func-name")
-               .text((d) => { return `${d.target.type} - ${d.target.id}` })
-    packageData.append("p").attr("class", "func-data")
-               .text((d) => { return `triggered by ${d.source.type} - ${d.source.id}` })
-    packageData.append("p").attr("class", "package-data")
-               .text((d) => { return `time taken to run: ${d.target.duration} ms`})
-    packageData.append("p").attr("class", "package-data")
-               .text((d) => { return `${d.target.errMessage}`})
+    // d3.select("#func-panel").selectAll("*").remove()
+    // var packageData = d3.select("#func-panel")
+    //                     .selectAll("#funcData")
+    //                     .data(newEventArray)
+    //                     .enter()
+    //                     .append("div")
+    //                     .attr("class", "func-info")
+    //                     .style("border-color", function(d){
+    //                       return d.target.color;
+    //                     })
+    // packageData.append("h4").attr("class", "func-name")
+    //            .text((d) => { return `${d.target.type} - ${d.target.id}` })
+    // packageData.append("p").attr("class", "func-data")
+    //            .text((d) => { return `triggered by ${d.source.type} - ${d.source.id}` })
+    // packageData.append("p").attr("class", "package-data")
+    //            .text((d) => { return `time taken to run: ${d.target.duration} ms`})
+    // packageData.append("p").attr("class", "package-data")
+    //            .text((d) => { return `${d.target.errMessage}`})
+    var funcData = d3.select("#nodes")
+                        .selectAll(".node")
+                        
+        newEventArray.forEach((event) => {
+          funcData.filter((d) => {
+            if(d.id === event.target.id){
+              d.isNew = true
+              return d.id === event.target.id
+            }
+          }).select("rect").style("stroke", "white")
+        })
+      funcData.on("mouseenter", (d) => {
+        if(d.isNew){
+          newEventArray.forEach((event) => {
+            funcData.filter((d) => {
+              return d.id === event.target.id
+            }).select("rect").style("opacity", .25)
+          })
+        }
+      })
+
+      funcData.on("mouseleave", () => {
+        newEventArray.forEach((event) => {
+          funcData.filter((d) => {
+            return d.id === event.target.id
+          }).select("rect").style("opacity", 1)
+        })
+      })
     }
 });
 
