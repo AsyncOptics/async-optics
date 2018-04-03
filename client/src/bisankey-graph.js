@@ -1,17 +1,20 @@
 const MIN_DURATION = 20;
-
-
+let lastLength;
+const hasSeen = {};
+let newEventArray;
 socket.on('funcInfo', data => {
   // console.log('raw Data', data.length);
   const needToRefresh = parseData(data);
   const chartDomElementId = "#chart";
-
   if (needToRefresh) {
      const nodeDataArray = nodeData(flatData);
      const linkDataArray = linkData(flatData);
      // console.log('flat Data', flatData);
      // console.log('nodeDataArray', nodeDataArray)
      // console.log('linkDataArray', linkDataArray)
+     // console.log('lastLen, newLength', lastLength, newLength)
+     // console.log('non-sliced', linkDataArray)
+     // console.log('sliced', linkDataArray.slice(newLength - 1, -1))
      biHiSankey.nodeWidth(40)
                .size([1000, 950])
                .onlyOneTextColor(false)
@@ -24,7 +27,26 @@ socket.on('funcInfo', data => {
                .layout(LAYOUT_INTERATIONS);
                disableUserInteractions(2 * TRANSITION_DURATION);
                update();
-  }
+
+    d3.select("#func-panel").selectAll("*").remove()
+    var packageData = d3.select("#func-panel")
+                        .selectAll("#funcData")
+                        .data(newEventArray)
+                        .enter()
+                        .append("div")
+                        .attr("class", "func-info")
+                        .style("border-color", function(d){
+                          return d.target.color;
+                        })
+    packageData.append("h4").attr("class", "func-name")
+               .text((d) => { return `${d.target.type} - ${d.target.id}` })
+    packageData.append("p").attr("class", "func-data")
+               .text((d) => { return `triggered by ${d.source.type} - ${d.source.id}` })
+    packageData.append("p").attr("class", "package-data")
+               .text((d) => { return `time taken to run: ${d.target.duration} ms`})
+    packageData.append("p").attr("class", "package-data")
+               .text((d) => { return `${d.target.errMessage}`})
+    }
 });
 
 
@@ -48,19 +70,27 @@ function nodeData(flatData) {
 }
 
 function linkData(flatData) {
- const linkDataArray = [];
- flatData.forEach((funcInfoNode) => {
+  const linkDataArray = [];
+  newEventArray = [];
+  flatData.forEach((funcInfoNode) => {
    const linkObj = {
      source: funcInfoNode.triggerAsyncId,
      target: funcInfoNode.asyncId,
      value: funcInfoNode.duration
-   };
+  };
 
-   if(linkObj.source !== "Node.js core" && linkObj.source) {
-     if (!linkObj.value) linkObj.value = MIN_DURATION;
-     linkDataArray.push(linkObj);
-   }
+  if(linkObj.source !== "Node.js core" && linkObj.source) {
+    if (!linkObj.value) linkObj.value = MIN_DURATION;
+    console.log(newEventArray)
+    if(!hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`]){
+      newEventArray.push(linkObj)
+      hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`] = true;
+      // console.log('after', hasSeen)
+    }
+    linkDataArray.push(linkObj);
+  }
  });
+
  return linkDataArray;
 }
 
@@ -281,6 +311,7 @@ function update () {
   }
 
   function showHideChildren(node) {
+    console.log(node, 'clicked' )
     disableUserInteractions(2 * TRANSITION_DURATION);
     hideTooltip();
     if (node.state === "collapsed") { expand(node); }
@@ -443,7 +474,14 @@ function update () {
     .style("stroke-WIDTH", "1px")
     .attr("height", function (d) { return d.height; })
     .attr("width", biHiSankey.nodeWidth());
-  nodeEnter.append("text"); // append text above rectangle
+  nodeEnter.append("foreignObject")
+           .append("xhtml:text")
+           .attr("class", "node-type")
+           .text(function(d) { 
+              if(d.sourceLinks.length > 0 || d.leftLinks.length > 0){
+                return d.name
+              }
+            });
 
   node.on("mouseenter", function (g) {
     if (!isTransitioning) {
@@ -470,7 +508,7 @@ function update () {
           .text(function () {
             var additionalInstructions = g.children.length ? "\n(Double click to expand)" : "";
             /*return g.name + "\nNet flow: " + formatFlow(g.netFlow) + additionalInstructions;*/
-            return g.name + additionalInstructions;
+            return g.name + g.errMessage;
           });
     }
   });
@@ -482,14 +520,7 @@ function update () {
     }
   });
 
-  node.filter(function (d) { return d.children.length; })
-    .on("dblclick", showHideChildren);
-
-  // allow nodes to be dragged to new positions
-  node.call(d3.drag()
-    .subject(function (d) { return d; })
-    .on("start", function () { this.parentNode.appendChild(this); })
-    .on("drag", dragmove));
+  node.on("click", showHideChildren)
 
   // add in the text for the nodes
   node
@@ -499,7 +530,7 @@ function update () {
     .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
     .attr("dy", ".35em")
     .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
-    .text(function (d) { return d.name[0]; });
+    .text(function (d) { return d.name; });
   if (!biHiSankey.onlyOneTextColor())
   node.filter(function (d) { return d.value !== 0; })
     .select("text")
@@ -510,20 +541,6 @@ function update () {
     .filter(function (d) { return d.x < biHiSankey.nodeWidth() / 2; })
     .attr("x", 6 + biHiSankey.nodeWidth())
     .attr("text-anchor", "start");
-
-  node.filter(function (d) { return d.value !== 0; }).select("text").append("tspan") /* append second line of the text */
-    .attr("x", biHiSankey.labelsAlwaysMiddle() ? biHiSankey.nodeWidth()/2 : -6)
-    .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
-    .attr("dy", "1.5em")
-    .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
-    .text(function (d) { return d.name[1]; });
-
-  node.filter(function (d) { return d.value !== 0; }).select("text").append("tspan") /* append third line of the text */
-    .attr("x", biHiSankey.labelsAlwaysMiddle() ? biHiSankey.nodeWidth()/2 : -6)
-    .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
-    .attr("dy", "2.65em")
-    .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
-    .text(function (d) { return d.name[2]; });
 
   collapser = svg.select("#collapsers").selectAll(".collapser")
     .data(biHiSankey.expandedNodes(), function (d) { return d.id; });
@@ -543,7 +560,7 @@ function update () {
       return "translate(" + (d.x + d.width / 2) + "," + (d.y + COLLAPSER.RADIUS) + ")";
     });
 
-  collapserEnter.on("dblclick", showHideChildren);
+  collapserEnter.on("click", showHideChildren );
 
   collapser.select("circle")
     .attr("r", COLLAPSER.RADIUS);
@@ -563,6 +580,7 @@ function update () {
     if (!isTransitioning) {
       showTooltip().select(".value")
         .text(function () {
+          console.log(g)
           return g.name + "\n(Double click to collapse its children)";
         });
 
