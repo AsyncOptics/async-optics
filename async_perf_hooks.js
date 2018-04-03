@@ -1,4 +1,4 @@
-  const async_hooks = require('async_hooks');
+const async_hooks = require('async_hooks');
 const {performance, PerformanceObserver} = require('perf_hooks');
 const funcInfo = require('./funcInfo/funcInfoModel.js');
 const {funcInfoParser, errMessageParser} = require('./funcInfo/funcInfoParser.js');
@@ -67,7 +67,6 @@ function deleteEntireBranch(triggerAsyncId) {
 }
 
 function init(asyncId, type, triggerAsyncId, resource) {
-  // process._rawDebug(type, Reflect.getPrototypeOf(resource));
   const err = new Error().stack;
   const errMessage = err.split('\n');
   const newErr = errMessageParser(errMessage);
@@ -102,6 +101,8 @@ function init(asyncId, type, triggerAsyncId, resource) {
   //   return;
   // }
   //from ourOwncode
+
+
   if( err.includes('ioController.js') ||
       err.includes('/alpha/node_modules/') ||
       err.includes('/alpha/packageMonitor.js') ||

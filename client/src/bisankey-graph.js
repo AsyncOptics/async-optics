@@ -1,8 +1,9 @@
+
+const hasSeen = {};
+let newEventArray;
 socket.on('funcInfo', data => {
-  // console.log('raw Data', data.length);
   const needToRefresh = parseData(data);
   const chartDomElementId = "#chart";
-
   if (needToRefresh) {
      scaleDuration();
      const nodeDataArray = nodeData(flatData);
@@ -24,6 +25,52 @@ socket.on('funcInfo', data => {
                .layout(LAYOUT_INTERATIONS);
     disableUserInteractions(2 * TRANSITION_DURATION);
     update();
+    // d3.select("#func-panel").selectAll("*").remove()
+    // var packageData = d3.select("#func-panel")
+    //                     .selectAll("#funcData")
+    //                     .data(newEventArray)
+    //                     .enter()
+    //                     .append("div")
+    //                     .attr("class", "func-info")
+    //                     .style("border-color", function(d){
+    //                       return d.target.color;
+    //                     })
+    // packageData.append("h4").attr("class", "func-name")
+    //            .text((d) => { return `${d.target.type} - ${d.target.id}` })
+    // packageData.append("p").attr("class", "func-data")
+    //            .text((d) => { return `triggered by ${d.source.type} - ${d.source.id}` })
+    // packageData.append("p").attr("class", "package-data")
+    //            .text((d) => { return `time taken to run: ${d.target.duration} ms`})
+    // packageData.append("p").attr("class", "package-data")
+    //            .text((d) => { return `${d.target.errMessage}`})
+    var funcData = d3.select("#nodes")
+                     .selectAll(".node")
+
+    newEventArray.forEach((event) => {
+      funcData.filter((d) => {
+        if(d.id === event.target.id){
+          d.isNew = true
+          return d.id === event.target.id
+        }
+      }).select("rect").style("stroke", "white")
+    })
+    funcData.on("mouseenter", (d) => {
+      if(d.isNew){
+        newEventArray.forEach((event) => {
+          funcData.filter((d) => {
+            return d.id === event.target.id
+          }).select("rect").style("opacity", .25)
+        })
+      }
+    })
+
+    funcData.on("mouseleave", () => {
+      newEventArray.forEach((event) => {
+        funcData.filter((d) => {
+          return d.id === event.target.id
+        }).select("rect").style("opacity", 1)
+      });
+    });
   }
 });
 
@@ -50,18 +97,24 @@ function nodeData(flatData) {
 }
 
 function linkData(flatData) {
- const linkDataArray = [];
- flatData.forEach((funcInfoNode) => {
+  const linkDataArray = [];
+  newEventArray = [];
+  flatData.forEach((funcInfoNode) => {
    const linkObj = {
      source: funcInfoNode.triggerAsyncId,
      target: funcInfoNode.asyncId,
-     value:  funcInfoNode.durationScaled
-   };
+     value: funcInfoNode.durationScaled
+  };
 
-   if(linkObj.source !== null && linkObj.source !== 'Node.js core') {
-     linkDataArray.push(linkObj);
-   }
+  if(linkObj.source !== "Node.js core" && linkObj.source) {
+    if(!hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`]){
+      newEventArray.push(linkObj)
+      hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`] = true;
+    }
+    linkDataArray.push(linkObj);
+  }
  });
+
  return linkDataArray;
 }
 
@@ -135,12 +188,6 @@ showTooltip = function () {
       .style("opacity", 1);
 };
 
-/** The parent DOM element id of D3 chart should be specified in html.
- * Let's check it for integrity.
- * Default value is "#chart".
- * */
-if (typeof chartDomElementId  === 'undefined') var chartDomElementId = "#chart"; // will make it optional
-if (!chartDomElementId) chartDomElementId = "#chart";
 
 colorScale = d3.scaleOrdinal().domain(TYPES).range(TYPE_COLORS),
 highlightColorScale = d3.scaleOrdinal().domain(TYPES).range(TYPE_HIGHLIGHT_COLORS),
@@ -280,6 +327,7 @@ function update () {
   }
 
   function showHideChildren(node) {
+    console.log(node, 'clicked' )
     disableUserInteractions(2 * TRANSITION_DURATION);
     hideTooltip();
     if (node.state === "collapsed") expand(node);
@@ -481,7 +529,7 @@ function update () {
           .text(function () {
             var additionalInstructions = g.children.length ? "\n(Double click to expand)" : "";
             /*return g.name + "\nNet flow: " + formatFlow(g.netFlow) + additionalInstructions;*/
-            return g.name + additionalInstructions;
+            return g.name + g.errMessage;
           });
     }
   });
@@ -493,14 +541,7 @@ function update () {
     }
   });
 
-  node.filter(function (d) { return d.children.length; })
-    .on("dblclick", showHideChildren);
-
-  // allow nodes to be dragged to new positions
-  node.call(d3.drag()
-    .subject(function (d) { return d; })
-    .on("start", function () { this.parentNode.appendChild(this); })
-    .on("drag", dragmove));
+  node.on("click", showHideChildren)
 
   // add in the text for the nodes
   node
@@ -539,7 +580,7 @@ function update () {
                   return "translate(" + (d.x + d.width / 2) + "," + (d.y + COLLAPSER.RADIUS) + ")";
                 });
 
-  collapserEnter.on("dblclick", showHideChildren);
+  collapserEnter.on("click", showHideChildren );
 
   collapser.select("circle")
     .attr("r", COLLAPSER.RADIUS);
@@ -559,6 +600,7 @@ function update () {
     if (!isTransitioning) {
       showTooltip().select(".value")
         .text(function () {
+          console.log(g)
           return g.name + "\n(Double click to collapse its children)";
         });
 

@@ -5,16 +5,7 @@ const path = require('path');
 
 let deps;
 const aggregate = {};
-// let hierarchyAggregate;
 let clientPath;
-
-// io.on('connection', (socket) => {
-//   process._rawDebug('socket id:', socket.id);
-//   io.emit('packageInfo',hierarchyAggregate );
-// });
-
-// process._rawDebug('packageInfo');
-// io.emit('packageInfo', );
 
 performance.maxEntries = process.env.pacmonMaxEntries || 1500
 mod.Module.prototype.require = performance.timerify(mod.Module.prototype.require);
@@ -22,10 +13,8 @@ require = performance.timerify(require);
 
 const obs = new PerformanceObserver((list, observer) => {
   const entries = list.getEntries();
-  // console.log(entries);
   let buffer;
   entries.forEach((entry, i) => {
-    // console.log(entry);
   	if (aggregate[entry[0]]) {
   		aggregate[entry[0]] = [];
   		buffer = aggregate[entry[0]];
@@ -39,7 +28,6 @@ const obs = new PerformanceObserver((list, observer) => {
   			children: []
   		})
   	} else if (!entry[0].includes('package.json')) {
-      // console.log(buffer)
   		buffer[0].totalTime += entry.duration
   		endTime = entry.startTime + entry.duration
   		buffer.push({
