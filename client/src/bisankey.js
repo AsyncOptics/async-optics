@@ -3,7 +3,7 @@ d3.biHiSankey = function() {
   let biHiSankey = {},
     nodeWidth = 24,
     nodeSpacing = 5,
-    linkSpacing = 5,
+    linkSpacing = 0,//5,
     arrowheadScaleFactor = 0, // Specifies the proportion of a link's stroke width to be allowed for the marker at the end of the link.
     size = [1, 1], // default to one pixel by one pixel
     nodes = [],
@@ -68,8 +68,8 @@ d3.biHiSankey = function() {
 
   // generate hierarchical connections between parent and child nodes
   function computeNodeHierarchy() {
-    var parent,
-        rootNodes = [];
+    let parent;
+    const rootNodes = [];
 
     nodes.forEach(function (node) {
       parent = nodeMap[node.parent];
@@ -183,24 +183,6 @@ d3.biHiSankey = function() {
   // To reduce clutter in the diagram merge links that are from the
   // same source to the same target by creating a new link
   // with a value equal to the sum of the values of the merged links
-  function mergeLinks() {
-    if (!mergeSameNodesLinks) return;
-    var linkGroups = d3.nest()
-      .key(function (link) { return link.source.id + "->" + link.target.id; })
-      .entries(links)
-      .map(function (object) { return object.values; });
-    links = linkGroups.map(function (linkGroup) {
-      return linkGroup.reduce(function (previousLink, currentLink) {
-        return {
-          "source": previousLink.source,
-          "target": previousLink.target,
-          "id": d3.min([previousLink.id, currentLink.id]),
-          "value": previousLink.value + currentLink.value
-        };
-      });
-    });
-
-  }
 
   function nodeHeight(sideLinks) {
     var spacing = Math.max(sideLinks.length - 1, 0) * linkSpacing,
@@ -213,17 +195,15 @@ d3.biHiSankey = function() {
   // Compute the number of source links for later decrementing
   function computeNodeValues() {
     nodes.forEach(function (node) {
-      node.value = Math.max(
-        d3.sum(node.leftLinks, value),
-        d3.sum(node.rightLinks, value)
-      );
-      node.value = node.duration;
-      node.netFlow = d3.sum(visible(node.targetLinks), value) - d3.sum(visible(node.sourceLinks), value);
-      // node.height = Math.max(nodeHeight(visible(node.leftLinks)), nodeHeight(visible(node.rightLinks)));
-      node.height = node.duration * yScaleFactor + Math.max(node.leftLinks.length - 1, node.rightLinks.length - 1,0) * linkSpacing;
       node.linkSpaceCount = Math.max(Math.max(node.leftLinks.length, node.rightLinks.length) - 1, 0);
+      // node.value = Math.max(d3.sum(node.leftLinks, value), d3.sum(node.rightLinks, value), 1);
+      // node.height = Math.max(nodeHeight(visible(node.leftLinks)), nodeHeight(visible(node.rightLinks)), 8);
+
+      node.value = node.durationScaled;
+      node.height = node.durationScaled * yScaleFactor + node.linkSpaceCount * linkSpacing;
+
+      node.netFlow = d3.sum(visible(node.targetLinks), value) - d3.sum(visible(node.sourceLinks), value);
     });
-    console.log(nodes);
   }
 
   function computeConnectedNodes() {
@@ -349,8 +329,10 @@ d3.biHiSankey = function() {
           .entries(nodes)
           .map(function (object) { return object.values; });
 
+
+
     function calculateYScaleFactor() {
-      var linkSpacesCount, nodeValueSum, discretionaryY;
+      let linkSpacesCount, nodeValueSum, discretionaryY;
       yScaleFactor = d3.min(nodesByXPosition, function (nodes) {
         linkSpacesCount = d3.sum(nodes, function (node) {
           return node.linkSpaceCount;
@@ -368,27 +350,33 @@ d3.biHiSankey = function() {
       // Fat links are those with lengths less than about 4 times their heights
       // Fat links don't bend well
       // Test that yScaleFactor is not so big that it causes "fat" links; adjust yScaleFactor accordingly
-      links.forEach(function (link) {
-        var linkLength = Math.abs(link.source.x - link.target.x),
-            linkHeight = link.value * yScaleFactor;
-        if (linkLength / linkHeight < 4) {
-          yScaleFactor = 0.25 * linkLength / link.value;
+      function scaleForFatlinks() {
+        for (let i=0; i<links.length; i++) {
+          const link = links[i];
+          const linkLength = Math.abs(link.source.x - link.target.x);
+          const linkHeight = link.value * yScaleFactor;
+          if (linkLength / linkHeight < 2) {
+            yScaleFactor = 0.9 * yScaleFactor;
+            scaleForFatlinks();
+          }
         }
-      });
+      }
+      scaleForFatlinks();
     }
 
     function initializeNodeYPosition() {
       nodesByXPosition.forEach(function (nodes) {
         nodes.forEach(function (node, i) {
           node.y = i;
-          node.heightAllowance = node.value * yScaleFactor + linkSpacing * node.linkSpaceCount;
+          node.heightAllowance = node.value * yScaleFactor + node.linkSpaceCount * linkSpacing;
         });
       });
+
     }
 
     function calculateLinkThickness() {
       links.forEach(function (link) {
-        link.thickness = link.value * yScaleFactor;
+        link.thickness = link.value * yScaleFactor / 7;
       });
     }
 
@@ -433,9 +421,7 @@ d3.biHiSankey = function() {
             y0 = 0,
             n = nodes.length,
             i;
-
         nodes.sort(ascendingYPosition);
-
         // Push any overlapping nodes down.
         for (i = 0; i < n; ++i) {
           node = nodes[i];
@@ -451,7 +437,6 @@ d3.biHiSankey = function() {
         if (dy > 0) {
           node.y -= dy;
           y0 = node.y;
-
           // Push any overlapping nodes back up.
           for (i = n - 2; i >= 0; --i) {
             node = nodes[i];
@@ -467,6 +452,7 @@ d3.biHiSankey = function() {
 
     calculateYScaleFactor();
     initializeNodeYPosition();
+    console.log('nodesByXPosition after',nodesByXPosition[2]);
     calculateLinkThickness();
     resolveCollisions();
 

@@ -1,5 +1,5 @@
 socket.on('packageInfo', data => {
-  console.log('packageInfo', data);
+  // console.log('packageInfo', data);
 	let sunData = data;
   for(let i = 0; i < sunData.children.length; i++){
     rootTime += sunData.children[i].totalTime

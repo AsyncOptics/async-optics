@@ -4,13 +4,15 @@ socket.on('funcInfo', data => {
   const chartDomElementId = "#chart";
 
   if (needToRefresh) {
-     scaleDuration(flatData);
+     scaleDuration();
      const nodeDataArray = nodeData(flatData);
      const linkDataArray = linkData(flatData);
      // console.log('flat Data', flatData);
      // console.log('nodeDataArray', nodeDataArray)
      // console.log('linkDataArray', linkDataArray)
-     biHiSankey.nodeWidth(100)
+     biHiSankey.nodeWidth(70)
+               .nodeSpacing(10)
+               .linkSpacing(5)
                .size([2200, 1100])
                .onlyOneTextColor(false)
                .labelsAlwaysMiddle(true)
@@ -29,13 +31,15 @@ socket.on('funcInfo', data => {
 function nodeData(flatData) {
  const nodeDataArray = [];
  flatData.forEach((funcInfoNode) => {
-   console.log(funcInfoNode.duration, funcInfoNode.type);
+   // console.log(funcInfoNode.duration, funcInfoNode.type);
    const nodeObj = {
      type: funcInfoNode.type,
      id: funcInfoNode.asyncId,
+     trigger: funcInfoNode.triggerAsyncId,
      parent: null,
      startTime: funcInfoNode.startTime,
      duration: funcInfoNode.duration,
+     durationScaled: funcInfoNode.durationScaled,
      errMessage: funcInfoNode.errMessage,
      resourceInfo: funcInfoNode.resourceInfo,
      name: funcInfoNode.type
@@ -51,10 +55,10 @@ function linkData(flatData) {
    const linkObj = {
      source: funcInfoNode.triggerAsyncId,
      target: funcInfoNode.asyncId,
-     value:  1 //funcInfoNode.duration
+     value:  funcInfoNode.durationScaled
    };
 
-   if(linkObj.source !== "Node.js core" && linkObj.source) {
+   if(linkObj.source !== null && linkObj.source !== 'Node.js core') {
      linkDataArray.push(linkObj);
    }
  });
@@ -95,10 +99,10 @@ var OPACITY = {
   TRANSITION_DURATION = 400,
   WIDTH = 2300 - MARGIN.LEFT - MARGIN.RIGHT,
   HEIGHT = 1100 - MARGIN.TOP - MARGIN.BOTTOM,
-  LAYOUT_INTERATIONS = 32,
+  LAYOUT_INTERATIONS = 10,
   REFRESH_INTERVAL = 7000;
 
-var formatNumber = function (d) {
+const formatNumber = function (d) {
   var numberFormat = d3.format(",.0f"); // zero decimal places
   return "$" + numberFormat(d);
 },
@@ -152,11 +156,11 @@ svg.append("g").attr("id", "links");
 svg.append("g").attr("id", "nodes");
 svg.append("g").attr("id", "collapsers");
 
-tooltip = d3.select(chartDomElementId).append("div").attr("id", "tooltip");
+tooltip = d3.select('#bisankey-container').append("div").attr("id", "tooltip");
 
 tooltip.style("opacity", 0)
-    .append("p")
-      .attr("class", "value");
+       .append("p")
+       .attr("class", "value");
 
 /** New D3 diagram object */
 biHiSankey = d3.biHiSankey();
@@ -168,10 +172,10 @@ biHiSankey
   .nodeWidth(NODE_WIDTH)
   .nodeSpacing(10)
   .linkSpacing(4)
-  .arrowheadScaleFactor(0.5) // Specifies that 0.5 of the link's stroke WIDTH should be allowed for the marker at the end of the link.
+  .arrowheadScaleFactor(0.5)
   .size([WIDTH, HEIGHT])
-  .onlyOneTextColor(false)  // 'true' will render single only AND the same text color as specified in css
-  .labelsAlwaysMiddle(false); // 'true' will align node's text in the middle. 'false' will align left and right
+  .onlyOneTextColor(false)
+  .labelsAlwaysMiddle(true);
 
 path = biHiSankey.link().curvature(0.45);
 
@@ -253,15 +257,13 @@ function update () {
   }
 
   function restoreLinksAndNodes() {
-    link
-      .style("stroke", LINK_COLOR)
-      .style("marker-end", function () { return 'url(#arrowHead)'; })
-      .transition()
+    link.style("stroke", LINK_COLOR)
+        .style("marker-end", function () { return 'url(#arrowHead)'; })
+        .transition()
         .duration(TRANSITION_DURATION)
         .style("opacity", OPACITY.LINK_DEFAULT);
 
-    node
-      .selectAll("rect")
+    node.selectAll("rect")
         .style("fill", function (d) {
           d.color = colorScale(d.type.replace(/ .*/, ""));
           return d.color;
@@ -280,8 +282,8 @@ function update () {
   function showHideChildren(node) {
     disableUserInteractions(2 * TRANSITION_DURATION);
     hideTooltip();
-    if (node.state === "collapsed") { expand(node); }
-    else { collapse(node); }
+    if (node.state === "collapsed") expand(node);
+    else collapse(node); 
 
     biHiSankey.relayout();
     update();
@@ -320,7 +322,7 @@ function update () {
 
   link.transition()
     .duration(TRANSITION_DURATION)
-    .style("stroke-WIDTH", function (d) { return Math.max(1, d.thickness); })
+    .style("stroke-WIDTH", function (d) {return Math.max(1, d.thickness); })
     .attr("d", path)
     .style("opacity", OPACITY.LINK_DEFAULT);
 
@@ -377,7 +379,10 @@ function update () {
       .delay(TRANSITION_DURATION)
       .duration(TRANSITION_DURATION)
       .attr("d", path)
-      .style("stroke-WIDTH", function (d) { return Math.max(1, d.thickness); })
+      .style("stroke-WIDTH", function (d) {
+        // console.log('d.thickness', d.thickness)
+        return Math.max(1, d.thickness);
+      })
       .style("opacity", OPACITY.LINK_DEFAULT);
 
 
@@ -528,11 +533,10 @@ function update () {
       return d.color;
     });
 
-  collapserEnter
-    .style("opacity", OPACITY.NODE_DEFAULT)
-    .attr("transform", function (d) {
-      return "translate(" + (d.x + d.width / 2) + "," + (d.y + COLLAPSER.RADIUS) + ")";
-    });
+  collapserEnter.style("opacity", OPACITY.NODE_DEFAULT)
+                .attr("transform", function (d) {
+                  return "translate(" + (d.x + d.width / 2) + "," + (d.y + COLLAPSER.RADIUS) + ")";
+                });
 
   collapserEnter.on("dblclick", showHideChildren);
 
