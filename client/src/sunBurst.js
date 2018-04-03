@@ -1,3 +1,39 @@
+socket.on('packageInfo', data => {
+  console.log('packageInfo', data);
+	let sunData = data;
+  for(let i = 0; i < sunData.children.length; i++){
+    rootTime += sunData.children[i].totalTime
+  }
+    root = d3.hierarchy(sunData);
+    root.sum(function(d) { return d.duration; });
+    svg_sun.selectAll("path")
+           .data(partition(root).descendants())
+           .enter().append("path")
+           .attr("d", arc)
+           .style("fill", function(d) { return color((d.children ? d : d.parent).data.name); })
+           .on("click", click)
+           .append("title")
+           .text(function(d) { return d.data.name === 'root' ? `${d.data.name} \n ${formatNumber_sun(rootTime)}` : `${d.data.name} \n ${formatNumber_sun(d.data.totalTime)}` });
+
+  var packageData = d3.select("#package-panel")
+      .selectAll("#packageData")
+      .data(sunData.children)
+      .enter()
+      .append("div")
+      .attr("class", "package-info")
+      .style("background-color", function(d){
+        return color((d.children ? d : d.parent).name);
+      })
+
+    packageData.append("h4").attr("class", "package-name")
+               .text((d) => { return `${d.name}`})
+    packageData.append("p").attr("class", "package-data")
+               .text((d) => { return `percentage: ${Math.floor(d.totalTime/rootTime * 100)}%`})
+    packageData.append("p").attr("class", "package-data")
+               .text((d) => { return `time taken to load: ${d.totalTime} ms`})
+});
+
+
 let rootTime = 0;
 
 const sunWidth = 960;
@@ -88,39 +124,3 @@ function click(d) {
 }
 
 d3.select(self.frameElement).style("height", sunHeight + "px");
-
-
-socket.on('packageInfo', data => {
-  console.log('packageInfo', data);
-	let sunData = data;
-  for(let i = 0; i < sunData.children.length; i++){
-    rootTime += sunData.children[i].totalTime
-  }
-    root = d3.hierarchy(sunData);
-    root.sum(function(d) { return d.duration; });
-    svg_sun.selectAll("path")
-           .data(partition(root).descendants())
-           .enter().append("path")
-           .attr("d", arc)
-           .style("fill", function(d) { return color((d.children ? d : d.parent).data.name); })
-           .on("click", click)
-           .append("title")
-           .text(function(d) { return d.data.name === 'root' ? `${d.data.name} \n ${formatNumber_sun(rootTime)}` : `${d.data.name} \n ${formatNumber_sun(d.data.totalTime)}` });
-
-  var packageData = d3.select("#package-panel")
-      .selectAll("#packageData")
-      .data(sunData.children)
-      .enter()
-      .append("div")
-      .attr("class", "package-info")
-      .style("background-color", function(d){
-        return color((d.children ? d : d.parent).name);
-      })
-
-    packageData.append("h4").attr("class", "package-name")
-               .text((d) => { return `${d.name}`})
-    packageData.append("p").attr("class", "package-data")
-               .text((d) => { return `percentage: ${Math.floor(d.totalTime/rootTime * 100)}%`})
-    packageData.append("p").attr("class", "package-data")
-               .text((d) => { return `time taken to load: ${d.totalTime} ms`})
-});

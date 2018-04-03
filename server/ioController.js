@@ -6,6 +6,7 @@ let asyncInfoEmit = [];
 let sendInfoAnyway;
 ioController.sendInfo = function(funcInfoNode) {
   if(io._hasConnection) {
+    io._asyncInfo.push(funcInfoNode);
     asyncInfoEmit.push(funcInfoNode);
     if (asyncInfoEmit.length > 59) {
       clearTimeout(sendInfoAnyway);
@@ -30,7 +31,7 @@ ioController.sendPackageInfo = function(packageInfo){
   process._rawDebug('send package info');
   if(io._hasConnection){
     io.emit('packageInfo', packageInfo)
-  } 
+  }
 }
 
 module.exports = ioController;

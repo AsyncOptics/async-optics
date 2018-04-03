@@ -30,7 +30,7 @@ function parseData(data) {
       if (checklist_flat[asyncId] >= 0) {
         needToRefresh = true;
         flatData[checklist_flat[asyncId]] = funcNode;
-      } else {      
+      } else {
         needToRefresh = true;
         checklist_flat[asyncId] = flatData.length;
         flatData.push(funcNode);
@@ -74,4 +74,25 @@ function putIntoRemainData(funcNode) {
   }
   if (!update) remainData[id].push(funcNode);
   return;
+}
+
+function scaleDuration(flatData) {   //scale duration from [0, +infinity] to [MIN_SCALE, MAX_SCALE]
+  const MIN_SCALE = 1;
+  const MAX_SCALE = 5;
+  const MIN_DURATION = 0.3;  // duration less than MIN_DURATION with be scaled to MIN_SCALE
+  const MAX_DURATION = 500;  // duration greater than MAX_DURATION with be scaled to MAX_SCALE
+  const b = MAX_DURATION - MIN_DURATION;
+  flatData.forEach( (funcInfoNode) => {
+    if ( (!funcInfoNode.duration) || funcInfoNode.duration <= MIN_DURATION || funcInfoNode.type === 'TIMERWRAP' || funcInfoNode.type === 'Timeout') {
+      funcInfoNode.duration = MIN_SCALE;
+    } else if (funcInfoNode.duration >= MAX_DURATION) {
+      funcInfoNode.duration = MAX_SCALE;
+    } else {
+      const x = funcInfoNode.duration - MIN_DURATION;
+      funcInfoNode.duration = (-x*x + 2*b*x)/(b*b)*MAX_SCALE + MIN_SCALE;
+    }
+
+  })
+
+
 }

@@ -2,7 +2,7 @@ d3.biHiSankey = function() {
   "use strict";
   let biHiSankey = {},
     nodeWidth = 24,
-    nodeSpacing = 8,
+    nodeSpacing = 5,
     linkSpacing = 5,
     arrowheadScaleFactor = 0, // Specifies the proportion of a link's stroke width to be allowed for the marker at the end of the link.
     size = [1, 1], // default to one pixel by one pixel
@@ -18,6 +18,7 @@ d3.biHiSankey = function() {
     onlyOneTextColor = false, // set it to 'true' if you want only AND the same text color as specified in css
     mergeSameNodesLinks = true, // default will merge the links in the same direction between the same target and source
     linkIdIncrement = 0;
+
 
   function center(node) {
     return node.y + node.height / 2;
@@ -95,7 +96,7 @@ d3.biHiSankey = function() {
     links.forEach(function (link) {
       sourceNode = nodeMap[link.source] || link.source;
       targetNode = nodeMap[link.target] || link.target;
-      link.id = link.source + '-' + link.target + (mergeSameNodesLinks?'':linkIdIncrement++);
+      link.id = link.source + '-' + link.target + (mergeSameNodesLinks? '' : linkIdIncrement++);
       link.source = sourceNode;
       link.target = targetNode;
       sourceNode.sourceLinks.push(link);
@@ -188,7 +189,6 @@ d3.biHiSankey = function() {
       .key(function (link) { return link.source.id + "->" + link.target.id; })
       .entries(links)
       .map(function (object) { return object.values; });
-
     links = linkGroups.map(function (linkGroup) {
       return linkGroup.reduce(function (previousLink, currentLink) {
         return {
@@ -199,6 +199,7 @@ d3.biHiSankey = function() {
         };
       });
     });
+
   }
 
   function nodeHeight(sideLinks) {
@@ -216,10 +217,13 @@ d3.biHiSankey = function() {
         d3.sum(node.leftLinks, value),
         d3.sum(node.rightLinks, value)
       );
+      node.value = node.duration;
       node.netFlow = d3.sum(visible(node.targetLinks), value) - d3.sum(visible(node.sourceLinks), value);
-      node.height = Math.max(nodeHeight(visible(node.leftLinks)), nodeHeight(visible(node.rightLinks)));
+      // node.height = Math.max(nodeHeight(visible(node.leftLinks)), nodeHeight(visible(node.rightLinks)));
+      node.height = node.duration * yScaleFactor + Math.max(node.leftLinks.length - 1, node.rightLinks.length - 1,0) * linkSpacing;
       node.linkSpaceCount = Math.max(Math.max(node.leftLinks.length, node.rightLinks.length) - 1, 0);
     });
+    console.log(nodes);
   }
 
   function computeConnectedNodes() {
@@ -275,7 +279,6 @@ d3.biHiSankey = function() {
     var minX = d3.min(nodes, function (node) { return node.x; }),
         maxX = d3.max(nodes, function (node) { return node.x; }) - minX;
     xScaleFactor = (size[0] - nodeWidth) / maxX;
-
     nodes.forEach(function (node) {
       node.x *= xScaleFactor;
     });
@@ -306,7 +309,6 @@ d3.biHiSankey = function() {
       }
       x += 1;
     }
-
     compressInXDirection();
     scaleNodeXPositions();
   }
@@ -697,7 +699,7 @@ d3.biHiSankey = function() {
     computeNodeHierarchy();
     computeNodeLinks();
     computeAncestorLinks();
-    mergeLinks();
+    // mergeLinks();
     computeConnectedNodes();
     nodes.forEach(callback);
     return biHiSankey;

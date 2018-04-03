@@ -1,19 +1,17 @@
-const MIN_DURATION = 20;
-
-
 socket.on('funcInfo', data => {
   // console.log('raw Data', data.length);
   const needToRefresh = parseData(data);
   const chartDomElementId = "#chart";
 
   if (needToRefresh) {
+     scaleDuration(flatData);
      const nodeDataArray = nodeData(flatData);
      const linkDataArray = linkData(flatData);
      // console.log('flat Data', flatData);
      // console.log('nodeDataArray', nodeDataArray)
      // console.log('linkDataArray', linkDataArray)
-     biHiSankey.nodeWidth(40)
-               .size([1000, 950])
+     biHiSankey.nodeWidth(100)
+               .size([2200, 1100])
                .onlyOneTextColor(false)
                .labelsAlwaysMiddle(true)
                .nodes(nodeDataArray)
@@ -22,8 +20,8 @@ socket.on('funcInfo', data => {
                  node.state = node.parent ? "contained" : "collapsed";
                })
                .layout(LAYOUT_INTERATIONS);
-               disableUserInteractions(2 * TRANSITION_DURATION);
-               update();
+    disableUserInteractions(2 * TRANSITION_DURATION);
+    update();
   }
 });
 
@@ -31,6 +29,7 @@ socket.on('funcInfo', data => {
 function nodeData(flatData) {
  const nodeDataArray = [];
  flatData.forEach((funcInfoNode) => {
+   console.log(funcInfoNode.duration, funcInfoNode.type);
    const nodeObj = {
      type: funcInfoNode.type,
      id: funcInfoNode.asyncId,
@@ -41,7 +40,6 @@ function nodeData(flatData) {
      resourceInfo: funcInfoNode.resourceInfo,
      name: funcInfoNode.type
    };
-   if (!nodeObj.duration) nodeObj.duration = MIN_DURATION;
    nodeDataArray.push(nodeObj);
  });
  return nodeDataArray;
@@ -53,11 +51,10 @@ function linkData(flatData) {
    const linkObj = {
      source: funcInfoNode.triggerAsyncId,
      target: funcInfoNode.asyncId,
-     value: funcInfoNode.duration
+     value:  1 //funcInfoNode.duration
    };
 
    if(linkObj.source !== "Node.js core" && linkObj.source) {
-     if (!linkObj.value) linkObj.value = MIN_DURATION;
      linkDataArray.push(linkObj);
    }
  });
@@ -96,8 +93,8 @@ var OPACITY = {
     LEFT: OUTER_MARGIN
   },
   TRANSITION_DURATION = 400,
-  WIDTH = 1300 - MARGIN.LEFT - MARGIN.RIGHT,
-  HEIGHT = 1000 - MARGIN.TOP - MARGIN.BOTTOM,
+  WIDTH = 2300 - MARGIN.LEFT - MARGIN.RIGHT,
+  HEIGHT = 1100 - MARGIN.TOP - MARGIN.BOTTOM,
   LAYOUT_INTERATIONS = 32,
   REFRESH_INTERVAL = 7000;
 
@@ -144,7 +141,7 @@ if (!chartDomElementId) chartDomElementId = "#chart";
 colorScale = d3.scaleOrdinal().domain(TYPES).range(TYPE_COLORS),
 highlightColorScale = d3.scaleOrdinal().domain(TYPES).range(TYPE_HIGHLIGHT_COLORS),
 
-svg = d3.select(chartDomElementId)
+svg = d3.select('#bisankey-container')
         .append("svg")
         .attr("width", WIDTH + MARGIN.LEFT + MARGIN.RIGHT)
         .attr("height", HEIGHT + MARGIN.TOP + MARGIN.BOTTOM)
@@ -443,7 +440,15 @@ function update () {
     .style("stroke-WIDTH", "1px")
     .attr("height", function (d) { return d.height; })
     .attr("width", biHiSankey.nodeWidth());
-  nodeEnter.append("text"); // append text above rectangle
+
+  nodeEnter.append("foreignObject")
+           .append("xhtml:text")
+           .attr("class", "node-type")
+           .text(function(d) {
+              if(d.sourceLinks.length > 0 || d.leftLinks.length > 0){
+                return d.name
+              }
+            });
 
   node.on("mouseenter", function (g) {
     if (!isTransitioning) {
@@ -499,7 +504,7 @@ function update () {
     .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
     .attr("dy", ".35em")
     .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
-    .text(function (d) { return d.name[0]; });
+    .text(function (d) { return d.name; });
   if (!biHiSankey.onlyOneTextColor())
   node.filter(function (d) { return d.value !== 0; })
     .select("text")
@@ -510,20 +515,6 @@ function update () {
     .filter(function (d) { return d.x < biHiSankey.nodeWidth() / 2; })
     .attr("x", 6 + biHiSankey.nodeWidth())
     .attr("text-anchor", "start");
-
-  node.filter(function (d) { return d.value !== 0; }).select("text").append("tspan") /* append second line of the text */
-    .attr("x", biHiSankey.labelsAlwaysMiddle() ? biHiSankey.nodeWidth()/2 : -6)
-    .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
-    .attr("dy", "1.5em")
-    .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
-    .text(function (d) { return d.name[1]; });
-
-  node.filter(function (d) { return d.value !== 0; }).select("text").append("tspan") /* append third line of the text */
-    .attr("x", biHiSankey.labelsAlwaysMiddle() ? biHiSankey.nodeWidth()/2 : -6)
-    .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
-    .attr("dy", "2.65em")
-    .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
-    .text(function (d) { return d.name[2]; });
 
   collapser = svg.select("#collapsers").selectAll(".collapser")
     .data(biHiSankey.expandedNodes(), function (d) { return d.id; });
