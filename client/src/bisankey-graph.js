@@ -283,7 +283,7 @@ function update () {
     disableUserInteractions(2 * TRANSITION_DURATION);
     hideTooltip();
     if (node.state === "collapsed") expand(node);
-    else collapse(node); 
+    else collapse(node);
 
     biHiSankey.relayout();
     update();
@@ -317,12 +317,13 @@ function update () {
       .style("opacity", OPACITY.NODE_FADED);
   }
 
-  link = svg.select("#links").selectAll("path.link")
-    .data(biHiSankey.visibleLinks(), function (d) { return d.id; });
+  link = svg.select("#links")
+            .selectAll("path.link")
+            .data(biHiSankey.visibleLinks(), function (d) { return d.id; });
 
   link.transition()
     .duration(TRANSITION_DURATION)
-    .style("stroke-WIDTH", function (d) {return Math.max(1, d.thickness); })
+    .attr("stroke-width", function (d) {return Math.max(1, d.thickness); })
     .attr("d", path)
     .style("opacity", OPACITY.LINK_DEFAULT);
 
@@ -379,7 +380,7 @@ function update () {
       .delay(TRANSITION_DURATION)
       .duration(TRANSITION_DURATION)
       .attr("d", path)
-      .style("stroke-WIDTH", function (d) {
+      .attr("stroke-width", function (d) {
         // console.log('d.thickness', d.thickness)
         return Math.max(1, d.thickness);
       })
@@ -400,7 +401,7 @@ function update () {
         return d.color;
       })
       .style("stroke", function (d) { return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1); })
-      .style("stroke-WIDTH", "1px")
+      .style("stroke-width", "1px")
       .attr("height", function (d) { return d.height; })
       .attr("width", biHiSankey.nodeWidth());
 
@@ -442,7 +443,7 @@ function update () {
     .style("stroke", function (d) {
       return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1);
     })
-    .style("stroke-WIDTH", "1px")
+    .style("stroke-width", "1px")
     .attr("height", function (d) { return d.height; })
     .attr("width", biHiSankey.nodeWidth());
 
@@ -582,7 +583,7 @@ function update () {
       d3.select(this)
         .style("opacity", OPACITY.NODE_DEFAULT)
         .select("circle")
-          .style("fill", function (d) { return d.color; });
+        .style("fill", function (d) { return d.color; });
 
       node.filter(function (d) {
         return d.ancestors.indexOf(g) >= 0;

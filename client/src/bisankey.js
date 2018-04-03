@@ -19,7 +19,6 @@ d3.biHiSankey = function() {
     mergeSameNodesLinks = true, // default will merge the links in the same direction between the same target and source
     linkIdIncrement = 0;
 
-
   function center(node) {
     return node.y + node.height / 2;
   }
@@ -180,24 +179,9 @@ d3.biHiSankey = function() {
     });
   }
 
-  // To reduce clutter in the diagram merge links that are from the
-  // same source to the same target by creating a new link
-  // with a value equal to the sum of the values of the merged links
-
-  function nodeHeight(sideLinks) {
-    var spacing = Math.max(sideLinks.length - 1, 0) * linkSpacing,
-        scaledValueSum = d3.sum(sideLinks, value) * yScaleFactor;
-    return scaledValueSum + spacing;
-  }
-
-  // Compute the value of each node by summing the associated links.
-  // Compute the number of spaces between the links
-  // Compute the number of source links for later decrementing
   function computeNodeValues() {
     nodes.forEach(function (node) {
       node.linkSpaceCount = Math.max(Math.max(node.leftLinks.length, node.rightLinks.length) - 1, 0);
-      // node.value = Math.max(d3.sum(node.leftLinks, value), d3.sum(node.rightLinks, value), 1);
-      // node.height = Math.max(nodeHeight(visible(node.leftLinks)), nodeHeight(visible(node.rightLinks)), 8);
 
       node.value = node.durationScaled;
       node.height = node.durationScaled * yScaleFactor + node.linkSpaceCount * linkSpacing;
@@ -452,7 +436,6 @@ d3.biHiSankey = function() {
 
     calculateYScaleFactor();
     initializeNodeYPosition();
-    console.log('nodesByXPosition after',nodesByXPosition[2]);
     calculateLinkThickness();
     resolveCollisions();
 
@@ -522,7 +505,6 @@ d3.biHiSankey = function() {
 
     });
   }
-
 
   biHiSankey.arrowheadScaleFactor = function (_) {
     if (!arguments.length) { return arrowheadScaleFactor; }
