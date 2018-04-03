@@ -1,4 +1,4 @@
-  const async_hooks = require('async_hooks');
+const async_hooks = require('async_hooks');
 const {performance, PerformanceObserver} = require('perf_hooks');
 const funcInfo = require('./funcInfo/funcInfoModel.js');
 const {funcInfoParser, errMessageParser} = require('./funcInfo/funcInfoParser.js');
@@ -67,7 +67,16 @@ function deleteEntireBranch(triggerAsyncId) {
 }
 
 function init(asyncId, type, triggerAsyncId, resource) {
+  // if(type === 'Timeout'){
+  //   asyncHook.disable()
+  // } 
+  //   asyncHook.enable()
+
+  // console.log(asyncResource)
   // process._rawDebug(type, Reflect.getPrototypeOf(resource));
+  process._rawDebug(asyncId, cid, triggerAsyncId, type)
+  // mongoose connection: Timeout, timerwrap, promise x2, tcpwrap, getaddrinfo, timerwrap, timeout, tickobj, tcpwrap, getaddrinfo, timeout, tick,tcpconnectwrap, randombytes, pbkdf2request
+  // express: timeout, timerwrap, tcpserverwrap, tickobj, tcpwrap, httpparser, randombytes, zlib
   const err = new Error().stack;
   const errMessage = err.split('\n');
   const newErr = errMessageParser(errMessage);
@@ -102,6 +111,8 @@ function init(asyncId, type, triggerAsyncId, resource) {
   //   return;
   // }
   //from ourOwncode
+
+
   if( err.includes('ioController.js') ||
       err.includes('/alpha/node_modules/') ||
       err.includes('/alpha/packageMonitor.js') ||

@@ -58,8 +58,8 @@ div.tooltip {
 }
 
 .package-info {
-  border: 1px solid black;
-  background-color: #FFFFFF;
+  border: 5px solid black;
+  /*background-color: #FFFFFF;*/
   width: 110%;
   padding: 10px;
 }
@@ -67,3 +67,4 @@ div.tooltip {
 .package-name {
   text-align: center;
 }
+

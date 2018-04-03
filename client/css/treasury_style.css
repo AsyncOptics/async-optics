@@ -37,8 +37,9 @@ html, body {
 .node text {
   pointer-events: none;
   /*text-shadow: 1px 1px 2px #fff;*/
-  font-size: 0.9em;
+  font-size: 0.7em;
   font-family: Helvetica, sans-serif;
+  text-align: center;
   /*-webkit-filter: drop-shadow( 2px 2px 2px #fff );
   filter: drop-shadow( 2px 2px 2px #fff );*/
   fill: white; 
@@ -64,4 +65,13 @@ html, body {
 .value {
   white-space: pre-line;
   margin: 0;
+}
+
+.node-type {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.func-info {
+  border: 2px solid black;
 }
