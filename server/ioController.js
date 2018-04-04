@@ -1,6 +1,5 @@
 const io = require('./socket.js');
 const ioController = {};
-// const infoSaved = [];
 
 let asyncInfoEmit = [];
 let sendInfoAnyway;
