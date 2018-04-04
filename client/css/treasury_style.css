@@ -106,3 +106,8 @@ html, body {
   overflow: hidden;
   white-space: nowrap;
 }
+
+.func-info {
+  border: 2px solid black;
+}
+

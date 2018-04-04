@@ -1,10 +1,10 @@
 const hasSeen = {};
-let newEventArray;
-
+let timer;
 socket.on('funcInfo', data => {
   const needToRefresh = parseData(data);
   const chartDomElementId = "#chart";
   if (needToRefresh) {
+     clearTimeout(timer);
      scaleDuration();
      const nodeDataArray = nodeData(flatData);
      const linkDataArray = linkData(flatData);
@@ -28,8 +28,19 @@ socket.on('funcInfo', data => {
   }
 });
 
+function pulse(path, duration, end){
+  path.transition()
+      .duration(duration)
+      .style('stroke-opacity', .2)
+      .transition()
+      .style('stroke-opacity', 1)
+  timer = setTimeout(function() { pulse(path, duration); }, duration*2);
+}
+
+
 function nodeData(flatData) {
  const nodeDataArray = [];
+ newEventArray = [];
  flatData.forEach((funcInfoNode) => {
    const nodeObj = {
      type: funcInfoNode.type,
@@ -43,6 +54,13 @@ function nodeData(flatData) {
      resourceInfo: funcInfoNode.resourceInfo,
      name: funcInfoNode.type
    };
+   if(!hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`]) {
+      nodeObj.isNew = true;
+      hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`] = true;
+      newEventArray.push(nodeObj);
+   } else {
+      nodeObj.isNew = false
+   }
    nodeDataArray.push(nodeObj);
  });
  return nodeDataArray;
@@ -50,7 +68,6 @@ function nodeData(flatData) {
 
 function linkData(flatData) {
   const linkDataArray = [];
-  newEventArray = [];
   flatData.forEach((funcInfoNode) => {
    const linkObj = {
      source: funcInfoNode.triggerAsyncId,
@@ -59,10 +76,10 @@ function linkData(flatData) {
   };
 
   if(linkObj.source !== "Node.js core" && linkObj.source) {
-    if(!hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`]){
-      newEventArray.push(linkObj)
-      hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`] = true;
-    }
+    // if(!hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`]){
+    //   newEventArray.push(linkObj)
+    //   hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`] = true;
+    // }
     linkDataArray.push(linkObj);
   }
  });
@@ -70,34 +87,20 @@ function linkData(flatData) {
 }
 
 function highlightNewEvent() {
-  let funcData = d3.select("#nodes")
-                   .selectAll(".node")
+    var funcData = d3.select("#nodes")
+                     .selectAll(".node")
 
-  newEventArray.forEach((event) => {
-    funcData.filter((d) => {
-      if(d.id === event.target.id){
-        d.isNew = true
-        return d.id === event.target.id
-      }
-    }).select("rect").style("stroke", "white")
-  })
-  funcData.on("mouseenter", (d) => {
-    if(d.isNew){
-      newEventArray.forEach((event) => {
-        funcData.filter((d) => {
-          return d.id === event.target.id
-        }).select("rect").style("opacity", .25)
-      })
-    }
-  })
-
-  funcData.on("mouseleave", () => {
-    newEventArray.forEach((event) => {
       funcData.filter((d) => {
-        return d.id === event.target.id
-      }).select("rect").style("opacity", 1)
-    });
-  });
+        return d.isNew === true
+      }).select("rect")
+        .call(pulse, 750)
+
+      funcData.filter((d) => {
+        return !d.isNew
+      }).select("rect")
+        .transition()
+        .duration(500)
+        .style("stroke-opacity", 1)
 }
 
 // https://github.com/northam/styled_sankey/blob/master/bihisankey.app.js
@@ -236,8 +239,11 @@ path = biHiSankey.link().curvature(0.45);
       .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
 
+<<<<<<< HEAD
 function update () {
   let link, linkEnter, node, nodeEnter, collapser, collapserEnter;
+=======
+>>>>>>> 52f17b496a43329e8559336a624e01ea62819e59
 
   function containChildren(node) {
     node.state = "contained";
@@ -494,6 +500,49 @@ function update () {
               }
             });
 
+<<<<<<< HEAD
+=======
+  node.on("mouseenter", function (g) {
+    d3.select("#chart-info").selectAll("*").remove();
+    if (!isTransitioning) {
+      restoreLinksAndNodes();
+      highlightConnected(g);
+      fadeUnconnected(g);
+
+      d3.select(this).select("rect")
+        .style("fill", function (d) {
+          d.color = d.netFlow > 0 ? INFLOW_COLOR : OUTFLOW_COLOR;
+          return d.color;
+        })
+      .style("stroke", function (d) { return d3.rgb(d.color).darker(0.1); })
+      .style("fill-opacity", OPACITY.LINK_DEFAULT);
+
+      // tooltip
+      // .style("left", g.x + MARGIN.LEFT + 100 + "px")
+      // .style("top", g.y + g.height + MARGIN.TOP + 15 + "px")
+      // .transition()
+      // .duration(TRANSITION_DURATION)
+      // .style("opacity", 1).select(".value")
+      // .text(() => {
+      //   let additionalInstructions = g.children.length ? "\n(Double click to expand)" : "";
+      //   return g.name + "\n Duration: " + g.duration + "\n ID: " + g.id + "\n Start Time: " + g.startTime + "\n Errors: " + g.errMessage ;
+      // });
+
+      var parentPanel = d3.select("#chart-info")
+                          .selectAll("#chartData")
+                          .data([g, ...g.rightLinks])
+                          .enter()
+                          .append("div")
+                          .attr("class", "chart-info")
+                          .style("background-color", function(d){
+                            return d.color ? d.color : d.target.color;
+                          })
+      parentPanel.append("h4").attr("class", "func-name")
+                 .text((d) => { return `${d.type ? d.type : d.target.type}`})
+
+      parentPanel.append("p").attr("class", "func-data")
+                 .text(d => { return `Id: ${d.id ? d.id : d.target.id}`})
+>>>>>>> 52f17b496a43329e8559336a624e01ea62819e59
 
 
 
@@ -509,6 +558,10 @@ function update () {
 
   nodeEnter.on("click", showHideChildren)
 
+<<<<<<< HEAD
+=======
+  node.on("click", showHideChildren);
+>>>>>>> 52f17b496a43329e8559336a624e01ea62819e59
 
   // add in the text for the nodes
   node.filter(function (d) { return d.value !== 0; })
