@@ -7,25 +7,25 @@ socket.on('funcInfo', data => {
   const chartDomElementId = "#chart";
 
   if (needToRefresh) {
-     const nodeDataArray = nodeData(flatData);
-     const linkDataArray = linkData(flatData);
+   const nodeDataArray = nodeData(flatData);
+   const linkDataArray = linkData(flatData);
      // console.log('flat Data', flatData);
      // console.log('nodeDataArray', nodeDataArray)
      // console.log('linkDataArray', linkDataArray)
      biHiSankey.nodeWidth(40)
-               .size([1000, 950])
-               .onlyOneTextColor(false)
-               .labelsAlwaysMiddle(true)
-               .nodes(nodeDataArray)
-               .links(linkDataArray)
-               .initializeNodes(function (node) {
-                 node.state = node.parent ? "contained" : "collapsed";
-               })
-               .layout(LAYOUT_INTERATIONS);
-               disableUserInteractions(2 * TRANSITION_DURATION);
-               update();
-  }
-});
+     .size([1000, 500])
+     .onlyOneTextColor(false)
+     .labelsAlwaysMiddle(true)
+     .nodes(nodeDataArray)
+     .links(linkDataArray)
+     .initializeNodes(function (node) {
+       node.state = node.parent ? "contained" : "collapsed";
+     })
+     .layout(LAYOUT_INTERATIONS);
+     disableUserInteractions(2 * TRANSITION_DURATION);
+     update();
+   }
+ });
 
 
 function nodeData(flatData) {
@@ -70,36 +70,36 @@ function linkData(flatData) {
 let svg, tooltip, biHiSankey, path, defs, colorScale, highlightColorScale, isTransitioning;
 
 var OPACITY = {
-    NODE_DEFAULT: 0.9,
-    NODE_FADED: 0.1,
-    NODE_HIGHLIGHT: 1,
-    LINK_DEFAULT: 0.6,
-    LINK_FADED: 0.05,
-    LINK_HIGHLIGHT: 0.9
-  },
-  TYPES = ["Solution", "Financial_Product", "Function", "Module", "Component", "Interface"],
-  TYPE_COLORS = ["#ffd644", "#6cfff9", "#30ff2c", "#ee74ff", "#ccff43", "#ff7d63"],
-  TYPE_HIGHLIGHT_COLORS = ["#ffd644", "#6cfff9", "#30ff2c", "#ee74ff", "#ccff43", "#ff7d63"],
-  LINK_COLOR = "#ede2bb",
-  INFLOW_COLOR = "#ffd644",
-  OUTFLOW_COLOR = "#6cfff9",
-  NODE_WIDTH = 20,
-  COLLAPSER = {
-    RADIUS: NODE_WIDTH,
-    SPACING: 2
-  },
-  OUTER_MARGIN = 10,
-  MARGIN = {
-    TOP: 2 * COLLAPSER.RADIUS + OUTER_MARGIN,
-    RIGHT: OUTER_MARGIN,
-    BOTTOM: OUTER_MARGIN,
-    LEFT: OUTER_MARGIN
-  },
-  TRANSITION_DURATION = 400,
-  WIDTH = 1300 - MARGIN.LEFT - MARGIN.RIGHT,
-  HEIGHT = 1000 - MARGIN.TOP - MARGIN.BOTTOM,
-  LAYOUT_INTERATIONS = 32,
-  REFRESH_INTERVAL = 7000;
+  NODE_DEFAULT: 0.9,
+  NODE_FADED: 0.1,
+  NODE_HIGHLIGHT: 1,
+  LINK_DEFAULT: 0.6,
+  LINK_FADED: 0.05,
+  LINK_HIGHLIGHT: 0.9
+},
+TYPES = ["Solution", "Financial_Product", "Function", "Module", "Component", "Interface"],
+TYPE_COLORS = ["#ffd644", "#6cfff9", "#30ff2c", "#ee74ff", "#ccff43", "#ff7d63"],
+TYPE_HIGHLIGHT_COLORS = ["#ffd644", "#6cfff9", "#30ff2c", "#ee74ff", "#ccff43", "#ff7d63"],
+LINK_COLOR = "#ede2bb",
+INFLOW_COLOR = "#ffd644",
+OUTFLOW_COLOR = "#6cfff9",
+NODE_WIDTH = 20,
+COLLAPSER = {
+  RADIUS: NODE_WIDTH,
+  SPACING: 2
+},
+OUTER_MARGIN = 10,
+MARGIN = {
+  TOP: 2 * COLLAPSER.RADIUS + OUTER_MARGIN,
+  RIGHT: OUTER_MARGIN,
+  BOTTOM: OUTER_MARGIN,
+  LEFT: OUTER_MARGIN
+},
+TRANSITION_DURATION = 400,
+WIDTH = 1300 - MARGIN.LEFT - MARGIN.RIGHT,
+HEIGHT = 400 - MARGIN.TOP - MARGIN.BOTTOM,
+LAYOUT_INTERATIONS = 32,
+REFRESH_INTERVAL = 7000;
 
 var formatNumber = function (d) {
   var numberFormat = d3.format(",.0f"); // zero decimal places
@@ -121,17 +121,17 @@ disableUserInteractions = function (time) {
 
 hideTooltip = function () {
   return tooltip.transition()
-    .duration(TRANSITION_DURATION)
-    .style("opacity", 0);
+  .duration(TRANSITION_DURATION)
+  .style("opacity", 0);
 },
 
 showTooltip = function () {
   return tooltip
-    .style("left", d3.event.pageX + "px")
-    .style("top", d3.event.pageY + 15 + "px")
-    .transition()
-      .duration(TRANSITION_DURATION)
-      .style("opacity", 1);
+  .style("left", d3.event.pageX + "px")
+  .style("top", d3.event.pageY + 15 + "px")
+  .transition()
+  .duration(TRANSITION_DURATION)
+  .style("opacity", 1);
 };
 
 /** The parent DOM element id of D3 chart should be specified in html.
@@ -145,21 +145,23 @@ colorScale = d3.scaleOrdinal().domain(TYPES).range(TYPE_COLORS),
 highlightColorScale = d3.scaleOrdinal().domain(TYPES).range(TYPE_HIGHLIGHT_COLORS),
 
 svg = d3.select(chartDomElementId)
-        .append("svg")
-        .attr("width", WIDTH + MARGIN.LEFT + MARGIN.RIGHT)
-        .attr("height", HEIGHT + MARGIN.TOP + MARGIN.BOTTOM)
-        .append("g")
-        .attr("transform", "translate(" + MARGIN.LEFT + "," + MARGIN.TOP + ")");
+.append("svg")
+.attr("width", WIDTH + MARGIN.LEFT + MARGIN.RIGHT)
+.attr("height", HEIGHT + MARGIN.TOP + MARGIN.BOTTOM)
+.append("g")
+.attr("transform", "translate(" + MARGIN.LEFT + "," + MARGIN.TOP + ")");
 
 svg.append("g").attr("id", "links");
 svg.append("g").attr("id", "nodes");
 svg.append("g").attr("id", "collapsers");
 
+infoPanel = d3.select(chartDomElementId).append("div").attr("id", "info-panel");
+
 tooltip = d3.select(chartDomElementId).append("div").attr("id", "tooltip");
 
 tooltip.style("opacity", 0)
-    .append("p")
-      .attr("class", "value");
+.append("p")
+.attr("class", "value");
 
 /** New D3 diagram object */
 biHiSankey = d3.biHiSankey();
@@ -167,20 +169,20 @@ biHiSankey = d3.biHiSankey();
 /** biHiSankey default properties
  *  Set as many defaults as possible to avoid error for the missing property in further declarations in html file
  */
-biHiSankey
-  .nodeWidth(NODE_WIDTH)
-  .nodeSpacing(10)
-  .linkSpacing(4)
+ biHiSankey
+ .nodeWidth(NODE_WIDTH)
+ .nodeSpacing(10)
+ .linkSpacing(4)
   .arrowheadScaleFactor(0.5) // Specifies that 0.5 of the link's stroke WIDTH should be allowed for the marker at the end of the link.
   .size([WIDTH, HEIGHT])
   .onlyOneTextColor(false)  // 'true' will render single only AND the same text color as specified in css
   .labelsAlwaysMiddle(false); // 'true' will align node's text in the middle. 'false' will align left and right
 
-path = biHiSankey.link().curvature(0.45);
+  path = biHiSankey.link().curvature(0.45);
 
-defs = svg.append("defs");
+  defs = svg.append("defs");
 
-defs.append("marker")
+  defs.append("marker")
   .style("fill", LINK_COLOR)
   .attr("id", "arrowHead")
   .attr("viewBox", "0 0 6 10")
@@ -191,9 +193,9 @@ defs.append("marker")
   .attr("markerHeight", "1")
   .attr("orient", "auto")
   .append("path")
-    .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
+  .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
-defs.append("marker")
+  defs.append("marker")
   .style("fill", OUTFLOW_COLOR)
   .attr("id", "arrowHeadInflow")
   .attr("viewBox", "0 0 6 10")
@@ -204,9 +206,9 @@ defs.append("marker")
   .attr("markerHeight", "1")
   .attr("orient", "auto")
   .append("path")
-    .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
+  .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
-defs.append("marker")
+  defs.append("marker")
   .style("fill", INFLOW_COLOR)
   .attr("id", "arrowHeadOutlow")
   .attr("viewBox", "0 0 6 10")
@@ -217,154 +219,154 @@ defs.append("marker")
   .attr("markerHeight", "1")
   .attr("orient", "auto")
   .append("path")
-    .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
+  .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
-function update () {
-  var link, linkEnter, node, nodeEnter, collapser, collapserEnter;
+  function update () {
+    var link, linkEnter, node, nodeEnter, collapser, collapserEnter;
 
-  function dragmove(node) {
-    node.x = Math.max(0, Math.min(WIDTH - node.width, d3.event.x));
-    node.y = Math.max(0, Math.min(HEIGHT - node.height, d3.event.y));
-    d3.select(this).attr("transform", "translate(" + node.x + "," + node.y + ")");
-    biHiSankey.relayout();
-    svg.selectAll(".node").selectAll("rect").attr("height", function (d) { return d.height; });
-    link.attr("d", path);
-  }
+    function dragmove(node) {
+      node.x = Math.max(0, Math.min(WIDTH - node.width, d3.event.x));
+      node.y = Math.max(0, Math.min(HEIGHT - node.height, d3.event.y));
+      d3.select(this).attr("transform", "translate(" + node.x + "," + node.y + ")");
+      biHiSankey.relayout();
+      svg.selectAll(".node").selectAll("rect").attr("height", function (d) { return d.height; });
+      link.attr("d", path);
+    }
 
-  function containChildren(node) {
-    node.children.forEach(function (child) {
-      child.state = "contained";
-      child.parent = this;
-      child._parent = null;
-      containChildren(child);
-    }, node);
-  }
+    function containChildren(node) {
+      node.children.forEach(function (child) {
+        child.state = "contained";
+        child.parent = this;
+        child._parent = null;
+        containChildren(child);
+      }, node);
+    }
 
-  function expand(node) {
-    node.state = "expanded";
-    node.children.forEach(function (child) {
-      child.state = "collapsed";
-      child._parent = this;
-      child.parent = null;
-      containChildren(child);
-    }, node);
-  }
+    function expand(node) {
+      node.state = "expanded";
+      node.children.forEach(function (child) {
+        child.state = "collapsed";
+        child._parent = this;
+        child.parent = null;
+        containChildren(child);
+      }, node);
+    }
 
-  function collapse(node) {
-    node.state = "collapsed";
-    containChildren(node);
-  }
+    function collapse(node) {
+      node.state = "collapsed";
+      containChildren(node);
+    }
 
-  function restoreLinksAndNodes() {
-    link
+    function restoreLinksAndNodes() {
+      link
       .style("stroke", LINK_COLOR)
       .style("marker-end", function () { return 'url(#arrowHead)'; })
       .transition()
-        .duration(TRANSITION_DURATION)
-        .style("opacity", OPACITY.LINK_DEFAULT);
+      .duration(TRANSITION_DURATION)
+      .style("opacity", OPACITY.LINK_DEFAULT);
 
-    node
+      node
       .selectAll("rect")
-        .style("fill", function (d) {
-          d.color = colorScale(d.type.replace(/ .*/, ""));
-          return d.color;
-        })
-        .style("stroke", function (d) {
-          return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1);
-        })
-        .style("fill-opacity", OPACITY.NODE_DEFAULT);
+      .style("fill", function (d) {
+        d.color = colorScale(d.type.replace(/ .*/, ""));
+        return d.color;
+      })
+      .style("stroke", function (d) {
+        return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1);
+      })
+      .style("fill-opacity", OPACITY.NODE_DEFAULT);
 
-    node.filter(function (n) { return n.state === "collapsed"; })
+      node.filter(function (n) { return n.state === "collapsed"; })
       .transition()
-        .duration(TRANSITION_DURATION)
-        .style("opacity", OPACITY.NODE_DEFAULT);
-  }
+      .duration(TRANSITION_DURATION)
+      .style("opacity", OPACITY.NODE_DEFAULT);
+    }
 
-  function showHideChildren(node) {
-    disableUserInteractions(2 * TRANSITION_DURATION);
-    hideTooltip();
-    if (node.state === "collapsed") { expand(node); }
-    else { collapse(node); }
+    function showHideChildren(node) {
+      disableUserInteractions(2 * TRANSITION_DURATION);
+      hideTooltip();
+      if (node.state === "collapsed") { expand(node); }
+      else { collapse(node); }
 
-    biHiSankey.relayout();
-    update();
-    link.attr("d", path);
-    restoreLinksAndNodes();
-  }
+      biHiSankey.relayout();
+      update();
+      link.attr("d", path);
+      restoreLinksAndNodes();
+    }
 
-  function highlightConnected(g) {
-    link.filter(function (d) { return d.source === g; })
+    function highlightConnected(g) {
+      link.filter(function (d) { return d.source === g; })
       .style("marker-end", function () { return 'url(#arrowHeadInflow)'; })
       .style("stroke", OUTFLOW_COLOR)
       .style("opacity", OPACITY.LINK_DEFAULT);
 
-    link.filter(function (d) { return d.target === g; })
+      link.filter(function (d) { return d.target === g; })
       .style("marker-end", function () { return 'url(#arrowHeadOutlow)'; })
       .style("stroke", INFLOW_COLOR)
       .style("opacity", OPACITY.LINK_DEFAULT);
-  }
+    }
 
-  function fadeUnconnected(g) {
-    link.filter(function (d) { return d.source !== g && d.target !== g; })
+    function fadeUnconnected(g) {
+      link.filter(function (d) { return d.source !== g && d.target !== g; })
       .style("marker-end", function () { return 'url(#arrowHead)'; })
       .transition()
-        .duration(TRANSITION_DURATION)
-        .style("opacity", OPACITY.LINK_FADED);
+      .duration(TRANSITION_DURATION)
+      .style("opacity", OPACITY.LINK_FADED);
 
-    node.filter(function (d) {
-      return (d.name === g.name) ? false : !biHiSankey.connected(d, g);
-    }).transition()
+      node.filter(function (d) {
+        return (d.name === g.name) ? false : !biHiSankey.connected(d, g);
+      }).transition()
       .duration(TRANSITION_DURATION)
       .style("opacity", OPACITY.NODE_FADED);
-  }
+    }
 
-  link = svg.select("#links").selectAll("path.link")
+    link = svg.select("#links").selectAll("path.link")
     .data(biHiSankey.visibleLinks(), function (d) { return d.id; });
 
-  link.transition()
+    link.transition()
     .duration(TRANSITION_DURATION)
     .style("stroke-WIDTH", function (d) { return Math.max(1, d.thickness); })
     .attr("d", path)
     .style("opacity", OPACITY.LINK_DEFAULT);
 
 
-  link.exit().remove();
+    link.exit().remove();
 
 
-  linkEnter = link.enter().append("path")
+    linkEnter = link.enter().append("path")
     .attr("class", "link")
     .style("fill", "none");
 
-  linkEnter.on('mouseenter', function (d) {
-    if (!isTransitioning) {
-      showTooltip().select(".value").text(function () {
-        if (d.direction > 0) {
-          return d.source.name + " -> " + d.target.name; /* + "\n" + formatNumber(d.value);*/
-        }
-        return d.target.name + " <- " + d.source.name; /* + "\n" + formatNumber(d.value);*/
-      });
+    linkEnter.on('mouseenter', function (d) {
+      if (!isTransitioning) {
+        showTooltip().select(".value").text(function () {
+          if (d.direction > 0) {
+            return d.source.name + " -> " + d.target.name; /* + "\n" + formatNumber(d.value);*/
+          }
+          return d.target.name + " <- " + d.source.name; /* + "\n" + formatNumber(d.value);*/
+        });
 
-      d3.select(this)
+        d3.select(this)
         .style("stroke", LINK_COLOR)
         .transition()
-          .duration(TRANSITION_DURATION / 2)
-          .style("opacity", OPACITY.LINK_HIGHLIGHT);
-    }
-  });
+        .duration(TRANSITION_DURATION / 2)
+        .style("opacity", OPACITY.LINK_HIGHLIGHT);
+      }
+    });
 
-  linkEnter.on('mouseleave', function () {
-    if (!isTransitioning) {
-      hideTooltip();
+    linkEnter.on('mouseleave', function () {
+      if (!isTransitioning) {
+        hideTooltip();
 
-      d3.select(this)
+        d3.select(this)
         .style("stroke", LINK_COLOR)
         .transition()
-          .duration(TRANSITION_DURATION / 2)
-          .style("opacity", OPACITY.LINK_DEFAULT);
-    }
-  });
+        .duration(TRANSITION_DURATION / 2)
+        .style("opacity", OPACITY.LINK_DEFAULT);
+      }
+    });
 
-  linkEnter.sort(function (a, b) { return b.thickness - a.thickness; })
+    linkEnter.sort(function (a, b) { return b.thickness - a.thickness; })
     .classed("leftToRight", function (d) {
       return d.direction > 0;
     })
@@ -377,62 +379,62 @@ function update () {
     .style("stroke", LINK_COLOR)
     .style("opacity", 0)
     .transition()
-      .delay(TRANSITION_DURATION)
-      .duration(TRANSITION_DURATION)
-      .attr("d", path)
-      .style("stroke-WIDTH", function (d) { return Math.max(1, d.thickness); })
-      .style("opacity", OPACITY.LINK_DEFAULT);
+    .delay(TRANSITION_DURATION)
+    .duration(TRANSITION_DURATION)
+    .attr("d", path)
+    .style("stroke-WIDTH", function (d) { return Math.max(1, d.thickness); })
+    .style("opacity", OPACITY.LINK_DEFAULT);
 
 
-  node = svg.select("#nodes").selectAll(".node")
-      .data(biHiSankey.collapsedNodes(), function (d) { return d.id; });
+    node = svg.select("#nodes").selectAll(".node")
+    .data(biHiSankey.collapsedNodes(), function (d) { return d.id; });
 
 
-  node.transition()
+    node.transition()
     .duration(TRANSITION_DURATION)
     .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
     .style("opacity", OPACITY.NODE_DEFAULT)
     .select("rect")
-      .style("fill", function (d) {
-        d.color = colorScale(d.type.replace(/ .*/, ""));
-        return d.color;
-      })
-      .style("stroke", function (d) { return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1); })
-      .style("stroke-WIDTH", "1px")
-      .attr("height", function (d) { return d.height; })
-      .attr("width", biHiSankey.nodeWidth());
+    .style("fill", function (d) {
+      d.color = colorScale(d.type.replace(/ .*/, ""));
+      return d.color;
+    })
+    .style("stroke", function (d) { return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1); })
+    .style("stroke-WIDTH", "1px")
+    .attr("height", function (d) { return d.height; })
+    .attr("width", biHiSankey.nodeWidth());
 
 
-  node.exit()
+    node.exit()
     .transition()
-      .duration(TRANSITION_DURATION)
-      .attr("transform", function (d) {
-        var collapsedAncestor, endX, endY;
-        collapsedAncestor = d.ancestors.filter(function (a) {
-          return a.state === "collapsed";
-        })[0];
-        endX = collapsedAncestor ? collapsedAncestor.x : d.x;
-        endY = collapsedAncestor ? collapsedAncestor.y : d.y;
-        return "translate(" + endX + "," + endY + ")";
-      })
-      .remove();
+    .duration(TRANSITION_DURATION)
+    .attr("transform", function (d) {
+      var collapsedAncestor, endX, endY;
+      collapsedAncestor = d.ancestors.filter(function (a) {
+        return a.state === "collapsed";
+      })[0];
+      endX = collapsedAncestor ? collapsedAncestor.x : d.x;
+      endY = collapsedAncestor ? collapsedAncestor.y : d.y;
+      return "translate(" + endX + "," + endY + ")";
+    })
+    .remove();
 
 
-  nodeEnter = node.enter().append("g").attr("class", "node");
+    nodeEnter = node.enter().append("g").attr("class", "node");
 
-  nodeEnter
+    nodeEnter
     .attr("transform", function (d) {
       var startX = d._parent ? d._parent.x : d.x,
-          startY = d._parent ? d._parent.y : d.y;
+      startY = d._parent ? d._parent.y : d.y;
       return "translate(" + startX + "," + startY + ")";
     })
     .style("opacity", 1e-6)
     .transition()
-      .duration(TRANSITION_DURATION)
-      .style("opacity", OPACITY.NODE_DEFAULT)
-      .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+    .duration(TRANSITION_DURATION)
+    .style("opacity", OPACITY.NODE_DEFAULT)
+    .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
 
-  nodeEnter.append("rect")
+    nodeEnter.append("rect")
     .style("fill", function (d) {
       d.color = colorScale(d.type.replace(/ .*/, ""));
       return d.color;
@@ -446,44 +448,100 @@ function update () {
   nodeEnter.append("text"); // append text above rectangle
 
   node.on("mouseenter", function (g) {
+
+    d3.select("#chart-info").selectAll("*").remove()
+
+    console.log('g', g)
     if (!isTransitioning) {
       restoreLinksAndNodes();
       highlightConnected(g);
       fadeUnconnected(g);
 
       d3.select(this).select("rect")
-        .style("fill", function (d) {
-          d.color = d.netFlow > 0 ? INFLOW_COLOR : OUTFLOW_COLOR;
-          return d.color;
-        })
-        .style("stroke", function (d) {
-          return d3.rgb(d.color).darker(0.1);
-        })
-        .style("fill-opacity", OPACITY.LINK_DEFAULT);
+      .style("fill", function (d) {
+        d.color = d.netFlow > 0 ? INFLOW_COLOR : OUTFLOW_COLOR;
+        return d.color;
+      })
+      .style("stroke", function (d) {
+        return d3.rgb(d.color).darker(0.1);
+      })
+      .style("fill-opacity", OPACITY.LINK_DEFAULT);
 
       tooltip
-        .style("left", g.x + MARGIN.LEFT + "px")
-        .style("top", g.y + g.height + MARGIN.TOP + 15 + "px")
-        .transition()
-          .duration(TRANSITION_DURATION)
-          .style("opacity", 1).select(".value")
-          .text(function () {
-            var additionalInstructions = g.children.length ? "\n(Double click to expand)" : "";
-            /*return g.name + "\nNet flow: " + formatFlow(g.netFlow) + additionalInstructions;*/
-            return g.name + additionalInstructions;
-          });
-    }
-  });
+      .style("left", g.x + MARGIN.LEFT + 100 + "px")
+      .style("top", g.y + g.height + MARGIN.TOP + 15 + "px")
+      .transition()
+      .duration(TRANSITION_DURATION)
+      .style("opacity", 1).select(".value")
+      .text(() => {
+        let additionalInstructions = g.children.length ? "\n(Double click to expand)" : "";
+        /*return g.name + "\nNet flow: " + formatFlow(g.netFlow) + additionalInstructions;*/
+        return g.name + "\n Duration: " + g.duration + "\n ID: " + g.id + "\n Start Time: " + g.startTime + "\n Errors: " + g.errMessage ;
+      });
+
+      var parentPanel = d3.select("#chart-info")
+      .selectAll("#chartData")
+      .data([g, ...g.rightLinks])
+      .enter()
+      .append("div")
+      .attr("class", "chart-info")
+      .style("background-color", function(d){
+        return d.color ? d.color : d.target.color;
+      })
+      parentPanel.append("h4").attr("class", "func-name")
+               .text((d) => { return `${d.type ? d.type : d.target.type}`})
+
+      parentPanel.append("p").attr("class", "func-data")
+              .text(d => { return `Id: ${d.id ? d.id : d.target.id}`})
+
+      parentPanel.append("p").attr("class", "func-data")
+               .text((d) => { return `Start time: ${d.startTime ? d.startTime : d.target.startTime}`})
+      
+      parentPanel.append("p").attr("class", "func-data")
+               .text((d) => { return `Time taken to run: ${d.duration ? d.duration : d.target.duration} ms`})
+
+      parentPanel.append("p").attr("class", "stack-expand")
+              .attr("id", (d) => `err${d.id ? d.id : d.target.id}`)
+              .text(() => {
+                return `Click to show stack trace`
+              })
+     
+      let errors = d3.selectAll(".stack-expand")
+           
+
+      errors.on("click", (d) => {
+              console.log(d3.event.target.id)
+              let errId = `#${d3.event.target.id}`
+              if(!d.errorShown){
+                d.errorShown = true;
+                // errors.select(errId)
+                d3.select(errId).append("p").attr("class", "stack-data")
+                .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
+                } else {
+                  d3.select(errId).select('.stack-data').remove()
+                  d.errorShown = false; 
+                }
+
+              })
+
+              
+
+      // parentPanel.append("p").attr("class", "func-data")
+      //          .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
+
+    }  
+});
 
   node.on("mouseleave", function () {
     if (!isTransitioning) {
       hideTooltip();
       restoreLinksAndNodes();
+      
     }
   });
 
   node.filter(function (d) { return d.children.length; })
-    .on("dblclick", showHideChildren);
+  .on("dblclick", showHideChildren);
 
   // allow nodes to be dragged to new positions
   node.call(d3.drag()
@@ -495,89 +553,89 @@ function update () {
   node
   .filter(function (d) { return d.value !== 0; })
   .select("text")
-    .attr("x", biHiSankey.labelsAlwaysMiddle() ? biHiSankey.nodeWidth()/2 : -6)
-    .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
-    .attr("dy", ".35em")
-    .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
-    .text(function (d) { return d.name[0]; });
+  .attr("x", biHiSankey.labelsAlwaysMiddle() ? biHiSankey.nodeWidth()/2 : -6)
+  .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
+  .attr("dy", ".35em")
+  .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
+  .text(function (d) { return d.name[0]; });
   if (!biHiSankey.onlyOneTextColor())
-  node.filter(function (d) { return d.value !== 0; })
-    .select("text")
-    .style("fill", function (d) { return colorScale(d.type.replace(/ .*/, "")); });
+    node.filter(function (d) { return d.value !== 0; })
+  .select("text")
+  .style("fill", function (d) { return colorScale(d.type.replace(/ .*/, "")); });
   if (!biHiSankey.labelsAlwaysMiddle())
-  node.filter(function (d) { return d.value !== 0; })
-    .select("text")
-    .filter(function (d) { return d.x < biHiSankey.nodeWidth() / 2; })
-    .attr("x", 6 + biHiSankey.nodeWidth())
-    .attr("text-anchor", "start");
+    node.filter(function (d) { return d.value !== 0; })
+  .select("text")
+  .filter(function (d) { return d.x < biHiSankey.nodeWidth() / 2; })
+  .attr("x", 6 + biHiSankey.nodeWidth())
+  .attr("text-anchor", "start");
 
   node.filter(function (d) { return d.value !== 0; }).select("text").append("tspan") /* append second line of the text */
-    .attr("x", biHiSankey.labelsAlwaysMiddle() ? biHiSankey.nodeWidth()/2 : -6)
-    .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
-    .attr("dy", "1.5em")
-    .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
-    .text(function (d) { return d.name[1]; });
+  .attr("x", biHiSankey.labelsAlwaysMiddle() ? biHiSankey.nodeWidth()/2 : -6)
+  .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
+  .attr("dy", "1.5em")
+  .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
+  .text(function (d) { return d.name[1]; });
 
   node.filter(function (d) { return d.value !== 0; }).select("text").append("tspan") /* append third line of the text */
-    .attr("x", biHiSankey.labelsAlwaysMiddle() ? biHiSankey.nodeWidth()/2 : -6)
-    .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
-    .attr("dy", "2.65em")
-    .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
-    .text(function (d) { return d.name[2]; });
+  .attr("x", biHiSankey.labelsAlwaysMiddle() ? biHiSankey.nodeWidth()/2 : -6)
+  .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
+  .attr("dy", "2.65em")
+  .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
+  .text(function (d) { return d.name[2]; });
 
   collapser = svg.select("#collapsers").selectAll(".collapser")
-    .data(biHiSankey.expandedNodes(), function (d) { return d.id; });
+  .data(biHiSankey.expandedNodes(), function (d) { return d.id; });
 
   collapserEnter = collapser.enter().append("g").attr("class", "collapser");
 
   collapserEnter.append("circle")
-    .attr("r", COLLAPSER.RADIUS)
-    .style("fill", function (d) {
-      d.color = colorScale(d.type.replace(/ .*/, ""));
-      return d.color;
-    });
+  .attr("r", COLLAPSER.RADIUS)
+  .style("fill", function (d) {
+    d.color = colorScale(d.type.replace(/ .*/, ""));
+    return d.color;
+  });
 
   collapserEnter
-    .style("opacity", OPACITY.NODE_DEFAULT)
-    .attr("transform", function (d) {
-      return "translate(" + (d.x + d.width / 2) + "," + (d.y + COLLAPSER.RADIUS) + ")";
-    });
+  .style("opacity", OPACITY.NODE_DEFAULT)
+  .attr("transform", function (d) {
+    return "translate(" + (d.x + d.width / 2) + "," + (d.y + COLLAPSER.RADIUS) + ")";
+  });
 
   collapserEnter.on("dblclick", showHideChildren);
 
   collapser.select("circle")
-    .attr("r", COLLAPSER.RADIUS);
+  .attr("r", COLLAPSER.RADIUS);
 
   collapser.transition()
-    .delay(TRANSITION_DURATION)
-    .duration(TRANSITION_DURATION)
-    .attr("transform", function (d, i) {
-      return "translate("
-        + (COLLAPSER.RADIUS + i * 2 * (COLLAPSER.RADIUS + COLLAPSER.SPACING))
-        + ","
-        + (-COLLAPSER.RADIUS - OUTER_MARGIN)
-        + ")";
-    });
+  .delay(TRANSITION_DURATION)
+  .duration(TRANSITION_DURATION)
+  .attr("transform", function (d, i) {
+    return "translate("
+    + (COLLAPSER.RADIUS + i * 2 * (COLLAPSER.RADIUS + COLLAPSER.SPACING))
+    + ","
+    + (-COLLAPSER.RADIUS - OUTER_MARGIN)
+    + ")";
+  });
 
   collapser.on("mouseenter", function (g) {
     if (!isTransitioning) {
       showTooltip().select(".value")
-        .text(function () {
-          return g.name + "\n(Double click to collapse its children)";
-        });
+      .text(function () {
+        return g.name + "\n(Double click to collapse its children)";
+      });
 
       var highlightColor = highlightColorScale(g.type.replace(/ .*/, ""));
 
       d3.select(this)
-        .style("opacity", OPACITY.NODE_HIGHLIGHT)
-        .select("circle")
-          .style("fill", highlightColor);
+      .style("opacity", OPACITY.NODE_HIGHLIGHT)
+      .select("circle")
+      .style("fill", highlightColor);
 
       node.filter(function (d) {
         return d.ancestors.indexOf(g) >= 0;
       }).style("opacity", OPACITY.NODE_HIGHLIGHT)
-        .select("rect")
-          .style("fill", highlightColor);
+      .select("rect")
+      .style("fill", highlightColor);
     }
   });
 
@@ -585,15 +643,15 @@ function update () {
     if (!isTransitioning) {
       hideTooltip();
       d3.select(this)
-        .style("opacity", OPACITY.NODE_DEFAULT)
-        .select("circle")
-          .style("fill", function (d) { return d.color; });
+      .style("opacity", OPACITY.NODE_DEFAULT)
+      .select("circle")
+      .style("fill", function (d) { return d.color; });
 
       node.filter(function (d) {
         return d.ancestors.indexOf(g) >= 0;
       }).style("opacity", OPACITY.NODE_DEFAULT)
-        .select("rect")
-          .style("fill", function (d) { return d.color; });
+      .select("rect")
+      .style("fill", function (d) { return d.color; });
     }
   });
 
