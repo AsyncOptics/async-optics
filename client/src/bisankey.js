@@ -3,7 +3,8 @@ d3.biHiSankey = function() {
   let biHiSankey = {},
     nodeWidth = 24,
     nodeSpacing = 5,
-    linkSpacing = 0,//5,
+    linkSpacing = 3,
+    linkThicknessFactor = 10,
     arrowheadScaleFactor = 0, // Specifies the proportion of a link's stroke width to be allowed for the marker at the end of the link.
     size = [1, 1], // default to one pixel by one pixel
     nodes = [],
@@ -360,7 +361,7 @@ d3.biHiSankey = function() {
 
     function calculateLinkThickness() {
       links.forEach(function (link) {
-        link.thickness = link.value * yScaleFactor / 7;
+        link.thickness = link.value * yScaleFactor / linkThicknessFactor;
       });
     }
 
@@ -602,6 +603,11 @@ d3.biHiSankey = function() {
   biHiSankey.linkSpacing = function (_) {
     if (!arguments.length) { return linkSpacing; }
     linkSpacing = +_;
+    return biHiSankey;
+  };
+
+  biHiSankey.linkThicknessFactor = function (_) {
+    linkThicknessFactor = _;
     return biHiSankey;
   };
 
