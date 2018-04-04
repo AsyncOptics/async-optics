@@ -1,5 +1,6 @@
 const hasSeen = {};
 let newEventArray;
+
 socket.on('funcInfo', data => {
   const needToRefresh = parseData(data);
   const chartDomElementId = "#chart";
@@ -7,9 +8,6 @@ socket.on('funcInfo', data => {
      scaleDuration();
      const nodeDataArray = nodeData(flatData);
      const linkDataArray = linkData(flatData);
-     // console.log('flat Data', flatData);
-     // console.log('nodeDataArray', nodeDataArray)
-     // console.log('linkDataArray', linkDataArray)
      biHiSankey.nodeWidth(70)
                .nodeSpacing(10)
                .linkSpacing(5)
@@ -51,7 +49,6 @@ socket.on('funcInfo', data => {
 function nodeData(flatData) {
  const nodeDataArray = [];
  flatData.forEach((funcInfoNode) => {
-   // console.log(funcInfoNode.duration, funcInfoNode.type);
    const nodeObj = {
      type: funcInfoNode.type,
      id: funcInfoNode.asyncId,
@@ -125,14 +122,14 @@ function highlightNewEvent() {
 
 let svg, tooltip, biHiSankey, path, defs, colorScale, highlightColorScale, isTransitioning;
 
-var OPACITY = {
-    NODE_DEFAULT: 0.9,
-    NODE_FADED: 0.1,
-    NODE_HIGHLIGHT: 1,
-    LINK_DEFAULT: 0.6,
-    LINK_FADED: 0.05,
-    LINK_HIGHLIGHT: 0.9
-  },
+let OPACITY = {
+      NODE_DEFAULT: 0.9,
+      NODE_FADED: 0.1,
+      NODE_HIGHLIGHT: 1,
+      LINK_DEFAULT: 0.6,
+      LINK_FADED: 0.05,
+      LINK_HIGHLIGHT: 0.9
+    },
   TYPES = ["Solution", "Financial_Product", "Function", "Module", "Component", "Interface"],
   TYPE_COLORS = ["#ffd644", "#6cfff9", "#30ff2c", "#ee74ff", "#ccff43", "#ff7d63"],
   TYPE_HIGHLIGHT_COLORS = ["#ffd644", "#6cfff9", "#30ff2c", "#ee74ff", "#ccff43", "#ff7d63"],
@@ -141,8 +138,8 @@ var OPACITY = {
   OUTFLOW_COLOR = "#6cfff9",
   NODE_WIDTH = 20,
   COLLAPSER = {
-    RADIUS: NODE_WIDTH,
-    SPACING: 2
+    RADIUS: NODE_WIDTH*0.8,
+    SPACING: 3
   },
   OUTER_MARGIN = 10,
   MARGIN = {
@@ -157,20 +154,10 @@ var OPACITY = {
   LAYOUT_INTERATIONS = 10,
   REFRESH_INTERVAL = 7000;
 
-const formatNumber = function (d) {
-  var numberFormat = d3.format(",.0f"); // zero decimal places
-  return "$" + numberFormat(d);
-},
-
-formatFlow = function (d) {
-  var flowFormat = d3.format(",.0f"); // zero decimal places with sign
-  return "$" + flowFormat(Math.abs(d)) + (d < 0 ? " CR" : " DR");
-},
-
 // Used when temporarily disabling user interactions to allow animations to complete
 disableUserInteractions = function (time) {
   isTransitioning = true;
-  setTimeout(function(){
+  setTimeout(function() {
     isTransitioning = false;
   }, time);
 },
@@ -186,8 +173,8 @@ showTooltip = function () {
     .style("left", d3.event.pageX + "px")
     .style("top", d3.event.pageY + 15 + "px")
     .transition()
-      .duration(TRANSITION_DURATION)
-      .style("opacity", 1);
+    .duration(TRANSITION_DURATION)
+    .style("opacity", 1);
 };
 
 
@@ -241,7 +228,7 @@ defs.append("marker")
   .attr("markerHeight", "1")
   .attr("orient", "auto")
   .append("path")
-    .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
+  .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
 defs.append("marker")
   .style("fill", OUTFLOW_COLOR)
@@ -254,7 +241,7 @@ defs.append("marker")
   .attr("markerHeight", "1")
   .attr("orient", "auto")
   .append("path")
-    .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
+  .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
 defs.append("marker")
   .style("fill", INFLOW_COLOR)
@@ -267,7 +254,7 @@ defs.append("marker")
   .attr("markerHeight", "1")
   .attr("orient", "auto")
   .append("path")
-    .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
+  .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
 function update () {
   var link, linkEnter, node, nodeEnter, collapser, collapserEnter;
@@ -584,13 +571,6 @@ function update () {
   collapser.transition()
            .delay(TRANSITION_DURATION)
            .duration(TRANSITION_DURATION)
-           .attr("transform", function (d, i) {
-             return "translate("
-               + (COLLAPSER.RADIUS + i * 2 * (COLLAPSER.RADIUS + COLLAPSER.SPACING))
-               + ","
-               + (-COLLAPSER.RADIUS - OUTER_MARGIN)
-               + ")";
-           });
 
   collapser.on("mouseenter", function (g) {
     if (!isTransitioning) {
