@@ -203,16 +203,15 @@ biHiSankey = d3.biHiSankey();
 /** biHiSankey default properties
  *  Set as many defaults as possible to avoid error for the missing property in further declarations in html file
  */
-biHiSankey
-  .nodeWidth(NODE_WIDTH)
-  .nodeSpacing(10)
-  .linkSpacing(4)
-  .arrowheadScaleFactor(0.5)
-  .size([WIDTH, HEIGHT])
-  .onlyOneTextColor(false)
-  .labelsAlwaysMiddle(true);
+biHiSankey.nodeWidth(NODE_WIDTH)
+          .nodeSpacing(10)
+          .linkSpacing(4)
+          .arrowheadScaleFactor(0.5)
+          .size([WIDTH, HEIGHT])
+          .onlyOneTextColor(false)
+          .labelsAlwaysMiddle(true);
 
-  path = biHiSankey.link().curvature(0.45);
+path = biHiSankey.link().curvature(0.45);
 
   defs = svg.append("defs");
 
@@ -254,6 +253,7 @@ biHiSankey
       .attr("orient", "auto")
       .append("path")
       .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
+
 
 function update () {
   var link, linkEnter, node, nodeEnter, collapser, collapserEnter;
@@ -342,9 +342,64 @@ function update () {
         .style("opacity", OPACITY.NODE_FADED);
   }
 
+  function displayInfoPanel(g) {
+    d3.select("#chart-info").selectAll("*").remove();
+    if (!isTransitioning) {
+      restoreLinksAndNodes();
+      highlightConnected(g);
+      fadeUnconnected(g);
+
+      d3.select(this).select("rect")
+        .style("fill", function (d) {
+          d.color = d.netFlow > 0 ? INFLOW_COLOR : OUTFLOW_COLOR;
+          return d.color;
+        })
+      .style("stroke", function (d) { return d3.rgb(d.color).darker(0.1); })
+      .style("fill-opacity", OPACITY.LINK_DEFAULT);
+
+      let parentPanel = d3.select("#chart-info")
+                          .selectAll("#chartData")
+                          .data([g, ...g.rightLinks])
+                          .enter()
+                          .append("div")
+                          .attr("class", "chart-info")
+                          .style("background-color", function(d){
+                            return d.color ? d.color : d.target.color;
+                          })
+      parentPanel.append("h4").attr("class", "func-name")
+                 .text((d) => { return `${d.type ? d.type : d.target.type}`})
+
+      parentPanel.append("p").attr("class", "func-data")
+                 .text(d => { return `Id: ${d.id ? d.id : d.target.id}`})
+
+      parentPanel.append("p").attr("class", "func-data")
+                 .text((d) => { return `Start time: ${d.startTime ? d.startTime : d.target.startTime} `})
+
+      parentPanel.append("p").attr("class", "func-data")
+                 .text((d) => { return `Time taken to run: ${d.duration ? d.duration : d.target.duration} ms`})
+
+      parentPanel.append("p").attr("class", "stack-expand")
+                 .attr("id", (d) => `err${d.id ? d.id : d.target.id}`)
+                 .text( () => { return `Click to show stack trace`})
+
+      let errors = d3.selectAll(".stack-expand")
+      errors.on("click", (d) => {
+        let errId = `#${d3.event.target.id}`
+        if(!d.errorShown){
+          d.errorShown = true;
+          d3.select(errId).append("p").attr("class", "stack-data")
+            .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
+        } else {
+          d3.select(errId).select('.stack-data').remove()
+          d.errorShown = false;
+        }
+      })
+    }
+  }
+
   link = svg.select("#links")
             .selectAll("path.link")
-            .data(biHiSankey.visibleLinks(), function (d) { return d.id; });
+            .data(biHiSankey.visibleLinks(), function(d) { return d.id; });
 
   link.transition()
       .duration(TRANSITION_DURATION)
@@ -401,24 +456,19 @@ function update () {
            .attr("stroke-width", function (d) {return Math.max(1, d.thickness);})
            .style("opacity", OPACITY.LINK_DEFAULT);
 
-
   node = svg.select("#nodes").selectAll(".node")
-            .data(biHiSankey.collapsedNodes(), function (d) { return d.id; });
-
+            .data(biHiSankey.collapsedNodes(), function(d) { return d.id; });
 
   node.transition()
       .duration(TRANSITION_DURATION)
       .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
       .style("opacity", OPACITY.NODE_DEFAULT)
       .select("rect")
-      .style("fill", function(d) {
-        d.color = colorScale(d.type.replace(/ .*/, ""));
-        return d.color;})
+      .style("fill", function(d) { return colorScale(d.type.replace(/ .*/, "")); })
       .style("stroke", function(d) { return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1); })
       .attr("stroke-width", "1px")
       .attr("height", function(d) { return d.height; })
       .attr("width", biHiSankey.nodeWidth());
-
 
   node.exit()
       .transition()
@@ -464,68 +514,21 @@ function update () {
               }
             });
 
-  node.on("mouseenter", function (g) {
-    d3.select("#chart-info").selectAll("*").remove();
-    if (!isTransitioning) {
-      restoreLinksAndNodes();
-      highlightConnected(g);
-      fadeUnconnected(g);
 
-      d3.select(this).select("rect")
-        .style("fill", function (d) {
-          d.color = d.netFlow > 0 ? INFLOW_COLOR : OUTFLOW_COLOR;
-          return d.color;
-        })
-      .style("stroke", function (d) { return d3.rgb(d.color).darker(0.1); })
-      .style("fill-opacity", OPACITY.LINK_DEFAULT);
 
-      let parentPanel = d3.select("#chart-info")
-                          .selectAll("#chartData")
-                          .data([g, ...g.rightLinks])
-                          .enter()
-                          .append("div")
-                          .attr("class", "chart-info")
-                          .style("background-color", function(d){
-                            return d.color ? d.color : d.target.color;
-                          })
-      parentPanel.append("h4").attr("class", "func-name")
-                 .text((d) => { return `${d.type ? d.type : d.target.type}`})
 
-      parentPanel.append("p").attr("class", "func-data")
-                 .text(d => { return `Id: ${d.id ? d.id : d.target.id}`})
+  node.on("mouseenter", displayInfoPanel);
 
-      parentPanel.append("p").attr("class", "func-data")
-                 .text((d) => { return `Start time: ${d.startTime ? d.startTime : d.target.startTime} `})
+  node.on("mouseleave", function() { if (!isTransitioning) restoreLinksAndNodes(); });
 
-      parentPanel.append("p").attr("class", "func-data")
-                 .text((d) => { return `Time taken to run: ${d.duration ? d.duration : d.target.duration} ms`})
+  node.on("click", showHideChildren);
 
-      parentPanel.append("p").attr("class", "stack-expand")
-                 .attr("id", (d) => `err${d.id ? d.id : d.target.id}`)
-                 .text( () => { return `Click to show stack trace`})
+  nodeEnter.on("mouseenter", displayInfoPanel);
 
-      let errors = d3.selectAll(".stack-expand")
-      errors.on("click", (d) => {
-        let errId = `#${d3.event.target.id}`
-        if(!d.errorShown){
-          d.errorShown = true;
-          d3.select(errId).append("p").attr("class", "stack-data")
-            .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
-        } else {
-          d3.select(errId).select('.stack-data').remove()
-          d.errorShown = false;
-        }
-      })
-    }
-  });
+  nodeEnter.on("mouseleave", function() { if (!isTransitioning) restoreLinksAndNodes(); });
 
-  node.on("mouseleave", function () {
-    if (!isTransitioning) {
-      restoreLinksAndNodes();
-    }
-  });
+  nodeEnter.on("click", showHideChildren)
 
-  node.on("click", showHideChildren)
 
   // add in the text for the nodes
   node.filter(function (d) { return d.value !== 0; })
