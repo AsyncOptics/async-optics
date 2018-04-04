@@ -575,78 +575,6 @@ function update () {
     }
 });
 
-  nodeEnter.on("mouseenter", function (g) {
-    d3.select("#chart-info").selectAll("*").remove();
-    if (!isTransitioning) {
-      restoreLinksAndNodes();
-      highlightConnected(g);
-      fadeUnconnected(g);
-
-      d3.select(this).select("rect")
-        .style("fill", function (d) {
-          d.color = d.netFlow > 0 ? INFLOW_COLOR : OUTFLOW_COLOR;
-          return d.color;
-        })
-      .style("stroke", function (d) { return d3.rgb(d.color).darker(0.1); })
-      .style("fill-opacity", OPACITY.LINK_DEFAULT);
-
-      // tooltip
-      // .style("left", g.x + MARGIN.LEFT + 100 + "px")
-      // .style("top", g.y + g.height + MARGIN.TOP + 15 + "px")
-      // .transition()
-      // .duration(TRANSITION_DURATION)
-      // .style("opacity", 1).select(".value")
-      // .text(() => {
-      //   let additionalInstructions = g.children.length ? "\n(Double click to expand)" : "";
-      //   return g.name + "\n Duration: " + g.duration + "\n ID: " + g.id + "\n Start Time: " + g.startTime + "\n Errors: " + g.errMessage ;
-      // });
-
-      var parentPanel = d3.select("#chart-info")
-                          .selectAll("#chartData")
-                          .data([g, ...g.rightLinks])
-                          .enter()
-                          .append("div")
-                          .attr("class", "chart-info")
-                          .style("background-color", function(d){
-                            return d.color ? d.color : d.target.color;
-                          })
-      parentPanel.append("h4").attr("class", "func-name")
-                 .text((d) => { return `${d.type ? d.type : d.target.type}`})
-
-      parentPanel.append("p").attr("class", "func-data")
-                 .text(d => { return `Id: ${d.id ? d.id : d.target.id}`})
-
-      parentPanel.append("p").attr("class", "func-data")
-                 .text((d) => { return `Start time: ${d.startTime ? d.startTime : d.target.startTime}`})
-
-      parentPanel.append("p").attr("class", "func-data")
-                 .text((d) => { return `Time taken to run: ${d.duration ? d.duration : d.target.duration} ms`})
-
-      parentPanel.append("p").attr("class", "stack-expand")
-                 .attr("id", (d) => `err${d.id ? d.id : d.target.id}`)
-                 .text( () => { return `Click to show stack trace`})
-
-      let errors = d3.selectAll(".stack-expand")
-      errors.on("click", (d) => {
-              // console.log(d3.event.target.id)
-        let errId = `#${d3.event.target.id}`
-        if(!d.errorShown){
-          d.errorShown = true;
-          // errors.select(errId)
-          d3.select(errId).append("p").attr("class", "stack-data")
-            .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
-          } else {
-            d3.select(errId).select('.stack-data').remove()
-            d.errorShown = false;
-          }
-      })
-
-      // parentPanel.append("p").attr("class", "func-data")
-      //          .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
-
-    }
-});
-
   node.on("mouseleave", function () {
     if (!isTransitioning) {
       hideTooltip();
@@ -656,8 +584,6 @@ function update () {
   });
 
   node.on("click", showHideChildren);
-
-  nodeEnter.on("click", showHideChildren);
 
   // add in the text for the nodes
   node
