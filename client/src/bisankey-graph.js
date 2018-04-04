@@ -323,7 +323,6 @@ function update () {
       restoreLinksAndNodes();
       highlightConnected(g);
       fadeUnconnected(g);
-
       d3.select(this).select("rect")
         .style("fill", function (d) {
           d.color = d.netFlow > 0 ? INFLOW_COLOR : OUTFLOW_COLOR;
@@ -339,9 +338,10 @@ function update () {
                           .enter()
                           .append("div")
                           .attr("class", "chart-info")
-                          .style("background-color", function(d){
+                          .style("background-color", function(d) {
                             return d.color ? d.color : d.target.color;
                           })
+
       parentPanel.append("h4").attr("class", "func-name")
                  .text((d) => { return `${d.type ? d.type : d.target.type}`})
 
@@ -450,7 +450,10 @@ function update () {
       .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
       .style("opacity", OPACITY.NODE_DEFAULT)
       .select("rect")
-      .style("fill", function(d) { return colorScale(d.type.replace(/ .*/, "")); })
+      .style("fill", function(d) {
+        d.color = colorScale(d.type.replace(/ .*/, ""));
+        return d.color;
+      })
       .style("stroke", function(d) { return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1); })
       .attr("stroke-width", "1px")
       .attr("height", function(d) { return d.height; })
@@ -485,7 +488,10 @@ function update () {
            .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
 
   nodeEnter.append("rect")
-           .style("fill", function(d) { return colorScale(d.type.replace(/ .*/, "")); })
+           .style("fill", function(d) {
+             d.color = colorScale(d.type.replace(/ .*/, ""));
+             return d.color;
+           })
            .style("stroke", function(d) {return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1);})
            .style("stroke-width", "1px")
            .attr("height", function(d) { return d.height; })
