@@ -1,4 +1,3 @@
-
 const hasSeen = {};
 let newEventArray;
 socket.on('funcInfo', data => {
@@ -14,6 +13,7 @@ socket.on('funcInfo', data => {
      biHiSankey.nodeWidth(70)
                .nodeSpacing(10)
                .linkSpacing(5)
+               .linkThicknessFactor(6)
                .size([2200, 1100])
                .onlyOneTextColor(false)
                .labelsAlwaysMiddle(true)
@@ -21,10 +21,13 @@ socket.on('funcInfo', data => {
                .links(linkDataArray)
                .initializeNodes(function (node) {
                  node.state = node.parent ? "contained" : "collapsed";
-               })
+               }) // collapsed means showing that node, contained means hiding the node
                .layout(LAYOUT_INTERATIONS);
     disableUserInteractions(2 * TRANSITION_DURATION);
     update();
+    highlightNewEvent();
+  }
+});
     // d3.select("#func-panel").selectAll("*").remove()
     // var packageData = d3.select("#func-panel")
     //                     .selectAll("#funcData")
@@ -43,36 +46,6 @@ socket.on('funcInfo', data => {
     //            .text((d) => { return `time taken to run: ${d.target.duration} ms`})
     // packageData.append("p").attr("class", "package-data")
     //            .text((d) => { return `${d.target.errMessage}`})
-    var funcData = d3.select("#nodes")
-                     .selectAll(".node")
-
-    newEventArray.forEach((event) => {
-      funcData.filter((d) => {
-        if(d.id === event.target.id){
-          d.isNew = true
-          return d.id === event.target.id
-        }
-      }).select("rect").style("stroke", "white")
-    })
-    funcData.on("mouseenter", (d) => {
-      if(d.isNew){
-        newEventArray.forEach((event) => {
-          funcData.filter((d) => {
-            return d.id === event.target.id
-          }).select("rect").style("opacity", .25)
-        })
-      }
-    })
-
-    funcData.on("mouseleave", () => {
-      newEventArray.forEach((event) => {
-        funcData.filter((d) => {
-          return d.id === event.target.id
-        }).select("rect").style("opacity", 1)
-      });
-    });
-  }
-});
 
 
 function nodeData(flatData) {
@@ -114,10 +87,39 @@ function linkData(flatData) {
     linkDataArray.push(linkObj);
   }
  });
-
  return linkDataArray;
 }
 
+function highlightNewEvent() {
+  let funcData = d3.select("#nodes")
+                   .selectAll(".node")
+
+  newEventArray.forEach((event) => {
+    funcData.filter((d) => {
+      if(d.id === event.target.id){
+        d.isNew = true
+        return d.id === event.target.id
+      }
+    }).select("rect").style("stroke", "white")
+  })
+  funcData.on("mouseenter", (d) => {
+    if(d.isNew){
+      newEventArray.forEach((event) => {
+        funcData.filter((d) => {
+          return d.id === event.target.id
+        }).select("rect").style("opacity", .25)
+      })
+    }
+  })
+
+  funcData.on("mouseleave", () => {
+    newEventArray.forEach((event) => {
+      funcData.filter((d) => {
+        return d.id === event.target.id
+      }).select("rect").style("opacity", 1)
+    });
+  });
+}
 
 // https://github.com/northam/styled_sankey/blob/master/bihisankey.app.js
 
@@ -280,27 +282,33 @@ function update () {
   }
 
   function containChildren(node) {
-    node.children.forEach(function (child) {
-      child.state = "contained";
-      child.parent = this;
-      child._parent = null;
-      containChildren(child);
-    }, node);
+    node.state = "contained";
+    const trigger = node.trigger;
+    node.connectedNodes.forEach(function(child) {
+      if (trigger !== child.id) {
+        containChildren(child)
+      }
+    });
   }
 
   function expand(node) {
     node.state = "expanded";
-    node.children.forEach(function (child) {
-      child.state = "collapsed";
-      child._parent = this;
-      child.parent = null;
-      containChildren(child);
-    }, node);
+    const trigger = node.trigger;
+    node.connectedNodes.forEach(function(child) {
+      if (trigger !== child.id) {
+        containChildren(child);   //hide all children
+      }
+    });
   }
 
   function collapse(node) {
     node.state = "collapsed";
-    containChildren(node);
+    const trigger = node.trigger;
+    node.connectedNodes.forEach(function(child) {
+      if (trigger !== child.id) {
+        collapse(child)
+      }
+    });
   }
 
   function restoreLinksAndNodes() {
@@ -321,17 +329,17 @@ function update () {
         .style("fill-opacity", OPACITY.NODE_DEFAULT);
 
     node.filter(function (n) { return n.state === "collapsed"; })
-      .transition()
+        .transition()
         .duration(TRANSITION_DURATION)
         .style("opacity", OPACITY.NODE_DEFAULT);
   }
 
   function showHideChildren(node) {
-    console.log(node, 'clicked' )
+    // console.log(node, 'clicked' )
     disableUserInteractions(2 * TRANSITION_DURATION);
     hideTooltip();
-    if (node.state === "collapsed") expand(node);
-    else collapse(node);
+    if (node.state === "collapsed") expand(node);  //to collaspe nodes, change state to expanded
+    else collapse(node); //to collapse nodes, change state to collapsed
 
     biHiSankey.relayout();
     update();
@@ -341,14 +349,14 @@ function update () {
 
   function highlightConnected(g) {
     link.filter(function (d) { return d.source === g; })
-      .style("marker-end", function () { return 'url(#arrowHeadInflow)'; })
-      .style("stroke", OUTFLOW_COLOR)
-      .style("opacity", OPACITY.LINK_DEFAULT);
+        .style("marker-end", function () { return 'url(#arrowHeadInflow)'; })
+        .style("stroke", OUTFLOW_COLOR)
+        .style("opacity", OPACITY.LINK_DEFAULT);
 
     link.filter(function (d) { return d.target === g; })
-      .style("marker-end", function () { return 'url(#arrowHeadOutlow)'; })
-      .style("stroke", INFLOW_COLOR)
-      .style("opacity", OPACITY.LINK_DEFAULT);
+        .style("marker-end", function () { return 'url(#arrowHeadOutlow)'; })
+        .style("stroke", INFLOW_COLOR)
+        .style("opacity", OPACITY.LINK_DEFAULT);
   }
 
   function fadeUnconnected(g) {
@@ -370,92 +378,81 @@ function update () {
             .data(biHiSankey.visibleLinks(), function (d) { return d.id; });
 
   link.transition()
-    .duration(TRANSITION_DURATION)
-    .attr("stroke-width", function (d) {return Math.max(1, d.thickness); })
-    .attr("d", path)
-    .style("opacity", OPACITY.LINK_DEFAULT);
+      .duration(TRANSITION_DURATION)
+      .attr("stroke-width", function (d) {return Math.max(1, d.thickness); })
+      .attr("d", path)
+      .style("opacity", OPACITY.LINK_DEFAULT);
 
 
   link.exit().remove();
 
 
   linkEnter = link.enter().append("path")
-    .attr("class", "link")
-    .style("fill", "none");
+                  .attr("class", "link")
+                  .style("fill", "none");
 
   linkEnter.on('mouseenter', function (d) {
     if (!isTransitioning) {
-      showTooltip().select(".value").text(function () {
+      showTooltip().select(".value").text(function() {
         if (d.direction > 0) {
-          return d.source.name + " -> " + d.target.name; /* + "\n" + formatNumber(d.value);*/
+          return d.source.name + " -> " + d.target.name;
         }
-        return d.target.name + " <- " + d.source.name; /* + "\n" + formatNumber(d.value);*/
+        return d.target.name + " <- " + d.source.name;
       });
 
       d3.select(this)
         .style("stroke", LINK_COLOR)
         .transition()
-          .duration(TRANSITION_DURATION / 2)
-          .style("opacity", OPACITY.LINK_HIGHLIGHT);
+        .duration(TRANSITION_DURATION / 2)
+        .style("opacity", OPACITY.LINK_HIGHLIGHT);
     }
   });
 
   linkEnter.on('mouseleave', function () {
     if (!isTransitioning) {
       hideTooltip();
-
       d3.select(this)
         .style("stroke", LINK_COLOR)
         .transition()
-          .duration(TRANSITION_DURATION / 2)
-          .style("opacity", OPACITY.LINK_DEFAULT);
+        .duration(TRANSITION_DURATION / 2)
+        .style("opacity", OPACITY.LINK_DEFAULT);
     }
   });
 
   linkEnter.sort(function (a, b) { return b.thickness - a.thickness; })
-    .classed("leftToRight", function (d) {
-      return d.direction > 0;
-    })
-    .classed("rightToLeft", function (d) {
-      return d.direction < 0;
-    })
-    .style("marker-end", function () {
-      return 'url(#arrowHead)';
-    })
-    .style("stroke", LINK_COLOR)
-    .style("opacity", 0)
-    .transition()
-      .delay(TRANSITION_DURATION)
-      .duration(TRANSITION_DURATION)
-      .attr("d", path)
-      .attr("stroke-width", function (d) {
-        // console.log('d.thickness', d.thickness)
-        return Math.max(1, d.thickness);
-      })
-      .style("opacity", OPACITY.LINK_DEFAULT);
+           .classed("leftToRight", function(d) {return d.direction > 0;})
+           .classed("rightToLeft", function(d) {return d.direction < 0;})
+           .style("marker-end", function() {return 'url(#arrowHead)';})
+           .style("stroke", LINK_COLOR)
+           .style("opacity", 0)
+           .transition()
+           .delay(TRANSITION_DURATION)
+           .duration(TRANSITION_DURATION)
+           .attr("d", path)
+           .attr("stroke-width", function (d) {return Math.max(1, d.thickness);})
+           .style("opacity", OPACITY.LINK_DEFAULT);
 
 
   node = svg.select("#nodes").selectAll(".node")
-      .data(biHiSankey.collapsedNodes(), function (d) { return d.id; });
+            .data(biHiSankey.collapsedNodes(), function (d) { return d.id; });
 
 
   node.transition()
-    .duration(TRANSITION_DURATION)
-    .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
-    .style("opacity", OPACITY.NODE_DEFAULT)
-    .select("rect")
-      .style("fill", function (d) {
+      .duration(TRANSITION_DURATION)
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+      .style("opacity", OPACITY.NODE_DEFAULT)
+      .select("rect")
+      .style("fill", function(d) {
         d.color = colorScale(d.type.replace(/ .*/, ""));
-        return d.color;
-      })
-      .style("stroke", function (d) { return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1); })
-      .style("stroke-width", "1px")
-      .attr("height", function (d) { return d.height; })
+        return d.color;})
+      .style("stroke", function(d) { return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1); })
+      .attr("stroke-width", "1px")
+      .attr("height", function(d) { return d.height; })
       .attr("width", biHiSankey.nodeWidth());
 
 
   node.exit()
-    .transition()
+      .transition()
       .duration(TRANSITION_DURATION)
       .attr("transform", function (d) {
         var collapsedAncestor, endX, endY;
@@ -484,16 +481,16 @@ function update () {
       .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
 
   nodeEnter.append("rect")
-    .style("fill", function (d) {
-      d.color = colorScale(d.type.replace(/ .*/, ""));
-      return d.color;
-    })
-    .style("stroke", function (d) {
-      return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1);
-    })
-    .style("stroke-width", "1px")
-    .attr("height", function (d) { return d.height; })
-    .attr("width", biHiSankey.nodeWidth());
+           .style("fill", function(d) {
+             d.color = colorScale(d.type.replace(/ .*/, ""));
+             return d.color;
+           })
+           .style("stroke", function(d) {
+             return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1);
+           })
+           .style("stroke-width", "1px")
+           .attr("height", function(d) { return d.height; })
+           .attr("width", biHiSankey.nodeWidth());
 
   nodeEnter.append("foreignObject")
            .append("xhtml:text")
@@ -511,26 +508,23 @@ function update () {
       fadeUnconnected(g);
 
       d3.select(this).select("rect")
-        .style("fill", function (d) {
+        .style("fill", function(d) {
           d.color = d.netFlow > 0 ? INFLOW_COLOR : OUTFLOW_COLOR;
           return d.color;
         })
-        .style("stroke", function (d) {
-          return d3.rgb(d.color).darker(0.1);
-        })
+        .style("stroke", function(d) {return d3.rgb(d.color).darker(0.1);})
         .style("fill-opacity", OPACITY.LINK_DEFAULT);
 
       tooltip
         .style("left", g.x + MARGIN.LEFT + "px")
         .style("top", g.y + g.height + MARGIN.TOP + 15 + "px")
         .transition()
-          .duration(TRANSITION_DURATION)
-          .style("opacity", 1).select(".value")
-          .text(function () {
-            var additionalInstructions = g.children.length ? "\n(Double click to expand)" : "";
-            /*return g.name + "\nNet flow: " + formatFlow(g.netFlow) + additionalInstructions;*/
-            return g.name + g.errMessage;
-          });
+        .duration(TRANSITION_DURATION)
+        .style("opacity", 1).select(".value")
+        .text(function () {
+          var additionalInstructions = g.children.length ? "\n(Double click to expand)" : "";
+          return g.name + g.errMessage;
+        });
     }
   });
 
@@ -545,56 +539,58 @@ function update () {
 
   // add in the text for the nodes
   node
-  .filter(function (d) { return d.value !== 0; })
-  .select("text")
+    .filter(function (d) { return d.value !== 0; })
+    .select("text")
     .attr("x", biHiSankey.labelsAlwaysMiddle() ? biHiSankey.nodeWidth()/2 : -6)
     .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
     .attr("dy", ".35em")
     .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
     .text(function (d) { return d.name; });
+
   if (!biHiSankey.onlyOneTextColor())
-  node.filter(function (d) { return d.value !== 0; })
-    .select("text")
-    .style("fill", function (d) { return colorScale(d.type.replace(/ .*/, "")); });
+    node.filter(function (d) { return d.value !== 0; })
+        .select("text")
+        .style("fill", function (d) { return colorScale(d.type.replace(/ .*/, "")); });
+
   if (!biHiSankey.labelsAlwaysMiddle())
-  node.filter(function (d) { return d.value !== 0; })
-    .select("text")
-    .filter(function (d) { return d.x < biHiSankey.nodeWidth() / 2; })
-    .attr("x", 6 + biHiSankey.nodeWidth())
-    .attr("text-anchor", "start");
+    node.filter(function (d) { return d.value !== 0; })
+        .select("text")
+        .filter(function (d) { return d.x < biHiSankey.nodeWidth() / 2; })
+        .attr("x", 6 + biHiSankey.nodeWidth())
+        .attr("text-anchor", "start");
 
   collapser = svg.select("#collapsers").selectAll(".collapser")
-    .data(biHiSankey.expandedNodes(), function (d) { return d.id; });
+                 .data(biHiSankey.expandedNodes(), function (d) { return d.id; });
 
   collapserEnter = collapser.enter().append("g").attr("class", "collapser");
 
   collapserEnter.append("circle")
-    .attr("r", COLLAPSER.RADIUS)
-    .style("fill", function (d) {
-      d.color = colorScale(d.type.replace(/ .*/, ""));
-      return d.color;
-    });
+                .attr("r", COLLAPSER.RADIUS)
+                .style("fill", function (d) {
+                  d.color = colorScale(d.type.replace(/ .*/, ""));
+                  return d.color;
+                });
 
   collapserEnter.style("opacity", OPACITY.NODE_DEFAULT)
-                .attr("transform", function (d) {
+                .attr("transform", function(d) {
                   return "translate(" + (d.x + d.width / 2) + "," + (d.y + COLLAPSER.RADIUS) + ")";
                 });
 
   collapserEnter.on("click", showHideChildren );
 
   collapser.select("circle")
-    .attr("r", COLLAPSER.RADIUS);
+           .attr("r", COLLAPSER.RADIUS);
 
   collapser.transition()
-    .delay(TRANSITION_DURATION)
-    .duration(TRANSITION_DURATION)
-    .attr("transform", function (d, i) {
-      return "translate("
-        + (COLLAPSER.RADIUS + i * 2 * (COLLAPSER.RADIUS + COLLAPSER.SPACING))
-        + ","
-        + (-COLLAPSER.RADIUS - OUTER_MARGIN)
-        + ")";
-    });
+           .delay(TRANSITION_DURATION)
+           .duration(TRANSITION_DURATION)
+           .attr("transform", function (d, i) {
+             return "translate("
+               + (COLLAPSER.RADIUS + i * 2 * (COLLAPSER.RADIUS + COLLAPSER.SPACING))
+               + ","
+               + (-COLLAPSER.RADIUS - OUTER_MARGIN)
+               + ")";
+           });
 
   collapser.on("mouseenter", function (g) {
     if (!isTransitioning) {
@@ -609,12 +605,11 @@ function update () {
       d3.select(this)
         .style("opacity", OPACITY.NODE_HIGHLIGHT)
         .select("circle")
-          .style("fill", highlightColor);
+        .style("fill", highlightColor);
 
-      node.filter(function (d) {
-        return d.ancestors.indexOf(g) >= 0;
-      }).style("opacity", OPACITY.NODE_HIGHLIGHT)
-        .select("rect")
+      node.filter(function (d) {return d.ancestors.indexOf(g) >= 0;})
+          .style("opacity", OPACITY.NODE_HIGHLIGHT)
+          .select("rect")
           .style("fill", highlightColor);
     }
   });
@@ -627,10 +622,9 @@ function update () {
         .select("circle")
         .style("fill", function (d) { return d.color; });
 
-      node.filter(function (d) {
-        return d.ancestors.indexOf(g) >= 0;
-      }).style("opacity", OPACITY.NODE_DEFAULT)
-        .select("rect")
+      node.filter(function(d) {return d.ancestors.indexOf(g) >= 0;})
+          .style("opacity", OPACITY.NODE_DEFAULT)
+          .select("rect")
           .style("fill", function (d) { return d.color; });
     }
   });

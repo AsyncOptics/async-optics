@@ -49,7 +49,7 @@ let y = d3.scaleSqrt()
             .range([0, radius]);
 
 const color = d3.scaleOrdinal(["#ffd644", "#6cfff9", "#30ff2c", "#ee74ff", "#ccff43", "#ff7d63"]);
-console.log('colorss', d3.schemeCategory20c)
+// console.log('colorss', d3.schemeCategory20c)
 
 const partition = d3.partition();
 
