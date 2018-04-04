@@ -29,7 +29,6 @@ io.on('connection', (socket) => {
 
   if(io._asyncInfo.length !== 0) {
   	socket.emit('funcInfo', io._asyncInfo);
-    io._asyncInfo = [];
   }
   socket.on('disconnect', (reason) => {
     process._rawDebug('Socket Disonnect', socket.id);

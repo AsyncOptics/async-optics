@@ -5,6 +5,7 @@ const ioController = {};
 let asyncInfoEmit = [];
 let sendInfoAnyway;
 ioController.sendInfo = function(funcInfoNode) {
+  io._asyncInfo.push(funcInfoNode);
   if(io._hasConnection) {
     asyncInfoEmit.push(funcInfoNode);
     if (asyncInfoEmit.length > 59) {
@@ -16,7 +17,7 @@ ioController.sendInfo = function(funcInfoNode) {
     }
   } else {
     // process._rawDebug('keep func info');
-    io._asyncInfo.push(funcInfoNode);
+    
   }
 }
 

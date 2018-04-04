@@ -2,10 +2,12 @@ const MIN_DURATION = 20;
 let lastLength;
 const hasSeen = {};
 let newEventArray;
+let timer;
 socket.on('funcInfo', data => {
   const needToRefresh = parseData(data);
   const chartDomElementId = "#chart";
   if (needToRefresh) {
+     clearTimeout(timer);
      const nodeDataArray = nodeData(flatData);
      const linkDataArray = linkData(flatData);
      biHiSankey.nodeWidth(40)
@@ -40,39 +42,54 @@ socket.on('funcInfo', data => {
     // packageData.append("p").attr("class", "package-data")
     //            .text((d) => { return `${d.target.errMessage}`})
     var funcData = d3.select("#nodes")
-                        .selectAll(".node")
-                        
-        newEventArray.forEach((event) => {
-          funcData.filter((d) => {
-            if(d.id === event.target.id){
-              d.isNew = true
-              return d.id === event.target.id
-            }
-          }).select("rect").style("stroke", "white")
-        })
-      funcData.on("mouseenter", (d) => {
-        if(d.isNew){
-          newEventArray.forEach((event) => {
-            funcData.filter((d) => {
-              return d.id === event.target.id
-            }).select("rect").style("opacity", .25)
-          })
-        }
-      })
+                     .selectAll(".node")
 
-      funcData.on("mouseleave", () => {
-        newEventArray.forEach((event) => {
-          funcData.filter((d) => {
-            return d.id === event.target.id
-          }).select("rect").style("opacity", 1)
-        })
-      })
+      funcData.filter((d) => {
+        return d.isNew === true
+      }).select("rect")
+        .call(pulse, 750)
+
+      funcData.filter((d) => {
+        return !d.isNew
+      }).select("rect")
+        .transition()
+        .duration(500)
+        .style("stroke-opacity", 1)
+
+    //   funcData.on("mouseenter", (d) => {
+    //     if(d.isNew){
+    //       newEventArray.forEach((event) => {
+    //         funcData.filter((d) => {
+    //           return d.id === event.target.id
+    //         }).select("rect").style("opacity", .25)
+    //       })
+    //     }
+    //   })
+
+    //   funcData.on("mouseleave", () => {
+    //     newEventArray.forEach((event) => {
+    //       funcData.filter((d) => {
+    //         return d.id === event.target.id
+    //       }).select("rect").style("opacity", 1)
+    //     })
+    //   })
+    }
+    
+
+    function pulse(path, duration, end){
+           path.transition()
+            .duration(duration)
+            .style('stroke-opacity', .2)
+            .transition()
+            .style('stroke-opacity', 1)
+          timer = setTimeout(function() { pulse(path, duration); }, duration*2);
     }
 });
 
 
 function nodeData(flatData) {
  const nodeDataArray = [];
+ newEventArray = [];
  flatData.forEach((funcInfoNode) => {
    const nodeObj = {
      type: funcInfoNode.type,
@@ -84,6 +101,13 @@ function nodeData(flatData) {
      resourceInfo: funcInfoNode.resourceInfo,
      name: funcInfoNode.type
    };
+   if(!hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`]){
+      nodeObj.isNew = true
+      hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`] = true
+      newEventArray.push(nodeObj)
+   } else {
+      nodeObj.isNew = false
+   }
    if (!nodeObj.duration) nodeObj.duration = MIN_DURATION;
    nodeDataArray.push(nodeObj);
  });
@@ -92,7 +116,6 @@ function nodeData(flatData) {
 
 function linkData(flatData) {
   const linkDataArray = [];
-  newEventArray = [];
   flatData.forEach((funcInfoNode) => {
    const linkObj = {
      source: funcInfoNode.triggerAsyncId,
@@ -102,12 +125,11 @@ function linkData(flatData) {
 
   if(linkObj.source !== "Node.js core" && linkObj.source) {
     if (!linkObj.value) linkObj.value = MIN_DURATION;
-    console.log(newEventArray)
-    if(!hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`]){
-      newEventArray.push(linkObj)
-      hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`] = true;
-      // console.log('after', hasSeen)
-    }
+    // if(!hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`]){
+    //   newEventArray.push(linkObj)
+    //   hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`] = true;
+    //   // console.log('after', hasSeen)
+    // }
     linkDataArray.push(linkObj);
   }
  });
