@@ -11,7 +11,7 @@ socket.on('funcInfo', data => {
      biHiSankey.nodeWidth(70)
                .nodeSpacing(10)
                .linkSpacing(5)
-               .linkThicknessFactor(6)
+               .linkThicknessFactor(10)
                .size([2200, 1100])
                .onlyOneTextColor(false)
                .labelsAlwaysMiddle(true)
@@ -40,7 +40,6 @@ function pulse(path, duration, end){
 
 function nodeData(flatData) {
  const nodeDataArray = [];
- newEventArray = [];
  flatData.forEach((funcInfoNode) => {
    const nodeObj = {
      type: funcInfoNode.type,
@@ -57,9 +56,8 @@ function nodeData(flatData) {
    if(!hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`]) {
       nodeObj.isNew = true;
       hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`] = true;
-      newEventArray.push(nodeObj);
    } else {
-      nodeObj.isNew = false
+      nodeObj.isNew = false;
    }
    nodeDataArray.push(nodeObj);
  });
@@ -74,12 +72,7 @@ function linkData(flatData) {
      target: funcInfoNode.asyncId,
      value: funcInfoNode.durationScaled
   };
-
   if(linkObj.source !== "Node.js core" && linkObj.source) {
-    // if(!hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`]){
-    //   newEventArray.push(linkObj)
-    //   hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`] = true;
-    // }
     linkDataArray.push(linkObj);
   }
  });
@@ -87,20 +80,18 @@ function linkData(flatData) {
 }
 
 function highlightNewEvent() {
-    var funcData = d3.select("#nodes")
+  const funcData = d3.select("#nodes")
                      .selectAll(".node")
 
-      funcData.filter((d) => {
-        return d.isNew === true
-      }).select("rect")
-        .call(pulse, 750)
+  funcData.filter( (d) => { return d.isNew === true; })
+          .select("rect")
+          .call(pulse, 750)
 
-      funcData.filter((d) => {
-        return !d.isNew
-      }).select("rect")
-        .transition()
-        .duration(500)
-        .style("stroke-opacity", 1)
+  funcData.filter( (d) => { return !d.isNew; })
+          .select("rect")
+          .transition()
+          .duration(500)
+          .style("stroke-opacity", 1)
 }
 
 // https://github.com/northam/styled_sankey/blob/master/bihisankey.app.js
@@ -239,11 +230,8 @@ path = biHiSankey.link().curvature(0.45);
       .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
 
-<<<<<<< HEAD
 function update () {
   let link, linkEnter, node, nodeEnter, collapser, collapserEnter;
-=======
->>>>>>> 52f17b496a43329e8559336a624e01ea62819e59
 
   function containChildren(node) {
     node.state = "contained";
@@ -344,6 +332,7 @@ function update () {
       .style("stroke", function (d) { return d3.rgb(d.color).darker(0.1); })
       .style("fill-opacity", OPACITY.LINK_DEFAULT);
 
+      const infoData = [g, ...g.rightLinks];
       let parentPanel = d3.select("#chart-info")
                           .selectAll("#chartData")
                           .data([g, ...g.rightLinks])
@@ -360,10 +349,21 @@ function update () {
                  .text(d => { return `Id: ${d.id ? d.id : d.target.id}`})
 
       parentPanel.append("p").attr("class", "func-data")
-                 .text((d) => { return `Start time: ${d.startTime ? d.startTime : d.target.startTime} `})
+                 .text((d) => {
+                   return d.target ?
+                     `Start time: ${d.startTime ? d.startTime : d.target.startTime} `
+                    :
+                     `Start time: ${d.startTime ? d.startTime : 'unfinished'} `;
+                 })
 
       parentPanel.append("p").attr("class", "func-data")
-                 .text((d) => { return `Time taken to run: ${d.duration ? d.duration : d.target.duration} ms`})
+                 .text((d) => {
+                   return d.target ?
+                     `Runtime: ${d.duration ? d.duration : d.target.duration} ms`
+                    :
+                     `Runtime: ${d.duration ? d.duration : 'unfinished'} ms`;
+                 })
+
 
       parentPanel.append("p").attr("class", "stack-expand")
                  .attr("id", (d) => `err${d.id ? d.id : d.target.id}`)
@@ -380,7 +380,7 @@ function update () {
           d3.select(errId).select('.stack-data').remove()
           d.errorShown = false;
         }
-      })
+      });
     }
   }
 
@@ -500,49 +500,6 @@ function update () {
               }
             });
 
-<<<<<<< HEAD
-=======
-  node.on("mouseenter", function (g) {
-    d3.select("#chart-info").selectAll("*").remove();
-    if (!isTransitioning) {
-      restoreLinksAndNodes();
-      highlightConnected(g);
-      fadeUnconnected(g);
-
-      d3.select(this).select("rect")
-        .style("fill", function (d) {
-          d.color = d.netFlow > 0 ? INFLOW_COLOR : OUTFLOW_COLOR;
-          return d.color;
-        })
-      .style("stroke", function (d) { return d3.rgb(d.color).darker(0.1); })
-      .style("fill-opacity", OPACITY.LINK_DEFAULT);
-
-      // tooltip
-      // .style("left", g.x + MARGIN.LEFT + 100 + "px")
-      // .style("top", g.y + g.height + MARGIN.TOP + 15 + "px")
-      // .transition()
-      // .duration(TRANSITION_DURATION)
-      // .style("opacity", 1).select(".value")
-      // .text(() => {
-      //   let additionalInstructions = g.children.length ? "\n(Double click to expand)" : "";
-      //   return g.name + "\n Duration: " + g.duration + "\n ID: " + g.id + "\n Start Time: " + g.startTime + "\n Errors: " + g.errMessage ;
-      // });
-
-      var parentPanel = d3.select("#chart-info")
-                          .selectAll("#chartData")
-                          .data([g, ...g.rightLinks])
-                          .enter()
-                          .append("div")
-                          .attr("class", "chart-info")
-                          .style("background-color", function(d){
-                            return d.color ? d.color : d.target.color;
-                          })
-      parentPanel.append("h4").attr("class", "func-name")
-                 .text((d) => { return `${d.type ? d.type : d.target.type}`})
-
-      parentPanel.append("p").attr("class", "func-data")
-                 .text(d => { return `Id: ${d.id ? d.id : d.target.id}`})
->>>>>>> 52f17b496a43329e8559336a624e01ea62819e59
 
 
 
@@ -558,10 +515,6 @@ function update () {
 
   nodeEnter.on("click", showHideChildren)
 
-<<<<<<< HEAD
-=======
-  node.on("click", showHideChildren);
->>>>>>> 52f17b496a43329e8559336a624e01ea62819e59
 
   // add in the text for the nodes
   node.filter(function (d) { return d.value !== 0; })
