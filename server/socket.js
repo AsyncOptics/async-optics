@@ -24,7 +24,8 @@ io.on('connection', (socket) => {
   numOfConnections++;
   io._hasConnection = true;
   // checkIdExist(20);
-  socket.emit('packageInfo',io._hierarchyAggregate);
+  process._rawDebug(io._hierarchyAggregate);
+  socket.emit('packageInfo', io._hierarchyAggregate);
 
 
   if(io._asyncInfo.length !== 0) {

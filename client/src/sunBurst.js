@@ -79,7 +79,9 @@ function click(d) {
       })
     .selectAll("path")
       .attrTween("d", function(d) { return function() { return arc(d); }; });
+
   d3.select("#package-panel").selectAll("*").remove()
+    packageData
     var parent = [d.data]
     var packageData = d3.select("#package-panel")
       .selectAll("#packageData")

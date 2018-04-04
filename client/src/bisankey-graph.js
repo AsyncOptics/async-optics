@@ -164,8 +164,8 @@ disableUserInteractions = function (time) {
 
 hideTooltip = function () {
   return tooltip.transition()
-    .duration(TRANSITION_DURATION)
-    .style("opacity", 0);
+  .duration(TRANSITION_DURATION)
+  .style("opacity", 0);
 },
 
 showTooltip = function () {
@@ -213,11 +213,11 @@ biHiSankey
   .onlyOneTextColor(false)
   .labelsAlwaysMiddle(true);
 
-path = biHiSankey.link().curvature(0.45);
+  path = biHiSankey.link().curvature(0.45);
 
-defs = svg.append("defs");
+  defs = svg.append("defs");
 
-defs.append("marker")
+  defs.append("marker")
   .style("fill", LINK_COLOR)
   .attr("id", "arrowHead")
   .attr("viewBox", "0 0 6 10")
@@ -230,7 +230,7 @@ defs.append("marker")
   .append("path")
   .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
-defs.append("marker")
+  defs.append("marker")
   .style("fill", OUTFLOW_COLOR)
   .attr("id", "arrowHeadInflow")
   .attr("viewBox", "0 0 6 10")
@@ -243,7 +243,7 @@ defs.append("marker")
   .append("path")
   .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
-defs.append("marker")
+  defs.append("marker")
   .style("fill", INFLOW_COLOR)
   .attr("id", "arrowHeadOutlow")
   .attr("viewBox", "0 0 6 10")
@@ -346,19 +346,19 @@ function update () {
         .style("opacity", OPACITY.LINK_DEFAULT);
   }
 
-  function fadeUnconnected(g) {
-    link.filter(function (d) { return d.source !== g && d.target !== g; })
+    function fadeUnconnected(g) {
+      link.filter(function (d) { return d.source !== g && d.target !== g; })
       .style("marker-end", function () { return 'url(#arrowHead)'; })
       .transition()
-        .duration(TRANSITION_DURATION)
-        .style("opacity", OPACITY.LINK_FADED);
+      .duration(TRANSITION_DURATION)
+      .style("opacity", OPACITY.LINK_FADED);
 
-    node.filter(function (d) {
-      return (d.name === g.name) ? false : !biHiSankey.connected(d, g);
-    }).transition()
+      node.filter(function (d) {
+        return (d.name === g.name) ? false : !biHiSankey.connected(d, g);
+      }).transition()
       .duration(TRANSITION_DURATION)
       .style("opacity", OPACITY.NODE_FADED);
-  }
+    }
 
   link = svg.select("#links")
             .selectAll("path.link")
@@ -371,7 +371,7 @@ function update () {
       .style("opacity", OPACITY.LINK_DEFAULT);
 
 
-  link.exit().remove();
+    link.exit().remove();
 
 
   linkEnter = link.enter().append("path")
@@ -387,7 +387,7 @@ function update () {
         return d.target.name + " <- " + d.source.name;
       });
 
-      d3.select(this)
+        d3.select(this)
         .style("stroke", LINK_COLOR)
         .transition()
         .duration(TRANSITION_DURATION / 2)
@@ -453,19 +453,19 @@ function update () {
       .remove();
 
 
-  nodeEnter = node.enter().append("g").attr("class", "node");
+    nodeEnter = node.enter().append("g").attr("class", "node");
 
-  nodeEnter
+    nodeEnter
     .attr("transform", function (d) {
       var startX = d._parent ? d._parent.x : d.x,
-          startY = d._parent ? d._parent.y : d.y;
+      startY = d._parent ? d._parent.y : d.y;
       return "translate(" + startX + "," + startY + ")";
     })
     .style("opacity", 1e-6)
     .transition()
-      .duration(TRANSITION_DURATION)
-      .style("opacity", OPACITY.NODE_DEFAULT)
-      .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+    .duration(TRANSITION_DURATION)
+    .style("opacity", OPACITY.NODE_DEFAULT)
+    .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
 
   nodeEnter.append("rect")
            .style("fill", function(d) {
@@ -479,7 +479,7 @@ function update () {
            .attr("height", function(d) { return d.height; })
            .attr("width", biHiSankey.nodeWidth());
 
-  nodeEnter.append("foreignObject")
+  nodeEnter.append("foreignObject")   // can be deleted?
            .append("xhtml:text")
            .attr("class", "node-type")
            .text(function(d) {
@@ -489,36 +489,84 @@ function update () {
             });
 
   node.on("mouseenter", function (g) {
+    d3.select("#chart-info").selectAll("*").remove();
+
+    console.log('g', g)
     if (!isTransitioning) {
       restoreLinksAndNodes();
       highlightConnected(g);
       fadeUnconnected(g);
 
       d3.select(this).select("rect")
-        .style("fill", function(d) {
+        .style("fill", function (d) {
           d.color = d.netFlow > 0 ? INFLOW_COLOR : OUTFLOW_COLOR;
           return d.color;
         })
-        .style("stroke", function(d) {return d3.rgb(d.color).darker(0.1);})
-        .style("fill-opacity", OPACITY.LINK_DEFAULT);
+      .style("stroke", function (d) { return d3.rgb(d.color).darker(0.1); })
+      .style("fill-opacity", OPACITY.LINK_DEFAULT);
 
-      tooltip
-        .style("left", g.x + MARGIN.LEFT + "px")
-        .style("top", g.y + g.height + MARGIN.TOP + 15 + "px")
-        .transition()
-        .duration(TRANSITION_DURATION)
-        .style("opacity", 1).select(".value")
-        .text(function () {
-          var additionalInstructions = g.children.length ? "\n(Double click to expand)" : "";
-          return g.name + g.errMessage;
-        });
+      // tooltip
+      // .style("left", g.x + MARGIN.LEFT + 100 + "px")
+      // .style("top", g.y + g.height + MARGIN.TOP + 15 + "px")
+      // .transition()
+      // .duration(TRANSITION_DURATION)
+      // .style("opacity", 1).select(".value")
+      // .text(() => {
+      //   let additionalInstructions = g.children.length ? "\n(Double click to expand)" : "";
+      //   return g.name + "\n Duration: " + g.duration + "\n ID: " + g.id + "\n Start Time: " + g.startTime + "\n Errors: " + g.errMessage ;
+      // });
+
+      var parentPanel = d3.select("#chart-info")
+                          .selectAll("#chartData")
+                          .data([g, ...g.rightLinks])
+                          .enter()
+                          .append("div")
+                          .attr("class", "chart-info")
+                          .style("background-color", function(d){
+                            return d.color ? d.color : d.target.color;
+                          })
+      parentPanel.append("h4").attr("class", "func-name")
+                 .text((d) => { return `${d.type ? d.type : d.target.type}`})
+
+      parentPanel.append("p").attr("class", "func-data")
+                 .text(d => { return `Id: ${d.id ? d.id : d.target.id}`})
+
+      parentPanel.append("p").attr("class", "func-data")
+                 .text((d) => { return `Start time: ${d.startTime ? d.startTime : d.target.startTime}`})
+
+      parentPanel.append("p").attr("class", "func-data")
+                 .text((d) => { return `Time taken to run: ${d.duration ? d.duration : d.target.duration} ms`})
+
+      parentPanel.append("p").attr("class", "stack-expand")
+                 .attr("id", (d) => `err${d.id ? d.id : d.target.id}`)
+                 .text( () => { return `Click to show stack trace`})
+
+      let errors = d3.selectAll(".stack-expand")
+      errors.on("click", (d) => {
+              // console.log(d3.event.target.id)
+        let errId = `#${d3.event.target.id}`
+        if(!d.errorShown){
+          d.errorShown = true;
+          // errors.select(errId)
+          d3.select(errId).append("p").attr("class", "stack-data")
+            .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
+          } else {
+            d3.select(errId).select('.stack-data').remove()
+            d.errorShown = false;
+          }
+      })
+
+      // parentPanel.append("p").attr("class", "func-data")
+      //          .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
+
     }
-  });
+});
 
   node.on("mouseleave", function () {
     if (!isTransitioning) {
       hideTooltip();
       restoreLinksAndNodes();
+
     }
   });
 
@@ -575,10 +623,9 @@ function update () {
   collapser.on("mouseenter", function (g) {
     if (!isTransitioning) {
       showTooltip().select(".value")
-        .text(function () {
-          console.log(g)
-          return g.name + "\n(Double click to collapse its children)";
-        });
+      .text(function () {
+        return g.name + "\n(Double click to collapse its children)";
+      });
 
       var highlightColor = highlightColorScale(g.type.replace(/ .*/, ""));
 
