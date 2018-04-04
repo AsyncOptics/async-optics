@@ -19,7 +19,7 @@ const asyncHook = async_hooks.createHook(hooks);
 asyncHook.enable();
 
 let previousTime = Date.now();
-const CHECK_DURATION = 15000;
+const CHECK_DURATION = 5000;
 const activeAsyncProcess = new Map();
 const activeTimeTrack = new Map();
 const idDeleted = [];

@@ -18,8 +18,9 @@ socket.on('funcInfo', data => {
                .nodes(nodeDataArray)
                .links(linkDataArray)
                .initializeNodes(function (node) {
+                 // collapsed means showing that node, contained means hiding the node
                  node.state = node.parent ? "contained" : "collapsed";
-               }) // collapsed means showing that node, contained means hiding the node
+               })
                .layout(LAYOUT_INTERATIONS);
     disableUserInteractions(2 * TRANSITION_DURATION);
     update();
@@ -148,11 +149,10 @@ let OPACITY = {
     BOTTOM: OUTER_MARGIN,
     LEFT: OUTER_MARGIN
   },
-  TRANSITION_DURATION = 400,
+  TRANSITION_DURATION = 200,
   WIDTH = 2300 - MARGIN.LEFT - MARGIN.RIGHT,
   HEIGHT = 1100 - MARGIN.TOP - MARGIN.BOTTOM,
-  LAYOUT_INTERATIONS = 10,
-  REFRESH_INTERVAL = 7000;
+  LAYOUT_INTERATIONS = 10;
 
 // Used when temporarily disabling user interactions to allow animations to complete
 disableUserInteractions = function (time) {
@@ -259,15 +259,6 @@ biHiSankey
 function update () {
   var link, linkEnter, node, nodeEnter, collapser, collapserEnter;
 
-  function dragmove(node) {
-    node.x = Math.max(0, Math.min(WIDTH - node.width, d3.event.x));
-    node.y = Math.max(0, Math.min(HEIGHT - node.height, d3.event.y));
-    d3.select(this).attr("transform", "translate(" + node.x + "," + node.y + ")");
-    biHiSankey.relayout();
-    svg.selectAll(".node").selectAll("rect").attr("height", function (d) { return d.height; });
-    link.attr("d", path);
-  }
-
   function containChildren(node) {
     node.state = "contained";
     const trigger = node.trigger;
@@ -306,13 +297,8 @@ function update () {
         .style("opacity", OPACITY.LINK_DEFAULT);
 
     node.selectAll("rect")
-        .style("fill", function (d) {
-          d.color = colorScale(d.type.replace(/ .*/, ""));
-          return d.color;
-        })
-        .style("stroke", function (d) {
-          return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1);
-        })
+        .style("fill", function (d) { return colorScale(d.type.replace(/ .*/, "")); })
+        .style("stroke", function (d) { return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1); })
         .style("fill-opacity", OPACITY.NODE_DEFAULT);
 
     node.filter(function (n) { return n.state === "collapsed"; })
@@ -322,16 +308,15 @@ function update () {
   }
 
   function showHideChildren(node) {
-    // console.log(node, 'clicked' )
     disableUserInteractions(2 * TRANSITION_DURATION);
-    hideTooltip();
     if (node.state === "collapsed") expand(node);  //to collaspe nodes, change state to expanded
     else collapse(node); //to collapse nodes, change state to collapsed
 
     biHiSankey.relayout();
-    update();
-    link.attr("d", path);
     restoreLinksAndNodes();
+    update();
+    // link.attr("d", path);
+
   }
 
   function highlightConnected(g) {
@@ -346,19 +331,19 @@ function update () {
         .style("opacity", OPACITY.LINK_DEFAULT);
   }
 
-    function fadeUnconnected(g) {
-      link.filter(function (d) { return d.source !== g && d.target !== g; })
-      .style("marker-end", function () { return 'url(#arrowHead)'; })
-      .transition()
-      .duration(TRANSITION_DURATION)
-      .style("opacity", OPACITY.LINK_FADED);
+  function fadeUnconnected(g) {
+    link.filter(function (d) { return d.source !== g && d.target !== g; })
+    .style("marker-end", function () { return 'url(#arrowHead)'; })
+    .transition()
+    .duration(TRANSITION_DURATION)
+    .style("opacity", OPACITY.LINK_FADED);
 
-      node.filter(function (d) {
-        return (d.name === g.name) ? false : !biHiSankey.connected(d, g);
-      }).transition()
-      .duration(TRANSITION_DURATION)
-      .style("opacity", OPACITY.NODE_FADED);
-    }
+    node.filter(function (d) {
+      return (d.name === g.name) ? false : !biHiSankey.connected(d, g);
+    }).transition()
+    .duration(TRANSITION_DURATION)
+    .style("opacity", OPACITY.NODE_FADED);
+  }
 
   link = svg.select("#links")
             .selectAll("path.link")
@@ -453,28 +438,22 @@ function update () {
       .remove();
 
 
-    nodeEnter = node.enter().append("g").attr("class", "node");
+  nodeEnter = node.enter().append("g").attr("class", "node");
 
-    nodeEnter
-    .attr("transform", function (d) {
-      var startX = d._parent ? d._parent.x : d.x,
-      startY = d._parent ? d._parent.y : d.y;
-      return "translate(" + startX + "," + startY + ")";
-    })
-    .style("opacity", 1e-6)
-    .transition()
-    .duration(TRANSITION_DURATION)
-    .style("opacity", OPACITY.NODE_DEFAULT)
-    .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+  nodeEnter.attr("transform", function (d) {
+              const startX = d._parent ? d._parent.x : d.x;
+              const startY = d._parent ? d._parent.y : d.y;
+              return "translate(" + startX + "," + startY + ")";
+            })
+           .style("opacity", 1e-6)
+           .transition()
+           .duration(TRANSITION_DURATION)
+           .style("opacity", OPACITY.NODE_DEFAULT)
+           .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
 
   nodeEnter.append("rect")
-           .style("fill", function(d) {
-             d.color = colorScale(d.type.replace(/ .*/, ""));
-             return d.color;
-           })
-           .style("stroke", function(d) {
-             return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1);
-           })
+           .style("fill", function(d) { return colorScale(d.type.replace(/ .*/, "")); })
+           .style("stroke", function(d) {return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1);})
            .style("stroke-width", "1px")
            .attr("height", function(d) { return d.height; })
            .attr("width", biHiSankey.nodeWidth());
@@ -483,15 +462,13 @@ function update () {
            .append("xhtml:text")
            .attr("class", "node-type")
            .text(function(d) {
-              if(d.sourceLinks.length > 0 || d.leftLinks.length > 0){
+              if(d.sourceLinks.length > 0 || d.leftLinks.length > 0) {
                 return d.name
               }
             });
 
   node.on("mouseenter", function (g) {
     d3.select("#chart-info").selectAll("*").remove();
-
-    console.log('g', g)
     if (!isTransitioning) {
       restoreLinksAndNodes();
       highlightConnected(g);
@@ -505,18 +482,7 @@ function update () {
       .style("stroke", function (d) { return d3.rgb(d.color).darker(0.1); })
       .style("fill-opacity", OPACITY.LINK_DEFAULT);
 
-      // tooltip
-      // .style("left", g.x + MARGIN.LEFT + 100 + "px")
-      // .style("top", g.y + g.height + MARGIN.TOP + 15 + "px")
-      // .transition()
-      // .duration(TRANSITION_DURATION)
-      // .style("opacity", 1).select(".value")
-      // .text(() => {
-      //   let additionalInstructions = g.children.length ? "\n(Double click to expand)" : "";
-      //   return g.name + "\n Duration: " + g.duration + "\n ID: " + g.id + "\n Start Time: " + g.startTime + "\n Errors: " + g.errMessage ;
-      // });
-
-      var parentPanel = d3.select("#chart-info")
+      let parentPanel = d3.select("#chart-info")
                           .selectAll("#chartData")
                           .data([g, ...g.rightLinks])
                           .enter()
@@ -532,7 +498,7 @@ function update () {
                  .text(d => { return `Id: ${d.id ? d.id : d.target.id}`})
 
       parentPanel.append("p").attr("class", "func-data")
-                 .text((d) => { return `Start time: ${d.startTime ? d.startTime : d.target.startTime}`})
+                 .text((d) => { return `Start time: ${d.startTime ? d.startTime : d.target.startTime} `})
 
       parentPanel.append("p").attr("class", "func-data")
                  .text((d) => { return `Time taken to run: ${d.duration ? d.duration : d.target.duration} ms`})
@@ -543,44 +509,35 @@ function update () {
 
       let errors = d3.selectAll(".stack-expand")
       errors.on("click", (d) => {
-              // console.log(d3.event.target.id)
         let errId = `#${d3.event.target.id}`
         if(!d.errorShown){
           d.errorShown = true;
-          // errors.select(errId)
           d3.select(errId).append("p").attr("class", "stack-data")
             .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
-          } else {
-            d3.select(errId).select('.stack-data').remove()
-            d.errorShown = false;
-          }
+        } else {
+          d3.select(errId).select('.stack-data').remove()
+          d.errorShown = false;
+        }
       })
-
-      // parentPanel.append("p").attr("class", "func-data")
-      //          .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
-
     }
-});
+  });
 
   node.on("mouseleave", function () {
     if (!isTransitioning) {
-      hideTooltip();
       restoreLinksAndNodes();
-
     }
   });
 
   node.on("click", showHideChildren)
 
   // add in the text for the nodes
-  node
-    .filter(function (d) { return d.value !== 0; })
-    .select("text")
-    .attr("x", biHiSankey.labelsAlwaysMiddle() ? biHiSankey.nodeWidth()/2 : -6)
-    .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
-    .attr("dy", ".35em")
-    .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
-    .text(function (d) { return d.name; });
+  node.filter(function (d) { return d.value !== 0; })
+      .select("text")
+      .attr("x", biHiSankey.labelsAlwaysMiddle() ? biHiSankey.nodeWidth()/2 : -6)
+      .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
+      .attr("dy", ".35em")
+      .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
+      .text(function (d) { return d.name; });
 
   if (!biHiSankey.onlyOneTextColor())
     node.filter(function (d) { return d.value !== 0; })
@@ -622,11 +579,6 @@ function update () {
 
   collapser.on("mouseenter", function (g) {
     if (!isTransitioning) {
-      showTooltip().select(".value")
-      .text(function () {
-        return g.name + "\n(Double click to collapse its children)";
-      });
-
       var highlightColor = highlightColorScale(g.type.replace(/ .*/, ""));
 
       d3.select(this)
@@ -643,7 +595,6 @@ function update () {
 
   collapser.on("mouseleave", function (g) {
     if (!isTransitioning) {
-      hideTooltip();
       d3.select(this)
         .style("opacity", OPACITY.NODE_DEFAULT)
         .select("circle")
