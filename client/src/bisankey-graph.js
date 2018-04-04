@@ -27,25 +27,6 @@ socket.on('funcInfo', data => {
     highlightNewEvent();
   }
 });
-    // d3.select("#func-panel").selectAll("*").remove()
-    // var packageData = d3.select("#func-panel")
-    //                     .selectAll("#funcData")
-    //                     .data(newEventArray)
-    //                     .enter()
-    //                     .append("div")
-    //                     .attr("class", "func-info")
-    //                     .style("border-color", function(d){
-    //                       return d.target.color;
-    //                     })
-    // packageData.append("h4").attr("class", "func-name")
-    //            .text((d) => { return `${d.target.type} - ${d.target.id}` })
-    // packageData.append("p").attr("class", "func-data")
-    //            .text((d) => { return `triggered by ${d.source.type} - ${d.source.id}` })
-    // packageData.append("p").attr("class", "package-data")
-    //            .text((d) => { return `time taken to run: ${d.target.duration} ms`})
-    // packageData.append("p").attr("class", "package-data")
-    //            .text((d) => { return `${d.target.errMessage}`})
-
 
 function nodeData(flatData) {
  const nodeDataArray = [];
@@ -256,7 +237,7 @@ path = biHiSankey.link().curvature(0.45);
 
 
 function update () {
-  var link, linkEnter, node, nodeEnter, collapser, collapserEnter;
+  let link, linkEnter, node, nodeEnter, collapser, collapserEnter;
 
   function containChildren(node) {
     node.state = "contained";
@@ -423,8 +404,7 @@ function update () {
         }
         return d.target.name + " <- " + d.source.name;
       });
-
-        d3.select(this)
+      d3.select(this)
         .style("stroke", LINK_COLOR)
         .transition()
         .duration(TRANSITION_DURATION / 2)
@@ -474,7 +454,7 @@ function update () {
       .transition()
       .duration(TRANSITION_DURATION)
       .attr("transform", function (d) {
-        var collapsedAncestor, endX, endY;
+        let collapsedAncestor, endX, endY;
         collapsedAncestor = d.ancestors.filter(function (a) {
           return a.state === "collapsed";
         })[0];
@@ -579,7 +559,7 @@ function update () {
 
   collapser.on("mouseenter", function (g) {
     if (!isTransitioning) {
-      var highlightColor = highlightColorScale(g.type.replace(/ .*/, ""));
+      let highlightColor = highlightColorScale(g.type.replace(/ .*/, ""));
 
       d3.select(this)
         .style("opacity", OPACITY.NODE_HIGHLIGHT)
