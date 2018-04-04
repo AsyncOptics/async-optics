@@ -139,7 +139,7 @@ let OPACITY = {
   OUTFLOW_COLOR = "#6cfff9",
   NODE_WIDTH = 20,
   COLLAPSER = {
-    RADIUS: NODE_WIDTH*0.8,
+    RADIUS: 14,
     SPACING: 3
   },
   OUTER_MARGIN = 10,
@@ -155,27 +155,26 @@ let OPACITY = {
   LAYOUT_INTERATIONS = 10;
 
 // Used when temporarily disabling user interactions to allow animations to complete
-disableUserInteractions = function (time) {
+function disableUserInteractions(time) {
   isTransitioning = true;
   setTimeout(function() {
     isTransitioning = false;
   }, time);
-},
+}
 
-hideTooltip = function () {
+function hideTooltip() {
   return tooltip.transition()
-  .duration(TRANSITION_DURATION)
-  .style("opacity", 0);
-},
+                .duration(TRANSITION_DURATION)
+                .style("opacity", 0);
+}
 
-showTooltip = function () {
-  return tooltip
-    .style("left", d3.event.pageX + "px")
-    .style("top", d3.event.pageY + 15 + "px")
-    .transition()
-    .duration(TRANSITION_DURATION)
-    .style("opacity", 1);
-};
+function showTooltip() {
+  return tooltip.style("left", d3.event.pageX + "px")
+                .style("top", d3.event.pageY + 15 + "px")
+                .transition()
+                .duration(TRANSITION_DURATION)
+                .style("opacity", 1);
+}
 
 
 colorScale = d3.scaleOrdinal().domain(TYPES).range(TYPE_COLORS),
@@ -218,43 +217,43 @@ biHiSankey
   defs = svg.append("defs");
 
   defs.append("marker")
-  .style("fill", LINK_COLOR)
-  .attr("id", "arrowHead")
-  .attr("viewBox", "0 0 6 10")
-  .attr("refX", "1")
-  .attr("refY", "5")
-  .attr("markerUnits", "strokeWidth")
-  .attr("markerWidth", "1")
-  .attr("markerHeight", "1")
-  .attr("orient", "auto")
-  .append("path")
-  .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
+      .style("fill", LINK_COLOR)
+      .attr("id", "arrowHead")
+      .attr("viewBox", "0 0 6 10")
+      .attr("refX", "1")
+      .attr("refY", "5")
+      .attr("markerUnits", "strokeWidth")
+      .attr("markerWidth", "1")
+      .attr("markerHeight", "1")
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
   defs.append("marker")
-  .style("fill", OUTFLOW_COLOR)
-  .attr("id", "arrowHeadInflow")
-  .attr("viewBox", "0 0 6 10")
-  .attr("refX", "1")
-  .attr("refY", "5")
-  .attr("markerUnits", "strokeWidth")
-  .attr("markerWidth", "1")
-  .attr("markerHeight", "1")
-  .attr("orient", "auto")
-  .append("path")
-  .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
+      .style("fill", OUTFLOW_COLOR)
+      .attr("id", "arrowHeadInflow")
+      .attr("viewBox", "0 0 6 10")
+      .attr("refX", "1")
+      .attr("refY", "5")
+      .attr("markerUnits", "strokeWidth")
+      .attr("markerWidth", "1")
+      .attr("markerHeight", "1")
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
   defs.append("marker")
-  .style("fill", INFLOW_COLOR)
-  .attr("id", "arrowHeadOutlow")
-  .attr("viewBox", "0 0 6 10")
-  .attr("refX", "1")
-  .attr("refY", "5")
-  .attr("markerUnits", "strokeWidth")
-  .attr("markerWidth", "1")
-  .attr("markerHeight", "1")
-  .attr("orient", "auto")
-  .append("path")
-  .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
+      .style("fill", INFLOW_COLOR)
+      .attr("id", "arrowHeadOutlow")
+      .attr("viewBox", "0 0 6 10")
+      .attr("refX", "1")
+      .attr("refY", "5")
+      .attr("markerUnits", "strokeWidth")
+      .attr("markerWidth", "1")
+      .attr("markerHeight", "1")
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
 function update () {
   var link, linkEnter, node, nodeEnter, collapser, collapserEnter;
@@ -316,7 +315,6 @@ function update () {
     restoreLinksAndNodes();
     update();
     // link.attr("d", path);
-
   }
 
   function highlightConnected(g) {
@@ -333,16 +331,15 @@ function update () {
 
   function fadeUnconnected(g) {
     link.filter(function (d) { return d.source !== g && d.target !== g; })
-    .style("marker-end", function () { return 'url(#arrowHead)'; })
-    .transition()
-    .duration(TRANSITION_DURATION)
-    .style("opacity", OPACITY.LINK_FADED);
+        .style("marker-end", function () { return 'url(#arrowHead)'; })
+        .transition()
+        .duration(TRANSITION_DURATION)
+        .style("opacity", OPACITY.LINK_FADED);
 
-    node.filter(function (d) {
-      return (d.name === g.name) ? false : !biHiSankey.connected(d, g);
-    }).transition()
-    .duration(TRANSITION_DURATION)
-    .style("opacity", OPACITY.NODE_FADED);
+    node.filter(function (d) { return (d.name === g.name) ? false : !biHiSankey.connected(d, g); })
+        .transition()
+        .duration(TRANSITION_DURATION)
+        .style("opacity", OPACITY.NODE_FADED);
   }
 
   link = svg.select("#links")
@@ -356,7 +353,7 @@ function update () {
       .style("opacity", OPACITY.LINK_DEFAULT);
 
 
-    link.exit().remove();
+  link.exit().remove();
 
 
   linkEnter = link.enter().append("path")
@@ -606,7 +603,5 @@ function update () {
           .style("fill", function (d) { return d.color; });
     }
   });
-
   collapser.exit().remove();
-
 }
