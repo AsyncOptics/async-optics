@@ -45,20 +45,7 @@ socket.on('funcInfo', data => {
     //            .text((d) => { return `time taken to run: ${d.target.duration} ms`})
     // packageData.append("p").attr("class", "package-data")
     //            .text((d) => { return `${d.target.errMessage}`})
-    var funcData = d3.select("#nodes")
-                     .selectAll(".node")
 
-      funcData.filter((d) => {
-        return d.isNew === true
-      }).select("rect")
-        .call(pulse, 750)
-
-      funcData.filter((d) => {
-        return !d.isNew
-      }).select("rect")
-        .transition()
-        .duration(500)
-        .style("stroke-opacity", 1)
 
     //   funcData.on("mouseenter", (d) => {
     //     if(d.isNew){
@@ -77,7 +64,6 @@ socket.on('funcInfo', data => {
     //       }).select("rect").style("opacity", 1)
     //     })
     //   })
-    }
     
 
     function pulse(path, duration, end){
@@ -88,7 +74,6 @@ socket.on('funcInfo', data => {
             .style('stroke-opacity', 1)
           timer = setTimeout(function() { pulse(path, duration); }, duration*2);
     }
-});
 
 
 function nodeData(flatData) {
@@ -114,7 +99,6 @@ function nodeData(flatData) {
    } else {
       nodeObj.isNew = false
    }
-   if (!nodeObj.duration) nodeObj.duration = MIN_DURATION;
    nodeDataArray.push(nodeObj);
  });
  return nodeDataArray;
@@ -141,34 +125,20 @@ function linkData(flatData) {
 }
 
 function highlightNewEvent() {
-  let funcData = d3.select("#nodes")
-                   .selectAll(".node")
+    var funcData = d3.select("#nodes")
+                     .selectAll(".node")
 
-  newEventArray.forEach((event) => {
-    funcData.filter((d) => {
-      if(d.id === event.target.id){
-        d.isNew = true
-        return d.id === event.target.id
-      }
-    }).select("rect").style("stroke", "white")
-  })
-  funcData.on("mouseenter", (d) => {
-    if(d.isNew){
-      newEventArray.forEach((event) => {
-        funcData.filter((d) => {
-          return d.id === event.target.id
-        }).select("rect").style("opacity", .25)
-      })
-    }
-  })
-
-  funcData.on("mouseleave", () => {
-    newEventArray.forEach((event) => {
       funcData.filter((d) => {
-        return d.id === event.target.id
-      }).select("rect").style("opacity", 1)
-    });
-  });
+        return d.isNew === true
+      }).select("rect")
+        .call(pulse, 750)
+
+      funcData.filter((d) => {
+        return !d.isNew
+      }).select("rect")
+        .transition()
+        .duration(500)
+        .style("stroke-opacity", 1)
 }
 
 // https://github.com/northam/styled_sankey/blob/master/bihisankey.app.js
@@ -312,14 +282,6 @@ biHiSankey
 function update () {
   var link, linkEnter, node, nodeEnter, collapser, collapserEnter;
 
-  function dragmove(node) {
-    node.x = Math.max(0, Math.min(WIDTH - node.width, d3.event.x));
-    node.y = Math.max(0, Math.min(HEIGHT - node.height, d3.event.y));
-    d3.select(this).attr("transform", "translate(" + node.x + "," + node.y + ")");
-    biHiSankey.relayout();
-    svg.selectAll(".node").selectAll("rect").attr("height", function (d) { return d.height; });
-    link.attr("d", path);
-  }
 
   function containChildren(node) {
     node.state = "contained";
@@ -543,8 +505,78 @@ function update () {
 
   node.on("mouseenter", function (g) {
     d3.select("#chart-info").selectAll("*").remove();
+    if (!isTransitioning) {
+      restoreLinksAndNodes();
+      highlightConnected(g);
+      fadeUnconnected(g);
 
-    console.log('g', g)
+      d3.select(this).select("rect")
+        .style("fill", function (d) {
+          d.color = d.netFlow > 0 ? INFLOW_COLOR : OUTFLOW_COLOR;
+          return d.color;
+        })
+      .style("stroke", function (d) { return d3.rgb(d.color).darker(0.1); })
+      .style("fill-opacity", OPACITY.LINK_DEFAULT);
+
+      // tooltip
+      // .style("left", g.x + MARGIN.LEFT + 100 + "px")
+      // .style("top", g.y + g.height + MARGIN.TOP + 15 + "px")
+      // .transition()
+      // .duration(TRANSITION_DURATION)
+      // .style("opacity", 1).select(".value")
+      // .text(() => {
+      //   let additionalInstructions = g.children.length ? "\n(Double click to expand)" : "";
+      //   return g.name + "\n Duration: " + g.duration + "\n ID: " + g.id + "\n Start Time: " + g.startTime + "\n Errors: " + g.errMessage ;
+      // });
+
+      var parentPanel = d3.select("#chart-info")
+                          .selectAll("#chartData")
+                          .data([g, ...g.rightLinks])
+                          .enter()
+                          .append("div")
+                          .attr("class", "chart-info")
+                          .style("background-color", function(d){
+                            return d.color ? d.color : d.target.color;
+                          })
+      parentPanel.append("h4").attr("class", "func-name")
+                 .text((d) => { return `${d.type ? d.type : d.target.type}`})
+
+      parentPanel.append("p").attr("class", "func-data")
+                 .text(d => { return `Id: ${d.id ? d.id : d.target.id}`})
+
+      parentPanel.append("p").attr("class", "func-data")
+                 .text((d) => { return `Start time: ${d.startTime ? d.startTime : d.target.startTime}`})
+
+      parentPanel.append("p").attr("class", "func-data")
+                 .text((d) => { return `Time taken to run: ${d.duration ? d.duration : d.target.duration} ms`})
+
+      parentPanel.append("p").attr("class", "stack-expand")
+                 .attr("id", (d) => `err${d.id ? d.id : d.target.id}`)
+                 .text( () => { return `Click to show stack trace`})
+
+      let errors = d3.selectAll(".stack-expand")
+      errors.on("click", (d) => {
+              // console.log(d3.event.target.id)
+        let errId = `#${d3.event.target.id}`
+        if(!d.errorShown){
+          d.errorShown = true;
+          // errors.select(errId)
+          d3.select(errId).append("p").attr("class", "stack-data")
+            .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
+          } else {
+            d3.select(errId).select('.stack-data').remove()
+            d.errorShown = false;
+          }
+      })
+
+      // parentPanel.append("p").attr("class", "func-data")
+      //          .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
+
+    }
+});
+
+  nodeEnter.on("mouseenter", function (g) {
+    d3.select("#chart-info").selectAll("*").remove();
     if (!isTransitioning) {
       restoreLinksAndNodes();
       highlightConnected(g);
@@ -623,7 +655,9 @@ function update () {
     }
   });
 
-  node.on("click", showHideChildren)
+  node.on("click", showHideChildren);
+
+  nodeEnter.on("click", showHideChildren);
 
   // add in the text for the nodes
   node
