@@ -23,10 +23,7 @@ io.on('connection', (socket) => {
   process._rawDebug('New Socket Connection', socket.id);
   numOfConnections++;
   io._hasConnection = true;
-  // checkIdExist(20);
-  process._rawDebug(io._hierarchyAggregate);
   socket.emit('packageInfo', io._hierarchyAggregate);
-
 
   if(io._asyncInfo.length !== 0) {
   	socket.emit('funcInfo', io._asyncInfo);
@@ -43,10 +40,6 @@ const PORT = 3000;
 server.listen(PORT, () => {
   process._rawDebug(`socket setup, listening to PORT ${PORT}`);
 });
-
-
-
-
 
 
 function checkIdExist(id) {

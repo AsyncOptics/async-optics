@@ -1,5 +1,4 @@
 const hasSeen = {};
-let newEventArray;
 let timer;
 socket.on('funcInfo', data => {
   const needToRefresh = parseData(data);
@@ -19,61 +18,24 @@ socket.on('funcInfo', data => {
                .nodes(nodeDataArray)
                .links(linkDataArray)
                .initializeNodes(function (node) {
+                 // collapsed means showing that node, contained means hiding the node
                  node.state = node.parent ? "contained" : "collapsed";
-               }) // collapsed means showing that node, contained means hiding the node
+               })
                .layout(LAYOUT_INTERATIONS);
     disableUserInteractions(2 * TRANSITION_DURATION);
     update();
     highlightNewEvent();
   }
 });
-    // d3.select("#func-panel").selectAll("*").remove()
-    // var packageData = d3.select("#func-panel")
-    //                     .selectAll("#funcData")
-    //                     .data(newEventArray)
-    //                     .enter()
-    //                     .append("div")
-    //                     .attr("class", "func-info")
-    //                     .style("border-color", function(d){
-    //                       return d.target.color;
-    //                     })
-    // packageData.append("h4").attr("class", "func-name")
-    //            .text((d) => { return `${d.target.type} - ${d.target.id}` })
-    // packageData.append("p").attr("class", "func-data")
-    //            .text((d) => { return `triggered by ${d.source.type} - ${d.source.id}` })
-    // packageData.append("p").attr("class", "package-data")
-    //            .text((d) => { return `time taken to run: ${d.target.duration} ms`})
-    // packageData.append("p").attr("class", "package-data")
-    //            .text((d) => { return `${d.target.errMessage}`})
 
-
-    //   funcData.on("mouseenter", (d) => {
-    //     if(d.isNew){
-    //       newEventArray.forEach((event) => {
-    //         funcData.filter((d) => {
-    //           return d.id === event.target.id
-    //         }).select("rect").style("opacity", .25)
-    //       })
-    //     }
-    //   })
-
-    //   funcData.on("mouseleave", () => {
-    //     newEventArray.forEach((event) => {
-    //       funcData.filter((d) => {
-    //         return d.id === event.target.id
-    //       }).select("rect").style("opacity", 1)
-    //     })
-    //   })
-    
-
-    function pulse(path, duration, end){
-           path.transition()
-            .duration(duration)
-            .style('stroke-opacity', .2)
-            .transition()
-            .style('stroke-opacity', 1)
-          timer = setTimeout(function() { pulse(path, duration); }, duration*2);
-    }
+function pulse(path, duration, end){
+  path.transition()
+      .duration(duration)
+      .style('stroke-opacity', .2)
+      .transition()
+      .style('stroke-opacity', 1)
+  timer = setTimeout(function() { pulse(path, duration); }, duration*2);
+}
 
 
 function nodeData(flatData) {
@@ -92,10 +54,10 @@ function nodeData(flatData) {
      resourceInfo: funcInfoNode.resourceInfo,
      name: funcInfoNode.type
    };
-   if(!hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`]){
-      nodeObj.isNew = true
-      hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`] = true
-      newEventArray.push(nodeObj)
+   if(!hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`]) {
+      nodeObj.isNew = true;
+      hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`] = true;
+      newEventArray.push(nodeObj);
    } else {
       nodeObj.isNew = false
    }
@@ -161,7 +123,7 @@ let OPACITY = {
   OUTFLOW_COLOR = "#6cfff9",
   NODE_WIDTH = 20,
   COLLAPSER = {
-    RADIUS: NODE_WIDTH*0.8,
+    RADIUS: 14,
     SPACING: 3
   },
   OUTER_MARGIN = 10,
@@ -171,34 +133,32 @@ let OPACITY = {
     BOTTOM: OUTER_MARGIN,
     LEFT: OUTER_MARGIN
   },
-  TRANSITION_DURATION = 400,
+  TRANSITION_DURATION = 200,
   WIDTH = 2300 - MARGIN.LEFT - MARGIN.RIGHT,
   HEIGHT = 1100 - MARGIN.TOP - MARGIN.BOTTOM,
-  LAYOUT_INTERATIONS = 10,
-  REFRESH_INTERVAL = 7000;
+  LAYOUT_INTERATIONS = 10;
 
 // Used when temporarily disabling user interactions to allow animations to complete
-disableUserInteractions = function (time) {
+function disableUserInteractions(time) {
   isTransitioning = true;
   setTimeout(function() {
     isTransitioning = false;
   }, time);
-},
+}
 
-hideTooltip = function () {
+function hideTooltip() {
   return tooltip.transition()
-  .duration(TRANSITION_DURATION)
-  .style("opacity", 0);
-},
+                .duration(TRANSITION_DURATION)
+                .style("opacity", 0);
+}
 
-showTooltip = function () {
-  return tooltip
-    .style("left", d3.event.pageX + "px")
-    .style("top", d3.event.pageY + 15 + "px")
-    .transition()
-    .duration(TRANSITION_DURATION)
-    .style("opacity", 1);
-};
+function showTooltip() {
+  return tooltip.style("left", d3.event.pageX + "px")
+                .style("top", d3.event.pageY + 15 + "px")
+                .transition()
+                .duration(TRANSITION_DURATION)
+                .style("opacity", 1);
+}
 
 
 colorScale = d3.scaleOrdinal().domain(TYPES).range(TYPE_COLORS),
@@ -227,61 +187,63 @@ biHiSankey = d3.biHiSankey();
 /** biHiSankey default properties
  *  Set as many defaults as possible to avoid error for the missing property in further declarations in html file
  */
-biHiSankey
-  .nodeWidth(NODE_WIDTH)
-  .nodeSpacing(10)
-  .linkSpacing(4)
-  .arrowheadScaleFactor(0.5)
-  .size([WIDTH, HEIGHT])
-  .onlyOneTextColor(false)
-  .labelsAlwaysMiddle(true);
+biHiSankey.nodeWidth(NODE_WIDTH)
+          .nodeSpacing(10)
+          .linkSpacing(4)
+          .arrowheadScaleFactor(0.5)
+          .size([WIDTH, HEIGHT])
+          .onlyOneTextColor(false)
+          .labelsAlwaysMiddle(true);
 
-  path = biHiSankey.link().curvature(0.45);
+path = biHiSankey.link().curvature(0.45);
 
   defs = svg.append("defs");
 
   defs.append("marker")
-  .style("fill", LINK_COLOR)
-  .attr("id", "arrowHead")
-  .attr("viewBox", "0 0 6 10")
-  .attr("refX", "1")
-  .attr("refY", "5")
-  .attr("markerUnits", "strokeWidth")
-  .attr("markerWidth", "1")
-  .attr("markerHeight", "1")
-  .attr("orient", "auto")
-  .append("path")
-  .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
+      .style("fill", LINK_COLOR)
+      .attr("id", "arrowHead")
+      .attr("viewBox", "0 0 6 10")
+      .attr("refX", "1")
+      .attr("refY", "5")
+      .attr("markerUnits", "strokeWidth")
+      .attr("markerWidth", "1")
+      .attr("markerHeight", "1")
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
   defs.append("marker")
-  .style("fill", OUTFLOW_COLOR)
-  .attr("id", "arrowHeadInflow")
-  .attr("viewBox", "0 0 6 10")
-  .attr("refX", "1")
-  .attr("refY", "5")
-  .attr("markerUnits", "strokeWidth")
-  .attr("markerWidth", "1")
-  .attr("markerHeight", "1")
-  .attr("orient", "auto")
-  .append("path")
-  .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
+      .style("fill", OUTFLOW_COLOR)
+      .attr("id", "arrowHeadInflow")
+      .attr("viewBox", "0 0 6 10")
+      .attr("refX", "1")
+      .attr("refY", "5")
+      .attr("markerUnits", "strokeWidth")
+      .attr("markerWidth", "1")
+      .attr("markerHeight", "1")
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
   defs.append("marker")
-  .style("fill", INFLOW_COLOR)
-  .attr("id", "arrowHeadOutlow")
-  .attr("viewBox", "0 0 6 10")
-  .attr("refX", "1")
-  .attr("refY", "5")
-  .attr("markerUnits", "strokeWidth")
-  .attr("markerWidth", "1")
-  .attr("markerHeight", "1")
-  .attr("orient", "auto")
-  .append("path")
-  .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
+      .style("fill", INFLOW_COLOR)
+      .attr("id", "arrowHeadOutlow")
+      .attr("viewBox", "0 0 6 10")
+      .attr("refX", "1")
+      .attr("refY", "5")
+      .attr("markerUnits", "strokeWidth")
+      .attr("markerWidth", "1")
+      .attr("markerHeight", "1")
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
+
+<<<<<<< HEAD
 function update () {
-  var link, linkEnter, node, nodeEnter, collapser, collapserEnter;
-
+  let link, linkEnter, node, nodeEnter, collapser, collapserEnter;
+=======
+>>>>>>> 52f17b496a43329e8559336a624e01ea62819e59
 
   function containChildren(node) {
     node.state = "contained";
@@ -321,13 +283,8 @@ function update () {
         .style("opacity", OPACITY.LINK_DEFAULT);
 
     node.selectAll("rect")
-        .style("fill", function (d) {
-          d.color = colorScale(d.type.replace(/ .*/, ""));
-          return d.color;
-        })
-        .style("stroke", function (d) {
-          return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1);
-        })
+        .style("fill", function (d) { return colorScale(d.type.replace(/ .*/, "")); })
+        .style("stroke", function (d) { return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1); })
         .style("fill-opacity", OPACITY.NODE_DEFAULT);
 
     node.filter(function (n) { return n.state === "collapsed"; })
@@ -337,16 +294,14 @@ function update () {
   }
 
   function showHideChildren(node) {
-    // console.log(node, 'clicked' )
     disableUserInteractions(2 * TRANSITION_DURATION);
-    hideTooltip();
     if (node.state === "collapsed") expand(node);  //to collaspe nodes, change state to expanded
     else collapse(node); //to collapse nodes, change state to collapsed
 
     biHiSankey.relayout();
-    update();
-    link.attr("d", path);
     restoreLinksAndNodes();
+    update();
+    // link.attr("d", path);
   }
 
   function highlightConnected(g) {
@@ -361,23 +316,77 @@ function update () {
         .style("opacity", OPACITY.LINK_DEFAULT);
   }
 
-    function fadeUnconnected(g) {
-      link.filter(function (d) { return d.source !== g && d.target !== g; })
-      .style("marker-end", function () { return 'url(#arrowHead)'; })
-      .transition()
-      .duration(TRANSITION_DURATION)
-      .style("opacity", OPACITY.LINK_FADED);
+  function fadeUnconnected(g) {
+    link.filter(function (d) { return d.source !== g && d.target !== g; })
+        .style("marker-end", function () { return 'url(#arrowHead)'; })
+        .transition()
+        .duration(TRANSITION_DURATION)
+        .style("opacity", OPACITY.LINK_FADED);
 
-      node.filter(function (d) {
-        return (d.name === g.name) ? false : !biHiSankey.connected(d, g);
-      }).transition()
-      .duration(TRANSITION_DURATION)
-      .style("opacity", OPACITY.NODE_FADED);
+    node.filter(function (d) { return (d.name === g.name) ? false : !biHiSankey.connected(d, g); })
+        .transition()
+        .duration(TRANSITION_DURATION)
+        .style("opacity", OPACITY.NODE_FADED);
+  }
+
+  function displayInfoPanel(g) {
+    d3.select("#chart-info").selectAll("*").remove();
+    if (!isTransitioning) {
+      restoreLinksAndNodes();
+      highlightConnected(g);
+      fadeUnconnected(g);
+
+      d3.select(this).select("rect")
+        .style("fill", function (d) {
+          d.color = d.netFlow > 0 ? INFLOW_COLOR : OUTFLOW_COLOR;
+          return d.color;
+        })
+      .style("stroke", function (d) { return d3.rgb(d.color).darker(0.1); })
+      .style("fill-opacity", OPACITY.LINK_DEFAULT);
+
+      let parentPanel = d3.select("#chart-info")
+                          .selectAll("#chartData")
+                          .data([g, ...g.rightLinks])
+                          .enter()
+                          .append("div")
+                          .attr("class", "chart-info")
+                          .style("background-color", function(d){
+                            return d.color ? d.color : d.target.color;
+                          })
+      parentPanel.append("h4").attr("class", "func-name")
+                 .text((d) => { return `${d.type ? d.type : d.target.type}`})
+
+      parentPanel.append("p").attr("class", "func-data")
+                 .text(d => { return `Id: ${d.id ? d.id : d.target.id}`})
+
+      parentPanel.append("p").attr("class", "func-data")
+                 .text((d) => { return `Start time: ${d.startTime ? d.startTime : d.target.startTime} `})
+
+      parentPanel.append("p").attr("class", "func-data")
+                 .text((d) => { return `Time taken to run: ${d.duration ? d.duration : d.target.duration} ms`})
+
+      parentPanel.append("p").attr("class", "stack-expand")
+                 .attr("id", (d) => `err${d.id ? d.id : d.target.id}`)
+                 .text( () => { return `Click to show stack trace`})
+
+      let errors = d3.selectAll(".stack-expand")
+      errors.on("click", (d) => {
+        let errId = `#${d3.event.target.id}`
+        if(!d.errorShown){
+          d.errorShown = true;
+          d3.select(errId).append("p").attr("class", "stack-data")
+            .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
+        } else {
+          d3.select(errId).select('.stack-data').remove()
+          d.errorShown = false;
+        }
+      })
     }
+  }
 
   link = svg.select("#links")
             .selectAll("path.link")
-            .data(biHiSankey.visibleLinks(), function (d) { return d.id; });
+            .data(biHiSankey.visibleLinks(), function(d) { return d.id; });
 
   link.transition()
       .duration(TRANSITION_DURATION)
@@ -386,7 +395,7 @@ function update () {
       .style("opacity", OPACITY.LINK_DEFAULT);
 
 
-    link.exit().remove();
+  link.exit().remove();
 
 
   linkEnter = link.enter().append("path")
@@ -401,8 +410,7 @@ function update () {
         }
         return d.target.name + " <- " + d.source.name;
       });
-
-        d3.select(this)
+      d3.select(this)
         .style("stroke", LINK_COLOR)
         .transition()
         .duration(TRANSITION_DURATION / 2)
@@ -434,30 +442,25 @@ function update () {
            .attr("stroke-width", function (d) {return Math.max(1, d.thickness);})
            .style("opacity", OPACITY.LINK_DEFAULT);
 
-
   node = svg.select("#nodes").selectAll(".node")
-            .data(biHiSankey.collapsedNodes(), function (d) { return d.id; });
-
+            .data(biHiSankey.collapsedNodes(), function(d) { return d.id; });
 
   node.transition()
       .duration(TRANSITION_DURATION)
       .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
       .style("opacity", OPACITY.NODE_DEFAULT)
       .select("rect")
-      .style("fill", function(d) {
-        d.color = colorScale(d.type.replace(/ .*/, ""));
-        return d.color;})
+      .style("fill", function(d) { return colorScale(d.type.replace(/ .*/, "")); })
       .style("stroke", function(d) { return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1); })
       .attr("stroke-width", "1px")
       .attr("height", function(d) { return d.height; })
       .attr("width", biHiSankey.nodeWidth());
 
-
   node.exit()
       .transition()
       .duration(TRANSITION_DURATION)
       .attr("transform", function (d) {
-        var collapsedAncestor, endX, endY;
+        let collapsedAncestor, endX, endY;
         collapsedAncestor = d.ancestors.filter(function (a) {
           return a.state === "collapsed";
         })[0];
@@ -468,28 +471,22 @@ function update () {
       .remove();
 
 
-    nodeEnter = node.enter().append("g").attr("class", "node");
+  nodeEnter = node.enter().append("g").attr("class", "node");
 
-    nodeEnter
-    .attr("transform", function (d) {
-      var startX = d._parent ? d._parent.x : d.x,
-      startY = d._parent ? d._parent.y : d.y;
-      return "translate(" + startX + "," + startY + ")";
-    })
-    .style("opacity", 1e-6)
-    .transition()
-    .duration(TRANSITION_DURATION)
-    .style("opacity", OPACITY.NODE_DEFAULT)
-    .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+  nodeEnter.attr("transform", function (d) {
+              const startX = d._parent ? d._parent.x : d.x;
+              const startY = d._parent ? d._parent.y : d.y;
+              return "translate(" + startX + "," + startY + ")";
+            })
+           .style("opacity", 1e-6)
+           .transition()
+           .duration(TRANSITION_DURATION)
+           .style("opacity", OPACITY.NODE_DEFAULT)
+           .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
 
   nodeEnter.append("rect")
-           .style("fill", function(d) {
-             d.color = colorScale(d.type.replace(/ .*/, ""));
-             return d.color;
-           })
-           .style("stroke", function(d) {
-             return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1);
-           })
+           .style("fill", function(d) { return colorScale(d.type.replace(/ .*/, "")); })
+           .style("stroke", function(d) {return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1);})
            .style("stroke-width", "1px")
            .attr("height", function(d) { return d.height; })
            .attr("width", biHiSankey.nodeWidth());
@@ -498,11 +495,13 @@ function update () {
            .append("xhtml:text")
            .attr("class", "node-type")
            .text(function(d) {
-              if(d.sourceLinks.length > 0 || d.leftLinks.length > 0){
+              if(d.sourceLinks.length > 0 || d.leftLinks.length > 0) {
                 return d.name
               }
             });
 
+<<<<<<< HEAD
+=======
   node.on("mouseenter", function (g) {
     d3.select("#chart-info").selectAll("*").remove();
     if (!isTransitioning) {
@@ -543,57 +542,35 @@ function update () {
 
       parentPanel.append("p").attr("class", "func-data")
                  .text(d => { return `Id: ${d.id ? d.id : d.target.id}`})
+>>>>>>> 52f17b496a43329e8559336a624e01ea62819e59
 
-      parentPanel.append("p").attr("class", "func-data")
-                 .text((d) => { return `Start time: ${d.startTime ? d.startTime : d.target.startTime}`})
 
-      parentPanel.append("p").attr("class", "func-data")
-                 .text((d) => { return `Time taken to run: ${d.duration ? d.duration : d.target.duration} ms`})
 
-      parentPanel.append("p").attr("class", "stack-expand")
-                 .attr("id", (d) => `err${d.id ? d.id : d.target.id}`)
-                 .text( () => { return `Click to show stack trace`})
+  node.on("mouseenter", displayInfoPanel);
 
-      let errors = d3.selectAll(".stack-expand")
-      errors.on("click", (d) => {
-              // console.log(d3.event.target.id)
-        let errId = `#${d3.event.target.id}`
-        if(!d.errorShown){
-          d.errorShown = true;
-          // errors.select(errId)
-          d3.select(errId).append("p").attr("class", "stack-data")
-            .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
-          } else {
-            d3.select(errId).select('.stack-data').remove()
-            d.errorShown = false;
-          }
-      })
-
-      // parentPanel.append("p").attr("class", "func-data")
-      //          .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
-
-    }
-});
-
-  node.on("mouseleave", function () {
-    if (!isTransitioning) {
-      hideTooltip();
-      restoreLinksAndNodes();
-
-    }
-  });
+  node.on("mouseleave", function() { if (!isTransitioning) restoreLinksAndNodes(); });
 
   node.on("click", showHideChildren);
 
+  nodeEnter.on("mouseenter", displayInfoPanel);
+
+  nodeEnter.on("mouseleave", function() { if (!isTransitioning) restoreLinksAndNodes(); });
+
+  nodeEnter.on("click", showHideChildren)
+
+<<<<<<< HEAD
+=======
+  node.on("click", showHideChildren);
+>>>>>>> 52f17b496a43329e8559336a624e01ea62819e59
+
   // add in the text for the nodes
-  node
-    .filter(function (d) { return d.value !== 0; })
-    .select("text")
-    .attr("x", biHiSankey.labelsAlwaysMiddle() ? biHiSankey.nodeWidth()/2 : -6)
-    .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
-    .attr("dy", ".35em")
-    .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
-    .text(function (d) { return d.name; });
+  node.filter(function (d) { return d.value !== 0; })
+      .select("text")
+      .attr("x", biHiSankey.labelsAlwaysMiddle() ? biHiSankey.nodeWidth()/2 : -6)
+      .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
+      .attr("dy", ".35em")
+      .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
+      .text(function (d) { return d.name; });
 
   if (!biHiSankey.onlyOneTextColor())
     node.filter(function (d) { return d.value !== 0; })
@@ -635,12 +612,7 @@ function update () {
 
   collapser.on("mouseenter", function (g) {
     if (!isTransitioning) {
-      showTooltip().select(".value")
-      .text(function () {
-        return g.name + "\n(Double click to collapse its children)";
-      });
-
-      var highlightColor = highlightColorScale(g.type.replace(/ .*/, ""));
+      let highlightColor = highlightColorScale(g.type.replace(/ .*/, ""));
 
       d3.select(this)
         .style("opacity", OPACITY.NODE_HIGHLIGHT)
@@ -656,7 +628,6 @@ function update () {
 
   collapser.on("mouseleave", function (g) {
     if (!isTransitioning) {
-      hideTooltip();
       d3.select(this)
         .style("opacity", OPACITY.NODE_DEFAULT)
         .select("circle")
@@ -668,7 +639,5 @@ function update () {
           .style("fill", function (d) { return d.color; });
     }
   });
-
   collapser.exit().remove();
-
 }
