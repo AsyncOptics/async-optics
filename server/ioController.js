@@ -1,6 +1,5 @@
 const io = require('./socket.js');
 const ioController = {};
-// const infoSaved = [];
 
 let asyncInfoEmit = [];
 let sendInfoAnyway;
@@ -17,7 +16,6 @@ ioController.sendInfo = function(funcInfoNode) {
     }
   } else {
     // process._rawDebug('keep func info');
-    
   }
 }
 
@@ -31,7 +29,7 @@ ioController.sendPackageInfo = function(packageInfo){
   process._rawDebug('send package info');
   if(io._hasConnection){
     io.emit('packageInfo', packageInfo)
-  } 
+  }
 }
 
 module.exports = ioController;

@@ -1,4 +1,4 @@
-html, body { 
+html, body {
   background-color: #001635;
   color: white;
   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
@@ -6,27 +6,15 @@ html, body {
   font-size: 0.9em;
 }
 #itemtitles {
-  margin: 2px 0 0 20px; 
+  margin: 2px 0 0 20px;
   min-height: 1.2em;
 }
 #itemtitles div {
-  position: absolute; 
-  float: left; 
+  position: absolute;
+  float: left;
   top: 100px;
 }
-#chart1 {
-  position: absolute; 
-  z-index:160; 
-  width: 1050px;
-}
 
-#chart1 svg {
- width: 1050px; /* to enable user's interactions on underlaying chart2 */
-}
-#chart2 {
-  position: absolute; z-index:80;
-  /*min-width:100px;min-height:100px;border-right: 1px dashed red;*/
-}
 .node rect {
   cursor: move;
   shape-rendering: crispEdges;
@@ -42,17 +30,17 @@ html, body {
   text-align: center;
   /*-webkit-filter: drop-shadow( 2px 2px 2px #fff );
   filter: drop-shadow( 2px 2px 2px #fff );*/
-  fill: white; 
+  fill: white;
   /*stroke: black; stroke-width: 1;*/
 }
 
 #tooltip {
-  color: black;
+  color: #001128;
   position: absolute;
   pointer-events: none;
-  font-size: 0.7em;
+  font-size: 0.8em;
   font-family: sans-serif;
-  padding: 3px;
+  padding: 5px;
   width: auto;
   height: auto;
   background-color: #F2F2F2;
@@ -67,6 +55,61 @@ html, body {
   margin: 0;
 }
 
+#bisankey-container {
+  display: flex;
+  flex-direction: column;
+  /* height: 1200px; */
+  border: 1px solid white;
+
+  padding: 10px;
+  min-height: 600px;
+  height: auto;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+
+
+#bisankey-container {
+/*  display: flex;
+  flex-direction: column;*/
+
+}
+
+#chart-info {
+/*  order:1;*/
+  height: auto;
+  padding: 10px;
+}
+
+.func-name {
+  text-align: center;
+}
+
+
+.chart-info {
+  border: 1px solid #001128;
+  width: 250px;
+  padding: 10px;
+  color: #001128;
+}
+
+#chart-info {
+  padding: 0px;
+  margin: 0;
+  list-style: none;
+  -ms-box-orient: horizontal;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -moz-flex;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: row;
+  flex-flow: row wrap;
+}
+
+
 .node-type {
   overflow: hidden;
   white-space: nowrap;
@@ -75,3 +118,4 @@ html, body {
 .func-info {
   border: 2px solid black;
 }
+

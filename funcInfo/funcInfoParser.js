@@ -56,7 +56,6 @@ function funcInfoParser(asyncId, type, triggerAsyncId, resource, err) {
     default:
 
   }
-
   return {shouldKeep,resourceInfo};
 }
 

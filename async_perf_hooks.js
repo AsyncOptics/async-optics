@@ -67,16 +67,6 @@ function deleteEntireBranch(triggerAsyncId) {
 }
 
 function init(asyncId, type, triggerAsyncId, resource) {
-  // if(type === 'Timeout'){
-  //   asyncHook.disable()
-  // } 
-  //   asyncHook.enable()
-
-  // console.log(asyncResource)
-  // process._rawDebug(type, Reflect.getPrototypeOf(resource));
-  process._rawDebug(asyncId, cid, triggerAsyncId, type)
-  // mongoose connection: Timeout, timerwrap, promise x2, tcpwrap, getaddrinfo, timerwrap, timeout, tickobj, tcpwrap, getaddrinfo, timeout, tick,tcpconnectwrap, randombytes, pbkdf2request
-  // express: timeout, timerwrap, tcpserverwrap, tickobj, tcpwrap, httpparser, randombytes, zlib
   const err = new Error().stack;
   const errMessage = err.split('\n');
   const newErr = errMessageParser(errMessage);

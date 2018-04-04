@@ -1,5 +1,3 @@
-const MIN_DURATION = 20;
-let lastLength;
 const hasSeen = {};
 let newEventArray;
 let timer;
@@ -8,21 +6,27 @@ socket.on('funcInfo', data => {
   const chartDomElementId = "#chart";
   if (needToRefresh) {
      clearTimeout(timer);
+     scaleDuration();
      const nodeDataArray = nodeData(flatData);
      const linkDataArray = linkData(flatData);
-     biHiSankey.nodeWidth(40)
-               .size([1000, 950])
+     biHiSankey.nodeWidth(70)
+               .nodeSpacing(10)
+               .linkSpacing(5)
+               .linkThicknessFactor(6)
+               .size([2200, 1100])
                .onlyOneTextColor(false)
                .labelsAlwaysMiddle(true)
                .nodes(nodeDataArray)
                .links(linkDataArray)
                .initializeNodes(function (node) {
                  node.state = node.parent ? "contained" : "collapsed";
-               })
+               }) // collapsed means showing that node, contained means hiding the node
                .layout(LAYOUT_INTERATIONS);
-               disableUserInteractions(2 * TRANSITION_DURATION);
-               update();
-
+    disableUserInteractions(2 * TRANSITION_DURATION);
+    update();
+    highlightNewEvent();
+  }
+});
     // d3.select("#func-panel").selectAll("*").remove()
     // var packageData = d3.select("#func-panel")
     //                     .selectAll("#funcData")
@@ -94,9 +98,11 @@ function nodeData(flatData) {
    const nodeObj = {
      type: funcInfoNode.type,
      id: funcInfoNode.asyncId,
+     trigger: funcInfoNode.triggerAsyncId,
      parent: null,
      startTime: funcInfoNode.startTime,
      duration: funcInfoNode.duration,
+     durationScaled: funcInfoNode.durationScaled,
      errMessage: funcInfoNode.errMessage,
      resourceInfo: funcInfoNode.resourceInfo,
      name: funcInfoNode.type
@@ -120,36 +126,63 @@ function linkData(flatData) {
    const linkObj = {
      source: funcInfoNode.triggerAsyncId,
      target: funcInfoNode.asyncId,
-     value: funcInfoNode.duration
+     value: funcInfoNode.durationScaled
   };
 
   if(linkObj.source !== "Node.js core" && linkObj.source) {
-    if (!linkObj.value) linkObj.value = MIN_DURATION;
     // if(!hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`]){
     //   newEventArray.push(linkObj)
     //   hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`] = true;
-    //   // console.log('after', hasSeen)
     // }
     linkDataArray.push(linkObj);
   }
  });
-
  return linkDataArray;
 }
 
+function highlightNewEvent() {
+  let funcData = d3.select("#nodes")
+                   .selectAll(".node")
+
+  newEventArray.forEach((event) => {
+    funcData.filter((d) => {
+      if(d.id === event.target.id){
+        d.isNew = true
+        return d.id === event.target.id
+      }
+    }).select("rect").style("stroke", "white")
+  })
+  funcData.on("mouseenter", (d) => {
+    if(d.isNew){
+      newEventArray.forEach((event) => {
+        funcData.filter((d) => {
+          return d.id === event.target.id
+        }).select("rect").style("opacity", .25)
+      })
+    }
+  })
+
+  funcData.on("mouseleave", () => {
+    newEventArray.forEach((event) => {
+      funcData.filter((d) => {
+        return d.id === event.target.id
+      }).select("rect").style("opacity", 1)
+    });
+  });
+}
 
 // https://github.com/northam/styled_sankey/blob/master/bihisankey.app.js
 
 let svg, tooltip, biHiSankey, path, defs, colorScale, highlightColorScale, isTransitioning;
 
-var OPACITY = {
-    NODE_DEFAULT: 0.9,
-    NODE_FADED: 0.1,
-    NODE_HIGHLIGHT: 1,
-    LINK_DEFAULT: 0.6,
-    LINK_FADED: 0.05,
-    LINK_HIGHLIGHT: 0.9
-  },
+let OPACITY = {
+      NODE_DEFAULT: 0.9,
+      NODE_FADED: 0.1,
+      NODE_HIGHLIGHT: 1,
+      LINK_DEFAULT: 0.6,
+      LINK_FADED: 0.05,
+      LINK_HIGHLIGHT: 0.9
+    },
   TYPES = ["Solution", "Financial_Product", "Function", "Module", "Component", "Interface"],
   TYPE_COLORS = ["#ffd644", "#6cfff9", "#30ff2c", "#ee74ff", "#ccff43", "#ff7d63"],
   TYPE_HIGHLIGHT_COLORS = ["#ffd644", "#6cfff9", "#30ff2c", "#ee74ff", "#ccff43", "#ff7d63"],
@@ -158,8 +191,8 @@ var OPACITY = {
   OUTFLOW_COLOR = "#6cfff9",
   NODE_WIDTH = 20,
   COLLAPSER = {
-    RADIUS: NODE_WIDTH,
-    SPACING: 2
+    RADIUS: NODE_WIDTH*0.8,
+    SPACING: 3
   },
   OUTER_MARGIN = 10,
   MARGIN = {
@@ -169,33 +202,23 @@ var OPACITY = {
     LEFT: OUTER_MARGIN
   },
   TRANSITION_DURATION = 400,
-  WIDTH = 1300 - MARGIN.LEFT - MARGIN.RIGHT,
-  HEIGHT = 1000 - MARGIN.TOP - MARGIN.BOTTOM,
-  LAYOUT_INTERATIONS = 32,
+  WIDTH = 2300 - MARGIN.LEFT - MARGIN.RIGHT,
+  HEIGHT = 1100 - MARGIN.TOP - MARGIN.BOTTOM,
+  LAYOUT_INTERATIONS = 10,
   REFRESH_INTERVAL = 7000;
-
-var formatNumber = function (d) {
-  var numberFormat = d3.format(",.0f"); // zero decimal places
-  return "$" + numberFormat(d);
-},
-
-formatFlow = function (d) {
-  var flowFormat = d3.format(",.0f"); // zero decimal places with sign
-  return "$" + flowFormat(Math.abs(d)) + (d < 0 ? " CR" : " DR");
-},
 
 // Used when temporarily disabling user interactions to allow animations to complete
 disableUserInteractions = function (time) {
   isTransitioning = true;
-  setTimeout(function(){
+  setTimeout(function() {
     isTransitioning = false;
   }, time);
 },
 
 hideTooltip = function () {
   return tooltip.transition()
-    .duration(TRANSITION_DURATION)
-    .style("opacity", 0);
+  .duration(TRANSITION_DURATION)
+  .style("opacity", 0);
 },
 
 showTooltip = function () {
@@ -203,21 +226,15 @@ showTooltip = function () {
     .style("left", d3.event.pageX + "px")
     .style("top", d3.event.pageY + 15 + "px")
     .transition()
-      .duration(TRANSITION_DURATION)
-      .style("opacity", 1);
+    .duration(TRANSITION_DURATION)
+    .style("opacity", 1);
 };
 
-/** The parent DOM element id of D3 chart should be specified in html.
- * Let's check it for integrity.
- * Default value is "#chart".
- * */
-if (typeof chartDomElementId  === 'undefined') var chartDomElementId = "#chart"; // will make it optional
-if (!chartDomElementId) chartDomElementId = "#chart";
 
 colorScale = d3.scaleOrdinal().domain(TYPES).range(TYPE_COLORS),
 highlightColorScale = d3.scaleOrdinal().domain(TYPES).range(TYPE_HIGHLIGHT_COLORS),
 
-svg = d3.select(chartDomElementId)
+svg = d3.select('#bisankey-container')
         .append("svg")
         .attr("width", WIDTH + MARGIN.LEFT + MARGIN.RIGHT)
         .attr("height", HEIGHT + MARGIN.TOP + MARGIN.BOTTOM)
@@ -228,11 +245,11 @@ svg.append("g").attr("id", "links");
 svg.append("g").attr("id", "nodes");
 svg.append("g").attr("id", "collapsers");
 
-tooltip = d3.select(chartDomElementId).append("div").attr("id", "tooltip");
+tooltip = d3.select('#bisankey-container').append("div").attr("id", "tooltip");
 
 tooltip.style("opacity", 0)
-    .append("p")
-      .attr("class", "value");
+       .append("p")
+       .attr("class", "value");
 
 /** New D3 diagram object */
 biHiSankey = d3.biHiSankey();
@@ -244,16 +261,16 @@ biHiSankey
   .nodeWidth(NODE_WIDTH)
   .nodeSpacing(10)
   .linkSpacing(4)
-  .arrowheadScaleFactor(0.5) // Specifies that 0.5 of the link's stroke WIDTH should be allowed for the marker at the end of the link.
+  .arrowheadScaleFactor(0.5)
   .size([WIDTH, HEIGHT])
-  .onlyOneTextColor(false)  // 'true' will render single only AND the same text color as specified in css
-  .labelsAlwaysMiddle(false); // 'true' will align node's text in the middle. 'false' will align left and right
+  .onlyOneTextColor(false)
+  .labelsAlwaysMiddle(true);
 
-path = biHiSankey.link().curvature(0.45);
+  path = biHiSankey.link().curvature(0.45);
 
-defs = svg.append("defs");
+  defs = svg.append("defs");
 
-defs.append("marker")
+  defs.append("marker")
   .style("fill", LINK_COLOR)
   .attr("id", "arrowHead")
   .attr("viewBox", "0 0 6 10")
@@ -264,9 +281,9 @@ defs.append("marker")
   .attr("markerHeight", "1")
   .attr("orient", "auto")
   .append("path")
-    .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
+  .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
-defs.append("marker")
+  defs.append("marker")
   .style("fill", OUTFLOW_COLOR)
   .attr("id", "arrowHeadInflow")
   .attr("viewBox", "0 0 6 10")
@@ -277,9 +294,9 @@ defs.append("marker")
   .attr("markerHeight", "1")
   .attr("orient", "auto")
   .append("path")
-    .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
+  .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
-defs.append("marker")
+  defs.append("marker")
   .style("fill", INFLOW_COLOR)
   .attr("id", "arrowHeadOutlow")
   .attr("viewBox", "0 0 6 10")
@@ -290,7 +307,7 @@ defs.append("marker")
   .attr("markerHeight", "1")
   .attr("orient", "auto")
   .append("path")
-    .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
+  .attr("d", "M 0 0 L 1 0 L 6 5 L 1 10 L 0 10 z");
 
 function update () {
   var link, linkEnter, node, nodeEnter, collapser, collapserEnter;
@@ -305,39 +322,43 @@ function update () {
   }
 
   function containChildren(node) {
-    node.children.forEach(function (child) {
-      child.state = "contained";
-      child.parent = this;
-      child._parent = null;
-      containChildren(child);
-    }, node);
+    node.state = "contained";
+    const trigger = node.trigger;
+    node.connectedNodes.forEach(function(child) {
+      if (trigger !== child.id) {
+        containChildren(child)
+      }
+    });
   }
 
   function expand(node) {
     node.state = "expanded";
-    node.children.forEach(function (child) {
-      child.state = "collapsed";
-      child._parent = this;
-      child.parent = null;
-      containChildren(child);
-    }, node);
+    const trigger = node.trigger;
+    node.connectedNodes.forEach(function(child) {
+      if (trigger !== child.id) {
+        containChildren(child);   //hide all children
+      }
+    });
   }
 
   function collapse(node) {
     node.state = "collapsed";
-    containChildren(node);
+    const trigger = node.trigger;
+    node.connectedNodes.forEach(function(child) {
+      if (trigger !== child.id) {
+        collapse(child)
+      }
+    });
   }
 
   function restoreLinksAndNodes() {
-    link
-      .style("stroke", LINK_COLOR)
-      .style("marker-end", function () { return 'url(#arrowHead)'; })
-      .transition()
+    link.style("stroke", LINK_COLOR)
+        .style("marker-end", function () { return 'url(#arrowHead)'; })
+        .transition()
         .duration(TRANSITION_DURATION)
         .style("opacity", OPACITY.LINK_DEFAULT);
 
-    node
-      .selectAll("rect")
+    node.selectAll("rect")
         .style("fill", function (d) {
           d.color = colorScale(d.type.replace(/ .*/, ""));
           return d.color;
@@ -348,17 +369,17 @@ function update () {
         .style("fill-opacity", OPACITY.NODE_DEFAULT);
 
     node.filter(function (n) { return n.state === "collapsed"; })
-      .transition()
+        .transition()
         .duration(TRANSITION_DURATION)
         .style("opacity", OPACITY.NODE_DEFAULT);
   }
 
   function showHideChildren(node) {
-    console.log(node, 'clicked' )
+    // console.log(node, 'clicked' )
     disableUserInteractions(2 * TRANSITION_DURATION);
     hideTooltip();
-    if (node.state === "collapsed") { expand(node); }
-    else { collapse(node); }
+    if (node.state === "collapsed") expand(node);  //to collaspe nodes, change state to expanded
+    else collapse(node); //to collapse nodes, change state to collapsed
 
     biHiSankey.relayout();
     update();
@@ -368,117 +389,110 @@ function update () {
 
   function highlightConnected(g) {
     link.filter(function (d) { return d.source === g; })
-      .style("marker-end", function () { return 'url(#arrowHeadInflow)'; })
-      .style("stroke", OUTFLOW_COLOR)
-      .style("opacity", OPACITY.LINK_DEFAULT);
+        .style("marker-end", function () { return 'url(#arrowHeadInflow)'; })
+        .style("stroke", OUTFLOW_COLOR)
+        .style("opacity", OPACITY.LINK_DEFAULT);
 
     link.filter(function (d) { return d.target === g; })
-      .style("marker-end", function () { return 'url(#arrowHeadOutlow)'; })
-      .style("stroke", INFLOW_COLOR)
-      .style("opacity", OPACITY.LINK_DEFAULT);
+        .style("marker-end", function () { return 'url(#arrowHeadOutlow)'; })
+        .style("stroke", INFLOW_COLOR)
+        .style("opacity", OPACITY.LINK_DEFAULT);
   }
 
-  function fadeUnconnected(g) {
-    link.filter(function (d) { return d.source !== g && d.target !== g; })
+    function fadeUnconnected(g) {
+      link.filter(function (d) { return d.source !== g && d.target !== g; })
       .style("marker-end", function () { return 'url(#arrowHead)'; })
       .transition()
-        .duration(TRANSITION_DURATION)
-        .style("opacity", OPACITY.LINK_FADED);
+      .duration(TRANSITION_DURATION)
+      .style("opacity", OPACITY.LINK_FADED);
 
-    node.filter(function (d) {
-      return (d.name === g.name) ? false : !biHiSankey.connected(d, g);
-    }).transition()
+      node.filter(function (d) {
+        return (d.name === g.name) ? false : !biHiSankey.connected(d, g);
+      }).transition()
       .duration(TRANSITION_DURATION)
       .style("opacity", OPACITY.NODE_FADED);
-  }
+    }
 
-  link = svg.select("#links").selectAll("path.link")
-    .data(biHiSankey.visibleLinks(), function (d) { return d.id; });
+  link = svg.select("#links")
+            .selectAll("path.link")
+            .data(biHiSankey.visibleLinks(), function (d) { return d.id; });
 
   link.transition()
-    .duration(TRANSITION_DURATION)
-    .style("stroke-WIDTH", function (d) { return Math.max(1, d.thickness); })
-    .attr("d", path)
-    .style("opacity", OPACITY.LINK_DEFAULT);
+      .duration(TRANSITION_DURATION)
+      .attr("stroke-width", function (d) {return Math.max(1, d.thickness); })
+      .attr("d", path)
+      .style("opacity", OPACITY.LINK_DEFAULT);
 
 
-  link.exit().remove();
+    link.exit().remove();
 
 
   linkEnter = link.enter().append("path")
-    .attr("class", "link")
-    .style("fill", "none");
+                  .attr("class", "link")
+                  .style("fill", "none");
 
   linkEnter.on('mouseenter', function (d) {
     if (!isTransitioning) {
-      showTooltip().select(".value").text(function () {
+      showTooltip().select(".value").text(function() {
         if (d.direction > 0) {
-          return d.source.name + " -> " + d.target.name; /* + "\n" + formatNumber(d.value);*/
+          return d.source.name + " -> " + d.target.name;
         }
-        return d.target.name + " <- " + d.source.name; /* + "\n" + formatNumber(d.value);*/
+        return d.target.name + " <- " + d.source.name;
       });
 
-      d3.select(this)
+        d3.select(this)
         .style("stroke", LINK_COLOR)
         .transition()
-          .duration(TRANSITION_DURATION / 2)
-          .style("opacity", OPACITY.LINK_HIGHLIGHT);
+        .duration(TRANSITION_DURATION / 2)
+        .style("opacity", OPACITY.LINK_HIGHLIGHT);
     }
   });
 
   linkEnter.on('mouseleave', function () {
     if (!isTransitioning) {
       hideTooltip();
-
       d3.select(this)
         .style("stroke", LINK_COLOR)
         .transition()
-          .duration(TRANSITION_DURATION / 2)
-          .style("opacity", OPACITY.LINK_DEFAULT);
+        .duration(TRANSITION_DURATION / 2)
+        .style("opacity", OPACITY.LINK_DEFAULT);
     }
   });
 
   linkEnter.sort(function (a, b) { return b.thickness - a.thickness; })
-    .classed("leftToRight", function (d) {
-      return d.direction > 0;
-    })
-    .classed("rightToLeft", function (d) {
-      return d.direction < 0;
-    })
-    .style("marker-end", function () {
-      return 'url(#arrowHead)';
-    })
-    .style("stroke", LINK_COLOR)
-    .style("opacity", 0)
-    .transition()
-      .delay(TRANSITION_DURATION)
-      .duration(TRANSITION_DURATION)
-      .attr("d", path)
-      .style("stroke-WIDTH", function (d) { return Math.max(1, d.thickness); })
-      .style("opacity", OPACITY.LINK_DEFAULT);
+           .classed("leftToRight", function(d) {return d.direction > 0;})
+           .classed("rightToLeft", function(d) {return d.direction < 0;})
+           .style("marker-end", function() {return 'url(#arrowHead)';})
+           .style("stroke", LINK_COLOR)
+           .style("opacity", 0)
+           .transition()
+           .delay(TRANSITION_DURATION)
+           .duration(TRANSITION_DURATION)
+           .attr("d", path)
+           .attr("stroke-width", function (d) {return Math.max(1, d.thickness);})
+           .style("opacity", OPACITY.LINK_DEFAULT);
 
 
   node = svg.select("#nodes").selectAll(".node")
-      .data(biHiSankey.collapsedNodes(), function (d) { return d.id; });
+            .data(biHiSankey.collapsedNodes(), function (d) { return d.id; });
 
 
   node.transition()
-    .duration(TRANSITION_DURATION)
-    .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
-    .style("opacity", OPACITY.NODE_DEFAULT)
-    .select("rect")
-      .style("fill", function (d) {
+      .duration(TRANSITION_DURATION)
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+      .style("opacity", OPACITY.NODE_DEFAULT)
+      .select("rect")
+      .style("fill", function(d) {
         d.color = colorScale(d.type.replace(/ .*/, ""));
-        return d.color;
-      })
-      .style("stroke", function (d) { return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1); })
-      .style("stroke-WIDTH", "1px")
-      .attr("height", function (d) { return d.height; })
+        return d.color;})
+      .style("stroke", function(d) { return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1); })
+      .attr("stroke-width", "1px")
+      .attr("height", function(d) { return d.height; })
       .attr("width", biHiSankey.nodeWidth());
 
 
   node.exit()
-    .transition()
+      .transition()
       .duration(TRANSITION_DURATION)
       .attr("transform", function (d) {
         var collapsedAncestor, endX, endY;
@@ -492,41 +506,45 @@ function update () {
       .remove();
 
 
-  nodeEnter = node.enter().append("g").attr("class", "node");
+    nodeEnter = node.enter().append("g").attr("class", "node");
 
-  nodeEnter
+    nodeEnter
     .attr("transform", function (d) {
       var startX = d._parent ? d._parent.x : d.x,
-          startY = d._parent ? d._parent.y : d.y;
+      startY = d._parent ? d._parent.y : d.y;
       return "translate(" + startX + "," + startY + ")";
     })
     .style("opacity", 1e-6)
     .transition()
-      .duration(TRANSITION_DURATION)
-      .style("opacity", OPACITY.NODE_DEFAULT)
-      .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+    .duration(TRANSITION_DURATION)
+    .style("opacity", OPACITY.NODE_DEFAULT)
+    .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
 
   nodeEnter.append("rect")
-    .style("fill", function (d) {
-      d.color = colorScale(d.type.replace(/ .*/, ""));
-      return d.color;
-    })
-    .style("stroke", function (d) {
-      return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1);
-    })
-    .style("stroke-WIDTH", "1px")
-    .attr("height", function (d) { return d.height; })
-    .attr("width", biHiSankey.nodeWidth());
-  nodeEnter.append("foreignObject")
+           .style("fill", function(d) {
+             d.color = colorScale(d.type.replace(/ .*/, ""));
+             return d.color;
+           })
+           .style("stroke", function(d) {
+             return d3.rgb(colorScale(d.type.replace(/ .*/, ""))).darker(0.1);
+           })
+           .style("stroke-width", "1px")
+           .attr("height", function(d) { return d.height; })
+           .attr("width", biHiSankey.nodeWidth());
+
+  nodeEnter.append("foreignObject")   // can be deleted?
            .append("xhtml:text")
            .attr("class", "node-type")
-           .text(function(d) { 
+           .text(function(d) {
               if(d.sourceLinks.length > 0 || d.leftLinks.length > 0){
                 return d.name
               }
             });
 
   node.on("mouseenter", function (g) {
+    d3.select("#chart-info").selectAll("*").remove();
+
+    console.log('g', g)
     if (!isTransitioning) {
       restoreLinksAndNodes();
       highlightConnected(g);
@@ -537,29 +555,71 @@ function update () {
           d.color = d.netFlow > 0 ? INFLOW_COLOR : OUTFLOW_COLOR;
           return d.color;
         })
-        .style("stroke", function (d) {
-          return d3.rgb(d.color).darker(0.1);
-        })
-        .style("fill-opacity", OPACITY.LINK_DEFAULT);
+      .style("stroke", function (d) { return d3.rgb(d.color).darker(0.1); })
+      .style("fill-opacity", OPACITY.LINK_DEFAULT);
 
-      tooltip
-        .style("left", g.x + MARGIN.LEFT + "px")
-        .style("top", g.y + g.height + MARGIN.TOP + 15 + "px")
-        .transition()
-          .duration(TRANSITION_DURATION)
-          .style("opacity", 1).select(".value")
-          .text(function () {
-            var additionalInstructions = g.children.length ? "\n(Double click to expand)" : "";
-            /*return g.name + "\nNet flow: " + formatFlow(g.netFlow) + additionalInstructions;*/
-            return g.name + g.errMessage;
-          });
+      // tooltip
+      // .style("left", g.x + MARGIN.LEFT + 100 + "px")
+      // .style("top", g.y + g.height + MARGIN.TOP + 15 + "px")
+      // .transition()
+      // .duration(TRANSITION_DURATION)
+      // .style("opacity", 1).select(".value")
+      // .text(() => {
+      //   let additionalInstructions = g.children.length ? "\n(Double click to expand)" : "";
+      //   return g.name + "\n Duration: " + g.duration + "\n ID: " + g.id + "\n Start Time: " + g.startTime + "\n Errors: " + g.errMessage ;
+      // });
+
+      var parentPanel = d3.select("#chart-info")
+                          .selectAll("#chartData")
+                          .data([g, ...g.rightLinks])
+                          .enter()
+                          .append("div")
+                          .attr("class", "chart-info")
+                          .style("background-color", function(d){
+                            return d.color ? d.color : d.target.color;
+                          })
+      parentPanel.append("h4").attr("class", "func-name")
+                 .text((d) => { return `${d.type ? d.type : d.target.type}`})
+
+      parentPanel.append("p").attr("class", "func-data")
+                 .text(d => { return `Id: ${d.id ? d.id : d.target.id}`})
+
+      parentPanel.append("p").attr("class", "func-data")
+                 .text((d) => { return `Start time: ${d.startTime ? d.startTime : d.target.startTime}`})
+
+      parentPanel.append("p").attr("class", "func-data")
+                 .text((d) => { return `Time taken to run: ${d.duration ? d.duration : d.target.duration} ms`})
+
+      parentPanel.append("p").attr("class", "stack-expand")
+                 .attr("id", (d) => `err${d.id ? d.id : d.target.id}`)
+                 .text( () => { return `Click to show stack trace`})
+
+      let errors = d3.selectAll(".stack-expand")
+      errors.on("click", (d) => {
+              // console.log(d3.event.target.id)
+        let errId = `#${d3.event.target.id}`
+        if(!d.errorShown){
+          d.errorShown = true;
+          // errors.select(errId)
+          d3.select(errId).append("p").attr("class", "stack-data")
+            .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
+          } else {
+            d3.select(errId).select('.stack-data').remove()
+            d.errorShown = false;
+          }
+      })
+
+      // parentPanel.append("p").attr("class", "func-data")
+      //          .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
+
     }
-  });
+});
 
   node.on("mouseleave", function () {
     if (!isTransitioning) {
       hideTooltip();
       restoreLinksAndNodes();
+
     }
   });
 
@@ -567,77 +627,69 @@ function update () {
 
   // add in the text for the nodes
   node
-  .filter(function (d) { return d.value !== 0; })
-  .select("text")
+    .filter(function (d) { return d.value !== 0; })
+    .select("text")
     .attr("x", biHiSankey.labelsAlwaysMiddle() ? biHiSankey.nodeWidth()/2 : -6)
     .attr("y", function (d) { return d.height / 2 - ((d.name.length-1)*7); })
     .attr("dy", ".35em")
     .attr("text-anchor", biHiSankey.labelsAlwaysMiddle() ? "middle" : "end")
     .text(function (d) { return d.name; });
+
   if (!biHiSankey.onlyOneTextColor())
-  node.filter(function (d) { return d.value !== 0; })
-    .select("text")
-    .style("fill", function (d) { return colorScale(d.type.replace(/ .*/, "")); });
+    node.filter(function (d) { return d.value !== 0; })
+        .select("text")
+        .style("fill", function (d) { return colorScale(d.type.replace(/ .*/, "")); });
+
   if (!biHiSankey.labelsAlwaysMiddle())
-  node.filter(function (d) { return d.value !== 0; })
-    .select("text")
-    .filter(function (d) { return d.x < biHiSankey.nodeWidth() / 2; })
-    .attr("x", 6 + biHiSankey.nodeWidth())
-    .attr("text-anchor", "start");
+    node.filter(function (d) { return d.value !== 0; })
+        .select("text")
+        .filter(function (d) { return d.x < biHiSankey.nodeWidth() / 2; })
+        .attr("x", 6 + biHiSankey.nodeWidth())
+        .attr("text-anchor", "start");
 
   collapser = svg.select("#collapsers").selectAll(".collapser")
-    .data(biHiSankey.expandedNodes(), function (d) { return d.id; });
+                 .data(biHiSankey.expandedNodes(), function (d) { return d.id; });
 
   collapserEnter = collapser.enter().append("g").attr("class", "collapser");
 
   collapserEnter.append("circle")
-    .attr("r", COLLAPSER.RADIUS)
-    .style("fill", function (d) {
-      d.color = colorScale(d.type.replace(/ .*/, ""));
-      return d.color;
-    });
+                .attr("r", COLLAPSER.RADIUS)
+                .style("fill", function (d) {
+                  d.color = colorScale(d.type.replace(/ .*/, ""));
+                  return d.color;
+                });
 
-  collapserEnter
-    .style("opacity", OPACITY.NODE_DEFAULT)
-    .attr("transform", function (d) {
-      return "translate(" + (d.x + d.width / 2) + "," + (d.y + COLLAPSER.RADIUS) + ")";
-    });
+  collapserEnter.style("opacity", OPACITY.NODE_DEFAULT)
+                .attr("transform", function(d) {
+                  return "translate(" + (d.x + d.width / 2) + "," + (d.y + COLLAPSER.RADIUS) + ")";
+                });
 
   collapserEnter.on("click", showHideChildren );
 
   collapser.select("circle")
-    .attr("r", COLLAPSER.RADIUS);
+           .attr("r", COLLAPSER.RADIUS);
 
   collapser.transition()
-    .delay(TRANSITION_DURATION)
-    .duration(TRANSITION_DURATION)
-    .attr("transform", function (d, i) {
-      return "translate("
-        + (COLLAPSER.RADIUS + i * 2 * (COLLAPSER.RADIUS + COLLAPSER.SPACING))
-        + ","
-        + (-COLLAPSER.RADIUS - OUTER_MARGIN)
-        + ")";
-    });
+           .delay(TRANSITION_DURATION)
+           .duration(TRANSITION_DURATION)
 
   collapser.on("mouseenter", function (g) {
     if (!isTransitioning) {
       showTooltip().select(".value")
-        .text(function () {
-          console.log(g)
-          return g.name + "\n(Double click to collapse its children)";
-        });
+      .text(function () {
+        return g.name + "\n(Double click to collapse its children)";
+      });
 
       var highlightColor = highlightColorScale(g.type.replace(/ .*/, ""));
 
       d3.select(this)
         .style("opacity", OPACITY.NODE_HIGHLIGHT)
         .select("circle")
-          .style("fill", highlightColor);
+        .style("fill", highlightColor);
 
-      node.filter(function (d) {
-        return d.ancestors.indexOf(g) >= 0;
-      }).style("opacity", OPACITY.NODE_HIGHLIGHT)
-        .select("rect")
+      node.filter(function (d) {return d.ancestors.indexOf(g) >= 0;})
+          .style("opacity", OPACITY.NODE_HIGHLIGHT)
+          .select("rect")
           .style("fill", highlightColor);
     }
   });
@@ -648,12 +700,11 @@ function update () {
       d3.select(this)
         .style("opacity", OPACITY.NODE_DEFAULT)
         .select("circle")
-          .style("fill", function (d) { return d.color; });
+        .style("fill", function (d) { return d.color; });
 
-      node.filter(function (d) {
-        return d.ancestors.indexOf(g) >= 0;
-      }).style("opacity", OPACITY.NODE_DEFAULT)
-        .select("rect")
+      node.filter(function(d) {return d.ancestors.indexOf(g) >= 0;})
+          .style("opacity", OPACITY.NODE_DEFAULT)
+          .select("rect")
           .style("fill", function (d) { return d.color; });
     }
   });

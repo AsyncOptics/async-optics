@@ -42,14 +42,15 @@ div.tooltip {
 #sunburst-container {
   display: flex;
   flex-direction: row;
-  border: 1px solid white;
+  /*border: 1px solid white;*/
+  margin-top: 50px;
 }
 
 #sun-container {
   width: 95%;
   height: auto;
-  margin-right: -20px;
-  margin-top: 30px;
+  margin-right: -40px;
+/*  margin-top: 30px;*/
 }
 
 #package-data {
@@ -67,4 +68,3 @@ div.tooltip {
 .package-name {
   text-align: center;
 }
-
