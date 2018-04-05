@@ -285,7 +285,7 @@ function update () {
     biHiSankey.relayout();
     restoreLinksAndNodes();
     update();
-    // link.attr("d", path);
+    link.attr("d", path);
   }
 
   function highlightConnected(g) {
@@ -390,9 +390,7 @@ function update () {
       .attr("d", path)
       .style("opacity", OPACITY.LINK_DEFAULT);
 
-
   link.exit().remove();
-
 
   linkEnter = link.enter().append("path")
                   .attr("class", "link")

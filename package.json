@@ -1,5 +1,5 @@
 {
-  "name": "async_optics",
+  "name": "async-optics",
   "version": "1.0.0",
   "description": "Node asynchronous process and package monitor",
   "main": "index.js",
@@ -29,9 +29,5 @@
       "url": "http://github.com/sartra"
     }
   ],
-  "license": "MIT",
-  "dependencies": {
-    "express": "^4.16.3",
-    "socket.io": "^2.1.0"
-  }
+  "license": "MIT"
 }

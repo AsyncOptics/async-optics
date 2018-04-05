@@ -16,7 +16,7 @@ const obs = new PerformanceObserver((list, observer) => {
   let buffer;
   entries.forEach((entry, i) => {
   	if (aggregate[entry[0]]) {
-  		aggregate[entry[0]] = [];
+  		if (aggregate[entry[0]].constructor !== Array) aggregate[entry[0]] = [];
   		buffer = aggregate[entry[0]];
   		endTime = entry.startTime + entry.duration;
   		buffer.push({
@@ -27,9 +27,9 @@ const obs = new PerformanceObserver((list, observer) => {
   			totalTime: entry.duration,
   			children: []
   		})
-  	} else if (!buffer) {
+  	} else if (!buffer) {}
       // do nothing for now,since it is from our library and not in package
-    } else if (!entry[0].includes('package.json')) {
+     else if (!entry[0].includes('package.json')) {
   		buffer[0].totalTime += entry.duration
   		endTime = entry.startTime + entry.duration
   		buffer.push({
@@ -42,6 +42,7 @@ const obs = new PerformanceObserver((list, observer) => {
   		})
   	}
   });
+  // console.log(aggregate);
   io._hierarchyAggregate = createHierarchy(aggregate)
   obs.disconnect();
   performance.clearFunctions();
