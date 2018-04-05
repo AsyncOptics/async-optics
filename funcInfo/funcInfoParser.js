@@ -42,7 +42,7 @@ function funcInfoParser(asyncId, type, triggerAsyncId, resource, err) {
       }
       break;
     case 'FSREQWRAP':
-      process._rawDebug(type, asyncId, triggerAsyncId, err);
+      // process._rawDebug(type, asyncId, triggerAsyncId, err);
       break;
     case 'TCPWRAP':
       // no information, but can trigger other events with information

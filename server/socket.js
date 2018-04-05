@@ -1,7 +1,8 @@
 const express = require('express');
 const socketio = require('socket.io');
 const http = require('http');
-const path = require('path')
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const server = http.Server(app);
@@ -30,9 +31,13 @@ io.on('connection', (socket) => {
 });
 
 function startServer(portNumber) {
-  server.listen(portNumber, () => {
-    process._rawDebug(`socket setup, listening to PORT ${portNumber}`);
-  });
+  const scriptStr = `const socket = io.connect('http://localhost:${portNumber}');`;
+  fs.writeFile(path.join(__dirname,'../client/src/main.js'), scriptStr, (err) => {
+    if (err) throw err;
+    server.listen(portNumber, () => {
+      process._rawDebug(`socket setup, listening to PORT ${portNumber}`);
+    });
+  })
 }
 
 
