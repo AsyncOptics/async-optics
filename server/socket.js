@@ -11,12 +11,6 @@ io._asyncInfo = [];
 
 let numOfConnections = 0;
 
-app.use( (req, res, next) => {
-  // process._rawDebug(req.method, req.url);
-  next();
-})
-
-// app.use(express.static('client'));
 app.use(express.static(path.join(__dirname, '../client')));
 
 io.on('connection', (socket) => {
@@ -35,23 +29,23 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = 3000;
-
-server.listen(PORT, () => {
-  process._rawDebug(`socket setup, listening to PORT ${PORT}`);
-});
-
-
-function checkIdExist(id) {
-  for (let i=0; i<io._asyncInfo.length; i++) {
-    if (io._asyncInfo[i].asyncId === id) {
-      process._rawDebug(`asyncID ${id} EXIST`);
-      return;
-    }
-  }
-  process._rawDebug(`asyncID ${id} DOESN"T EXIST`);
-  return;
-};
+function startServer(portNumber) {
+  server.listen(portNumber, () => {
+    process._rawDebug(`socket setup, listening to PORT ${portNumber}`);
+  });
+}
 
 
-module.exports = io;
+
+// function checkIdExist(id) {
+//   for (let i=0; i<io._asyncInfo.length; i++) {
+//     if (io._asyncInfo[i].asyncId === id) {
+//       process._rawDebug(`asyncID ${id} EXIST`);
+//       return;
+//     }
+//   }
+//   process._rawDebug(`asyncID ${id} DOESN"T EXIST`);
+//   return;
+// };
+
+module.exports = {io, startServer};

@@ -95,7 +95,6 @@ function highlightNewEvent() {
 }
 
 // https://github.com/northam/styled_sankey/blob/master/bihisankey.app.js
-
 let svg, tooltip, biHiSankey, path, defs, colorScale, highlightColorScale, isTransitioning;
 
 let OPACITY = {
@@ -172,12 +171,9 @@ tooltip.style("opacity", 0)
        .append("p")
        .attr("class", "value");
 
-/** New D3 diagram object */
+
 biHiSankey = d3.biHiSankey();
 
-/** biHiSankey default properties
- *  Set as many defaults as possible to avoid error for the missing property in further declarations in html file
- */
 biHiSankey.nodeWidth(NODE_WIDTH)
           .nodeSpacing(10)
           .linkSpacing(4)

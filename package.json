@@ -1,15 +1,33 @@
 {
-  "name": "test",
+  "name": "mnode",
   "version": "1.0.0",
-  "description": "",
-  "main": "test.js",
-  "scripts": {
-    "start": "node async_perf_hooks.js"
+  "description": "Node asynchronous function monitor, and package monitor",
+  "main": "index.js",
+  "homepage": "https://github.com/MNodejs",
+  "bugs": {
+    "url": "https://github.com/MNodejs/alpha/issues"
   },
-  "author": "penghe",
-  "license": "ISC",
-  "dependencies": {
-    "express": "^4.16.3",
-    "socket.io": "^2.0.4"
-  }
+  "contributors": [
+    {
+      "name": "Aleksander Turberville",
+      "email": "aturberv@gmail.com",
+      "url": "http://github.com/Aturberv"
+    },
+    {
+      "name": "Penghe Wu",
+      "email": "wupenghe92@gmail.com",
+      "url": "http://github.com/wupenghe92"
+    },
+    {
+      "name": "Ralph Salaza",
+      "email": "ralph.slzr@gmail.com",
+      "url": "http://github.com/pjr4lph"
+    },
+    {
+      "name": "Sarah Renshaw",
+      "email": "strenshaw@gmail.com",
+      "url": "http://github.com/sartra"
+    }
+  ],
+  "license": "MIT"
 }

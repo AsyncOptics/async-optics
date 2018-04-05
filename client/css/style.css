@@ -39,7 +39,6 @@ div.tooltip {
 #sunburst-container {
   display: flex;
   flex-direction: row;
-  /*border: 1px solid white;*/
   margin-top: 50px;
 }
 
@@ -47,7 +46,6 @@ div.tooltip {
   width: 95%;
   height: auto;
   margin-right: -40px;
-/*  margin-top: 30px;*/
 }
 
 #package-data {
@@ -57,7 +55,6 @@ div.tooltip {
 
 .package-info {
   border: 5px solid black;
-  /*background-color: #FFFFFF;*/
   width: 110%;
   padding: 10px;
 }
