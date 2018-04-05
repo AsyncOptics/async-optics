@@ -9,7 +9,7 @@ console.log = process._rawDebug;
 // and retrieving the resource of the current trigger without needing to use an
 // AsyncHook.
 const cid = async_hooks.executionAsyncId();
-// process._rawDebug('currentId',async_hooks.executionAsyncId(),'  triggerId',async_hooks.triggerAsyncId());
+// process._rawDebug('currentId',async_hooks.executionAsyncId(), 'triggerId',async_hooks.triggerAsyncId());
 function asyncMonitor(portNumber) {
   ioController.startServer(portNumber);
 
@@ -96,9 +96,9 @@ function asyncMonitor(portNumber) {
     }
 
     if( err.includes('ioController_mnode.js') ||
-        err.includes('/alpha/node_modules/') ||
-        err.includes('/alpha/packageMonitor.js') ||
-        err.includes(`at AsyncHook.init (${__dirname}/async_perf_hooks.js)`) &&
+        err.includes('/async_optics/node_modules/') ||
+        err.includes('/async_optics/packageMonitor.js') ||
+        err.includes(`at AsyncHook.init (${__dirname}/asyncMonitor.js)`) &&
         err.includes('at TCP.emitInitNative (internal/async_hooks.js:131:43)') ) {
       return;
     } else if(triggerAsyncId < 8 || activeAsyncProcess.get(triggerAsyncId)) {

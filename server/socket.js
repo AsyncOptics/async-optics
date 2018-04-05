@@ -15,7 +15,6 @@ let numOfConnections = 0;
 app.use(express.static(path.join(__dirname, '../client')));
 
 io.on('connection', (socket) => {
-  process._rawDebug('New Socket Connection', socket.id);
   numOfConnections++;
   io._hasConnection = true;
   socket.emit('packageInfo', io._hierarchyAggregate);
@@ -24,7 +23,6 @@ io.on('connection', (socket) => {
   	socket.emit('funcInfo', io._asyncInfo);
   }
   socket.on('disconnect', (reason) => {
-    process._rawDebug('Socket Disonnect', socket.id);
     numOfConnections--;
     if (numOfConnections === 0) io._hasConnection = false;
   });
@@ -39,8 +37,6 @@ function startServer(portNumber) {
     });
   })
 }
-
-
 
 // function checkIdExist(id) {
 //   for (let i=0; i<io._asyncInfo.length; i++) {
