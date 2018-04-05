@@ -1,5 +1,5 @@
 const {performance, PerformanceObserver} = require('perf_hooks');
-const io = require('./server/socket.js');
+const {io} = require('./server/socket.js');
 const mod = require('module');
 const path = require('path');
 
@@ -27,7 +27,9 @@ const obs = new PerformanceObserver((list, observer) => {
   			totalTime: entry.duration,
   			children: []
   		})
-  	} else if (!entry[0].includes('package.json')) {
+  	} else if (!buffer) {
+      // do nothing for now,since it is from our library and not in package
+    } else if (!entry[0].includes('package.json')) {
   		buffer[0].totalTime += entry.duration
   		endTime = entry.startTime + entry.duration
   		buffer.push({
@@ -133,4 +135,4 @@ function checkStack(stack, currHierarchy){
 
 
 
-module.exports = {pkgMonitor};
+module.exports = pkgMonitor;

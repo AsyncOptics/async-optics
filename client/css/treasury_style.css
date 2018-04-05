@@ -24,14 +24,10 @@ html, body {
 
 .node text {
   pointer-events: none;
-  /*text-shadow: 1px 1px 2px #fff;*/
   font-size: 0.7em;
   font-family: Helvetica, sans-serif;
   text-align: center;
-  /*-webkit-filter: drop-shadow( 2px 2px 2px #fff );
-  filter: drop-shadow( 2px 2px 2px #fff );*/
   fill: white;
-  /*stroke: black; stroke-width: 1;*/
 }
 
 #tooltip {
@@ -69,7 +65,6 @@ html, body {
 }
 
 #chart-info {
-/*  order:1;*/
   height: auto;
   padding: 10px;
 }
@@ -110,4 +105,3 @@ html, body {
 .func-info {
   border: 2px solid black;
 }
-
