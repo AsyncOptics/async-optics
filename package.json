@@ -1,11 +1,11 @@
 {
-  "name": "mnode",
+  "name": "async_optics",
   "version": "1.0.0",
-  "description": "Node asynchronous function monitor, and package monitor",
+  "description": "Node asynchronous process and package monitor",
   "main": "index.js",
-  "homepage": "https://github.com/MNodejs",
+  "homepage": "https://github.com/MNodejs/AsyncOptics",
   "bugs": {
-    "url": "https://github.com/MNodejs/alpha/issues"
+    "url": "https://github.com/MNodejs/AsyncOptics/issues"
   },
   "contributors": [
     {
@@ -29,5 +29,9 @@
       "url": "http://github.com/sartra"
     }
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.16.3",
+    "socket.io": "^2.1.0"
+  }
 }

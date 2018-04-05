@@ -1,1 +1,1 @@
-const socket = io.connect('http://localhost:3333');
+const socket = io.connect('http://localhost:3000');

@@ -1,16 +1,13 @@
 const hist = {};
 let counter = 0;
 const DISPLAY_FREQ = 400;
-
+let FSREQWRAP_COUNT = 0;
 function funcInfoParser(asyncId, type, triggerAsyncId, resource, err) {
   // histDisplay(type);
   let shouldKeep = true;
   let resourceInfo = null;
   switch (type) {
     case 'TickObject':
-      // process._rawDebug('CALLBACK******',resource.callback); //not useful
-      // process._rawDebug('ARGS******',resource.args);         // too much info
-      // process._rawDebug('DOMAIN******',resource.domain);     // null
       if (err.includes('/mongodb-core/lib/connection/pool.js:1246:15') ||    //ignore mongoose calling process.nextTick (_execute)
           err.includes('/mongodb-core/lib/connection/pool.js:552:17') ||
           err.includes('/mongodb-core/lib/connection/pool.js:540:24')) {
@@ -24,7 +21,6 @@ function funcInfoParser(asyncId, type, triggerAsyncId, resource, err) {
                 err.includes('at TCP.onread (net.js:') && err.includes(':20')) {
         shouldKeep = false;
       }
-      // process._rawDebug(err);
       break;
     case 'TIMERWRAP':
       // no information at all, Timer {}
@@ -42,7 +38,12 @@ function funcInfoParser(asyncId, type, triggerAsyncId, resource, err) {
       }
       break;
     case 'FSREQWRAP':
-      // process._rawDebug(type, asyncId, triggerAsyncId, err);
+      if (FSREQWRAP_COUNT <= 2) {
+          FSREQWRAP_COUNT++;
+          shouldKeep = false;
+          break;
+      }
+      process._rawDebug(type, asyncId, triggerAsyncId, resource.oncomplete);
       break;
     case 'TCPWRAP':
       // no information, but can trigger other events with information
