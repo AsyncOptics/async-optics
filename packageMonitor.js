@@ -42,7 +42,6 @@ const obs = new PerformanceObserver((list, observer) => {
   		})
   	}
   });
-  // console.log(aggregate);
   io._hierarchyAggregate = createHierarchy(aggregate)
   obs.disconnect();
   performance.clearFunctions();
