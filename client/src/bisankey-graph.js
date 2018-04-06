@@ -28,16 +28,6 @@ socket.on('funcInfo', data => {
   }
 });
 
-function pulse(path, duration, end){
-  path.transition()
-      .duration(duration)
-      .style('stroke-opacity', .2)
-      .transition()
-      .style('stroke-opacity', 1)
-  timer = setTimeout(function() { pulse(path, duration); }, duration*2);
-}
-
-
 function nodeData(flatData) {
  const nodeDataArray = [];
  flatData.forEach((funcInfoNode) => {
@@ -95,6 +85,15 @@ function highlightNewEvent() {
   setTimeout(()=>{
     clearTimeout(timer);
   }, 10000)
+}
+
+function pulse(path, duration, end){
+  path.transition()
+      .duration(duration)
+      .style('stroke-opacity', .2)
+      .transition()
+      .style('stroke-opacity', 1)
+  timer = setTimeout(function() { pulse(path, duration); }, duration*2);
 }
 
 // https://github.com/northam/styled_sankey/blob/master/bihisankey.app.js

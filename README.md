@@ -1,4 +1,4 @@
-async-optics 1.0.0
+async-optics 1.0.4
 
 
 async-optics is an asynchronous code viewer, performance monitor, and package monitor for applications that use Node.js.
