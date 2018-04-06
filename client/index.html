@@ -1,25 +1,54 @@
  <!DOCTYPE html>
  <html>
  <head>
-   <title>M_Node</title>
+   <title>AsyncOptics</title>
    <script type="text/javascript" src="./d3/d3.min.js"></script>
    <script src="/socket.io/socket.io.js"></script>
    <link rel="stylesheet" type="text/css" href="./css/style.css">
-   <link rel="stylesheet" type="text/css" href="./css/treasury_style.css">
    <script type="text/javascript" src="./src/dataParser.js"></script>
    <script type="text/javascript" src="./src/bisankey.js"></script>
  </head>
  <body>
-   <h1>Async Function Monitor</h1>
-   <div id="bisankey-container"></div>
-   <div id="chart-info"></div>
+   <select id='chart-selection'>
+     <option value="0">Choose a Graph</option>
+     <option value="1">Async Monitor</option>
+     <option value="2">Package Monitor</option>
+   </select>
+
+   <div id='chart1-wrapper'>
+     <h1>Async Function Monitor</h1>
+     <div id="bisankey-container"></div>
+     <div id="chart-info"></div>
+   </div>
 
    <br>
-   <br>
-   <h1>Node Package Monitor</h1>
+
    <div id="sunburst-container">
      <div id="package-panel"></div>
    </div>
+
+   <script type="text/javascript">
+     window.addEventListener('DOMContentLoaded', function () {
+       const sankey = document.getElementById('chart1-wrapper');
+       const sunburst = document.getElementById('sunburst-container');
+       const selection = document.getElementById('chart-selection');
+
+       selection.addEventListener("change", (e) => {
+         if(e.target.value =='2') {
+           sankey.style.display = 'none';
+           sunburst.style.display = 'flex';
+         } else if (e.target.value =='1') {
+           sankey.style.display = 'block';
+           sunburst.style.display = 'none';
+         } else {
+           sankey.style.display = 'block';
+         }
+       })
+     });
+
+  </script>
+
+
    <script type="text/javascript" src="./src/main.js"></script>
    <script type="text/javascript" src="./src/sunBurst.js"></script>
    <script type="text/javascript" src="./src/bisankey-graph.js"></script>

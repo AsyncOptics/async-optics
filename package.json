@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "Node asynchronous process and package monitor",
   "main": "index.js",
-  "homepage": "https://github.com/MNodejs/AsyncOptics",
+  "homepage": "https://github.com/AsyncOptics/async-optics",
   "bugs": {
-    "url": "https://github.com/MNodejs/AsyncOptics/issues"
+    "url": "https://github.com/AsyncOptics/async-optics/issues"
   },
   "contributors": [
     {
@@ -19,7 +19,7 @@
       "url": "http://github.com/wupenghe92"
     },
     {
-      "name": "Ralph Salaza",
+      "name": "Ralph Salazar",
       "email": "ralph.slzr@gmail.com",
       "url": "http://github.com/pjr4lph"
     },
