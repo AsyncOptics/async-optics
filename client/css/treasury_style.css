@@ -105,3 +105,8 @@ html, body {
 .func-info {
   border: 2px solid black;
 }
+
+foreignObject .node-type {
+  text-align: center;
+  font-size: 37px;
+}

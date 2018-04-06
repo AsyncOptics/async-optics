@@ -8,7 +8,7 @@ socket.on('funcInfo', data => {
      scaleDuration();
      const nodeDataArray = nodeData(flatData);
      const linkDataArray = linkData(flatData);
-     biHiSankey.nodeWidth(70)
+     biHiSankey.nodeWidth(110)
                .nodeSpacing(10)
                .linkSpacing(5)
                .linkThicknessFactor(10)
@@ -53,6 +53,8 @@ function nodeData(flatData) {
      resourceInfo: funcInfoNode.resourceInfo,
      name: funcInfoNode.type
    };
+   if (nodeObj.startTime) nodeObj.startTime = nodeObj.startTime.toFixed(2);
+   if (nodeObj.duration) nodeObj.duration = nodeObj.duration.toFixed(2);
    if(!hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`]) {
       nodeObj.isNew = true;
       hasSeen[`${funcInfoNode.type}${funcInfoNode.asyncId}`] = true;

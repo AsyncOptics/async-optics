@@ -20,7 +20,7 @@ socket.on('packageInfo', data => {
       .enter()
       .append("div")
       .attr("class", "package-info")
-      .style("background-color", function(d){
+      .style("border-color", function(d){
         return color((d.children ? d : d.parent).name);
       })
 
@@ -29,7 +29,7 @@ socket.on('packageInfo', data => {
     packageData.append("p").attr("class", "package-data")
                .text((d) => { return `percentage: ${Math.floor(d.totalTime/rootTime * 100)}%`})
     packageData.append("p").attr("class", "package-data")
-               .text((d) => { return `time taken to load: ${d.totalTime} ms`})
+               .text((d) => { return `time taken to load: ${d.totalTime.toFixed(2)} ms`})
 });
 
 
@@ -104,7 +104,7 @@ function click(d) {
                   Math.floor(c.data.totalTime/parent[0].totalTime * 100)}%`
               })
     packageData.append("p").attr("class", "package-data")
-               .text((c) => { return `time taken to load: ${c.data.totalTime} ms`})
+               .text((c) => { return `time taken to load: ${c.data.totalTime.toFixed(2)} ms`})
 
 
     var parentPanel = d3.select("#package-panel")
@@ -122,7 +122,7 @@ function click(d) {
                })
     parentPanel.insert("p", ".package-info").attr("class", "parent-data")
                .text(() => {
-                  return `time taken to load: ${parent[0].name === 'root' ? rootTime : parent[0].totalTime} ms`
+                  return `time taken to load: ${parent[0].name === 'root' ? rootTime.toFixed(2) : parent[0].totalTime.toFixed(2)} ms`
                })
 }
 
