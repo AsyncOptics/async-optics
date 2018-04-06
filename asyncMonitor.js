@@ -96,10 +96,10 @@ function asyncMonitor(portNumber) {
     }
 
     if( err.includes('ioController_mnode.js') ||
-        err.includes('/async_optics/node_modules/') ||
-        err.includes('/async_optics/packageMonitor.js') ||
+        err.includes('/async-optics/node_modules/') ||
+        err.includes('/async-optics/packageMonitor.js') ||
         err.includes(`at AsyncHook.init (${__dirname}/asyncMonitor.js)`) &&
-        err.includes('at TCP.emitInitNative (internal/async_hooks.js:131:43)') ) {
+        err.includes('at TCP.emitInitNative (internal/async_hooks.js)') ) {
       return;
     } else if(triggerAsyncId < 8 || activeAsyncProcess.get(triggerAsyncId)) {
       const p = funcInfoParser(asyncId, type, triggerAsyncId, resource, newErr);

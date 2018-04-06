@@ -91,9 +91,10 @@ function highlightNewEvent() {
 
   funcData.filter( (d) => { return !d.isNew; })
           .select("rect")
-          .transition()
-          .duration(500)
           .style("stroke-opacity", 1)
+  setTimeout(()=>{
+    clearTimeout(timer);
+  }, 10000)
 }
 
 // https://github.com/northam/styled_sankey/blob/master/bihisankey.app.js
@@ -329,12 +330,12 @@ function update () {
       .style("stroke", function (d) { return d3.rgb(d.color).darker(0.1); })
       .style("fill-opacity", OPACITY.LINK_DEFAULT);
 
-      const infoData = [g, ...g.rightLinks];
       let parentPanel = d3.select("#chart-info")
                           .selectAll("#chartData")
                           .data([g, ...g.rightLinks])
                           .enter()
-                          .append("div")
+                          .append("foreignObject")
+                          .append("xhtml:div")
                           .attr("class", "chart-info")
                           .style("background-color", function(d) {
                             return d.color ? d.color : d.target.color;
@@ -362,17 +363,33 @@ function update () {
                      `Runtime: ${d.duration ? d.duration : 'unfinished'} ms`;
                  })
 
-
       parentPanel.append("p").attr("class", "stack-expand")
                  .attr("id", (d) => `err${d.id ? d.id : d.target.id}`)
                  .text( () => { return `Click to show stack trace`})
+
+      function breakLines(str) {
+        let chunks = 25; // enter space every 25 chars
+        let res = '';
+        for(let i=0; i<str.length; i++) {
+          res += str[i];
+          if(i !== 0 && i % chunks === 0) {
+            res += ' ';
+          }
+        }
+        return res;
+      }
+
 
       let errors = d3.selectAll(".stack-expand")
       errors.on("click", (d) => {
         let errId = `#${d3.event.target.id}`
         if(!d.errorShown){
           d.errorShown = true;
-          d3.select(errId).append("p").attr("class", "stack-data")
+          d3.select(errId)
+            .append("foreignObject")
+            .append("xhtml:div")
+            .attr('width', 300)
+            .attr("class", "stack-data")
             .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
         } else {
           d3.select(errId).select('.stack-data').remove()
@@ -516,7 +533,6 @@ function update () {
   nodeEnter.on("mouseleave", function() { if (!isTransitioning) restoreLinksAndNodes(); });
 
   nodeEnter.on("click", showHideChildren)
-
 
   // add in the text for the nodes
   node.filter(function (d) { return d.value !== 0; })
