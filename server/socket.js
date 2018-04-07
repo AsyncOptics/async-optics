@@ -33,7 +33,7 @@ function startServer(portNumber) {
   fs.writeFile(path.join(__dirname,'../client/src/main.js'), scriptStr, (err) => {
     if (err) throw err;
     server.listen(portNumber, () => {
-      process._rawDebug(`socket setup, listening to PORT ${portNumber}`);
+      process._rawDebug(`async-optics socket setup, listening to PORT ${portNumber}`);
     });
   })
 }
