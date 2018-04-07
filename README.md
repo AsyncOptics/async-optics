@@ -1,5 +1,5 @@
 # AsyncOptics
-[npm version](https://badge.fury.io/js/async-optics.svg)](https://badge.fury.io/js/async-optics)
+[![npm version](https://badge.fury.io/js/async-optics.svg)](https://badge.fury.io/js/async-optics)
 
 <img src="readme/logo.png" width="200"/>
 
