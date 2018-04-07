@@ -35,8 +35,8 @@ socket.on('packageInfo', data => {
 
 let rootTime = 0;
 
-const sunWidth = 960;
-const sunHeight = 700;
+const sunWidth = 1200;
+const sunHeight = 1200;
 const radius = (Math.min(sunWidth, sunHeight) / 2) - 10;
 
 const formatNumber_sun = d3.format(",d");
@@ -66,7 +66,7 @@ const svg_sun = d3.select("#sunburst-container")
             .attr("width", sunWidth)
             .attr("height", sunHeight)
             .append("g")
-            .attr("transform", "translate(" + sunWidth / 2 + "," + (sunHeight / 2) + ")");
+            .attr("transform", "translate(" + (sunWidth+360) / 2 + "," + (sunHeight / 2) + ")");
 
 function click(d) {
   svg_sun.transition()

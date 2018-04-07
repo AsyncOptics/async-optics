@@ -346,6 +346,7 @@ d3.biHiSankey = function() {
           }
         }
       }
+      // yScaleFactor = 0.9 * yScaleFactor;
       scaleForFatlinks();
     }
 
