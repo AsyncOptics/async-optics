@@ -47,8 +47,7 @@ let x = d3.scaleLinear()
 let y = d3.scaleSqrt()
             .range([0, radius]);
 
-// const color = d3.scaleOrdinal(["#ffd644", "#6cfff9", "#30ff2c", "#ee74ff", "#ccff43", "#ff7d63"]);
-const color = d3.scaleOrdinal(d3.schemeCategory20c);
+const color = d3.scaleOrdinal(["#5CE5BB", "#BFEF62", "#F4D038", "#F49751", "#F26BBC", "#3E8BF9"]);
 // console.log('colorss', d3.schemeCategory20c)
 
 const partition = d3.partition();
