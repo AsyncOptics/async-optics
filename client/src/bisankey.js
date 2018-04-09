@@ -339,8 +339,8 @@ d3.biHiSankey = function() {
         for (let i=0; i<links.length; i++) {
           const link = links[i];
           const linkLength = Math.abs(link.source.x - link.target.x);
-          const linkHeight = link.value * yScaleFactor;
-          if (linkLength / linkHeight < 1.4) {
+          const linkHeight = link.value * yScaleFactor / linkThicknessFactor;
+          if (linkLength / linkHeight < 4) {
             yScaleFactor = 0.9 * yScaleFactor;
             scaleForFatlinks();
           }
