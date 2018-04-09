@@ -10,19 +10,68 @@
    <script type="text/javascript" src="./src/bisankey.js"></script>
  </head>
  <body>
-   <h1>Async Function Monitor</h1>
-    <div id="bisankey-container">
-      <div id="func-panel"></div>
 
+
+<header>
+
+  <img id="logo" src='./img/logo-white-02.svg' />
+
+  <div class="tab">
+    <button class="tablinks" onclick="openCity(event, 'chart1-wrapper')">Async Monitor</button>
+    <button class="tablinks" onclick="openCity(event, 'chart2-wrapper')">Package Monitor</button>
     </div>
+</header>
+
+<hr>
+
+  <div id='chart1-wrapper' class="tabcontent">
+    <div id="bisankey-container"></div>
     <div id="chart-info"></div>
+  </div>
+
+  <div id='chart2-wrapper' class="tabcontent" style="display: none">
     <div id="sunburst-container">
-      <div id="package-panel"></div>
+      <div id="package-panel"> </div>
     </div>
+  </div>
 
-    <script type="text/javascript" src="./src/main.js"></script>
-    <script type="text/javascript" src="./src/sunBurst.js"></script>
-    <script type="text/javascript" src="./src/bisankey-graph.js"></script>
-  </body>
 
-  </html>
+
+  <script type="text/javascript" src="./src/main.js"></script>
+  <script type="text/javascript" src="./src/sunBurst.js"></script>
+  <script type="text/javascript" src="./src/bisankey-graph.js"></script>
+
+    <script type="text/javascript">
+
+
+      const sankey = document.getElementById('chart1-wrapper');
+      const sunburst = document.getElementById('sunburst-container');
+      const selection = document.getElementById('chart-selection');
+
+      function openCity(evt, cityName) {
+       // Declare all variables
+       var i, tabcontent, tablinks;
+
+       // Get all elements with class="tabcontent" and hide them
+       tabcontent = document.getElementsByClassName("tabcontent");
+       for (i = 0; i < tabcontent.length; i++) {
+           tabcontent[i].style.display = "none";
+       }
+
+       // Get all elements with class="tablinks" and remove the class "active"
+       tablinks = document.getElementsByClassName("tablinks");
+       for (i = 0; i < tablinks.length; i++) {
+           tablinks[i].className = tablinks[i].className.replace(" active", "");
+       }
+
+       // Show the current tab, and add an "active" class to the button that opened the tab
+       document.getElementById(cityName).style.display = "flex";
+       evt.currentTarget.className += " active";
+   }
+
+  </script>
+
+
+</body>
+
+</html>

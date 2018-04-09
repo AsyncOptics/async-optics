@@ -11,11 +11,42 @@ body{
   padding: 0;
 }
 
+header {
+  padding: 1em;
+}
+
 #text-area{
   flex: 1;
   order: 2;
   background: #333;
   margin-left: 20px;
+}
+
+hr {
+  margin-top: 1em;
+}
+
+#logo {
+  width: 400px;
+}
+
+.tablinks {
+  padding: 1em;
+  background-color: #022873;
+  color: white;
+  margin-top: 10px;
+  font-size: 1.2em;
+}
+
+.monitor-label {
+  margin: 1em;
+}
+.tablinks:hover {
+  background-color: #053FC0;
+  }
+
+.active{
+  background-color: #053FC0;
 }
 
 div.tooltip {
@@ -44,6 +75,7 @@ div.tooltip {
   flex-direction: row;
   /*border: 1px solid white;*/
   margin-top: 50px;
+  /*width: 100%;*/
 }
 
 #sun-container {
@@ -61,7 +93,7 @@ div.tooltip {
 .package-info {
   border: 5px solid black;
   /*background-color: #FFFFFF;*/
-  width: 110%;
+ /* width: 110%;*/
   padding: 10px;
 }
 

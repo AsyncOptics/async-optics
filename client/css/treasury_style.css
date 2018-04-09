@@ -55,29 +55,36 @@ html, body {
   margin: 0;
 }
 
-#bisankey-container {
+#chart1-wrapper {
   display: flex;
   flex-direction: column;
-  /* height: 1200px; */
-  border: 1px solid white;
-
-  padding: 10px;
-  min-height: 600px;
+  /*height: calc(100vh - 100px); * output container is small for display  */
   height: auto;
-  margin-top: 30px;
+  /*width: calc(100vw - 100px);*/
+  display: block;
+  /*border: 1px solid red;*/
+}
+
+#chart2-wrapper {
+  display: flex;
+  flex-direction: column;
+  /*height: calc(100vh - 100px); * output container is small for display  */
+  height: auto;
+  /*width: calc(100vw - 100px);*/
+}
+
+#bisankey-container {
+  /*border: 1px solid white;*/
+  order: 1;
+  padding: 10px;
+  height: auto;
+  margin-top: 5px;
   margin-bottom: 30px;
 }
 
 
-
-#bisankey-container {
-/*  display: flex;
-  flex-direction: column;*/
-
-}
-
 #chart-info {
-/*  order:1;*/
+  order:2;
   height: auto;
   padding: 10px;
 }
@@ -89,13 +96,13 @@ html, body {
 
 .chart-info {
   border: 1px solid #001128;
-  width: 250px;
-  padding: 10px;
+  width: 330px;
+  padding: 16px;
   color: #001128;
 }
 
 #chart-info {
-  padding: 0px;
+  padding: 10px;
   margin: 0;
   list-style: none;
   -ms-box-orient: horizontal;
@@ -109,8 +116,16 @@ html, body {
   flex-flow: row wrap;
 }
 
+#chart-info p {
+  display: flex;
+  flex-wrap: wrap;
+}
 
-.node-type {
+.stack-data {
+  max-width: 300px;
+}
+
+/*.node-type {
   overflow: hidden;
   white-space: nowrap;
-}
+}*/
