@@ -1,18 +1,39 @@
-/* body{
-  padding: 2em;
-  background-color: #464a51;
-} */
-
-/* * {
-  margin: 0;
-  padding: 0;
-} */
+header {
+  padding: 1em;
+}
 
 #text-area{
   flex: 1;
   order: 2;
   background: #333;
   margin-left: 20px;
+}
+
+hr {
+  margin-top: 1em;
+}
+
+#logo {
+  width: 400px;
+}
+
+.tablinks {
+  padding: 1em;
+  background-color: #022873;
+  color: white;
+  margin-top: 10px;
+  font-size: 1.2em;
+}
+
+.monitor-label {
+  margin: 1em;
+}
+.tablinks:hover {
+  background-color: #053FC0;
+  }
+
+.active{
+  background-color: #053FC0;
 }
 
 div.tooltip {
@@ -33,7 +54,7 @@ div.tooltip {
   display: flex;
   flex-direction: row;
   margin-top: 50px;
-  display: none;
+  /* display: none; */
 }
 
 #sun-container {
@@ -49,7 +70,6 @@ div.tooltip {
 
 .package-info {
   border: 5px solid black;
-  width: 110%;
   padding: 10px;
 }
 
@@ -65,6 +85,7 @@ html, body {
   font-weight: 300;
   font-size: 0.9em;
 }
+
 #itemtitles {
   margin: 2px 0 0 20px;
   min-height: 1.2em;
@@ -114,27 +135,32 @@ html, body {
 #chart1-wrapper {
   display: flex;
   flex-direction: column;
-  /*height: calc(100vh - 100px); * output container is small for display  */
   height: auto;
   width: calc(100vw - 100px);
   display: block;
-  /*border: 1px solid red;*/
+}
+
+
+
+#chart2-wrapper {
+  display: flex;
+  flex-direction: column;
+  /*height: calc(100vh - 100px); * output container is small for display  */
+  height: auto;
+  /*width: calc(100vw - 100px);*/
 }
 
 #bisankey-container {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid white;
   order: 1;
   padding: 10px;
-  min-height: 800px;
   height: auto;
-  margin-top: 30px;
+  margin-top: 5px;
   margin-bottom: 30px;
 }
 
+
 #chart-info {
-  order: 2;
+  order:2;
   height: auto;
   padding: 10px;
 }
@@ -169,6 +195,10 @@ html, body {
 #chart-info p {
   display: flex;
   flex-wrap: wrap;
+}
+
+.stack-data {
+  max-width: 300px;
 }
 
 .node-type {

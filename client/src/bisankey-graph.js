@@ -108,8 +108,8 @@ let OPACITY = {
       LINK_HIGHLIGHT: 0.9
     },
   TYPES = ["Solution", "Financial_Product", "Function", "Module", "Component", "Interface"],
-  TYPE_COLORS = ["#ffd644", "#6cfff9", "#30ff2c", "#ee74ff", "#ccff43", "#ff7d63"],
-  TYPE_HIGHLIGHT_COLORS = ["#ffd644", "#6cfff9", "#30ff2c", "#ee74ff", "#ccff43", "#ff7d63"],
+  TYPE_COLORS = ["#5CE5BB", "#BFEF62", "#F4D038", "#F49751", "#F26BBC", "#3E8BF9"],
+  TYPE_HIGHLIGHT_COLORS = ["#8EF4D6", "#D9FF97", "#F9E178", "#F7B279", "#F99DD0", "#6BA2F9"],
   LINK_COLOR = "#ede2bb",
   INFLOW_COLOR = "#ffd644",
   OUTFLOW_COLOR = "#6cfff9",
@@ -160,6 +160,7 @@ svg = d3.select('#bisankey-container')
         .append("svg")
         .attr("width", WIDTH + MARGIN.LEFT + MARGIN.RIGHT)
         .attr("height", HEIGHT + MARGIN.TOP + MARGIN.BOTTOM)
+        .style("padding", "0px 0px 70px 0px")
         .append("g")
         .attr("transform", "translate(" + MARGIN.LEFT + "," + MARGIN.TOP + ")");
 
@@ -378,7 +379,6 @@ function update () {
         return res;
       }
 
-
       let errors = d3.selectAll(".stack-expand")
       errors.on("click", (d) => {
         let errId = `#${d3.event.target.id}`
@@ -389,7 +389,7 @@ function update () {
             .append("xhtml:div")
             .attr('width', 300)
             .attr("class", "stack-data")
-            .text((d) => { return `Err: ${d.errMessage ? d.errMessage : d.target.errMessage}`})
+            .text((d) => { return `${d.errMessage ? d.errMessage : d.target.errMessage}`})
         } else {
           d3.select(errId).select('.stack-data').remove()
           d.errorShown = false;
