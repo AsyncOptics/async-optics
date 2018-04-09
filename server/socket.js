@@ -29,6 +29,7 @@ io.on('connection', (socket) => {
 });
 
 function startServer(portNumber) {
+  if (!portNumber) portNumber = 3000;
   const scriptStr = `const socket = io.connect('http://localhost:${portNumber}');`;
   fs.writeFile(path.join(__dirname,'../client/src/main.js'), scriptStr, (err) => {
     if (err) throw err;
@@ -37,16 +38,5 @@ function startServer(portNumber) {
     });
   })
 }
-
-// function checkIdExist(id) {
-//   for (let i=0; i<io._asyncInfo.length; i++) {
-//     if (io._asyncInfo[i].asyncId === id) {
-//       process._rawDebug(`asyncID ${id} EXIST`);
-//       return;
-//     }
-//   }
-//   process._rawDebug(`asyncID ${id} DOESN"T EXIST`);
-//   return;
-// };
 
 module.exports = {io, startServer};

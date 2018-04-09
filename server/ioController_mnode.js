@@ -17,13 +17,10 @@ ioController.sendInfo = function(funcInfoNode) {
       clearTimeout(sendInfoAnyway);
       sendInfoAnyway = setTimeout(sendFuncInfo, 1500);
     }
-  } else {
-    // process._rawDebug('keep func info');
-  }
+  } 
 }
 
 function sendFuncInfo() {
-  // process._rawDebug('send func info');
   io.emit('funcInfo', asyncInfoEmit);
   asyncInfoEmit = [];
 }
