@@ -1,6 +1,6 @@
 {
   "name": "async-optics",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Node asynchronous process and package monitor",
   "keywords": [
     "async",
