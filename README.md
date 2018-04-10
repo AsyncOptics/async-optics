@@ -1,4 +1,4 @@
-<img src="readme/logo.png" width="400"/>
+<img src="readme/new-logo.png" width="400"/>
 [![npm version](https://badge.fury.io/js/async-optics.svg)](https://badge.fury.io/js/async-optics)
 
 
