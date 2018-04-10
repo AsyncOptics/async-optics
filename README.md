@@ -17,11 +17,13 @@ pkgMonitor(complete path to package.json file);
 `
 - run your program, go to http://localhost:PortNumber
 
+
+### Demo
 async monitor
-<img src="readme/async.gif" width="800"/>
+<img src="readme/async.gif" width="900"/>
 
 pkg monitor
-<img src="readme/pm.gif" width="800"/>
+<img src="readme/pm.gif" width="900"/>
 
 
 ## Contributing
