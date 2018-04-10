@@ -10,21 +10,17 @@ AsyncOptics is an asynchronous code viewer, performance monitor, and package mon
 
 ### How to use
 
-```
+`
 const {asyncMonitor, pkgMonitor} = require('async-optics');
-asyncMonitor(PortNumber);                        // asyncMonitor(3000);
-pkgMonitor(complete path to package.json file);  //pkgMonitor(path.join(__dirname, '../package.json'));
-```
+asyncMonitor(PortNumber);      // default 3000
+pkgMonitor(complete path to package.json file);
+`
 - run your program, go to http://localhost:PortNumber
 
-```
 async monitor
-```
 <img src="readme/async.gif" width="800"/>
 
-```
 pkg monitor
-```
 <img src="readme/pm.gif" width="800"/>
 
 
