@@ -20,12 +20,12 @@ pkgMonitor(complete path to package.json file);  //pkgMonitor(path.join(__dirnam
 ```
 async monitor
 ```
-<img src="readme/async.gif" width="1000"/>
+<img src="readme/async.gif" width="800"/>
 
 ```
 pkg monitor
 ```
-<img src="readme/pkgMonitor.png" width="800"/>
+<img src="readme/pm.gif" width="800"/>
 
 
 ## Contributing
