@@ -88,7 +88,7 @@ function asyncMonitor(portNumber) {
       }
     }
 
-    if(resource.args && resource.args[0].constructor.name === 'Socket'){
+    if(resource.args && resource.args[0] && resource.args[0].constructor.name === 'Socket'){
       if(resource.args[0].server && resource.args[0].server._connectionKey === `6::::${portNumber}`){
         deleteEntireBranch(triggerAsyncId);
         return;
