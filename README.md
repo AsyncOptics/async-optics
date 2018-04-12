@@ -20,10 +20,10 @@ pkgMonitor(complete path to package.json file);
 
 ### Demo
 * async monitor
-<img src="readme/async.gif" width="900"/>
+<img src="readme/async.gif" width="700"/>
 
 * pkg monitor
-<img src="readme/pm.gif" width="900"/>
+<img src="readme/pm.gif" width="700"/>
 
 
 ## Contributing
